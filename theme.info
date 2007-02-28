@@ -1,0 +1,3 @@
+desc=Virtualmin Mobile Theme
+depends=1.328 virtual-server/3.355
+version=1.0
