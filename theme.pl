@@ -439,6 +439,17 @@ if ($module_name eq "virtual-server") {
 	}
 }
 
+# Output text-only selector
+sub theme_ui_radio_selector
+{
+local ($opts, $name, $sel) = @_;
+foreach my $o (@$opts) {
+	$rv .= &ui_oneradio($name, $o->[0], $o->[1], $sel eq $o->[0])."<br>\n";
+	$rv .= $o->[2];
+	}
+return $rv;
+}
+
 # Popup buttons don't work
 sub theme_modules_chooser_button
 {
