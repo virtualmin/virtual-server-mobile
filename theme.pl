@@ -450,6 +450,36 @@ foreach my $o (@$opts) {
 return $rv;
 }
 
+sub theme_ui_buttons_start
+{
+return "";
+}
+
+sub theme_ui_buttons_end
+{
+return "";
+}
+
+sub theme_ui_buttons_row
+{
+local ($script, $label, $desc, $hiddens, $after, $before) = @_;
+return "<form action=$script>\n".
+       $hiddens.
+       ($before ? $before." " : "").
+       &ui_submit($label).($after ? " ".$after : "")."<br>\n".
+       $desc."<p>\n".
+       "</form>\n";
+}
+
+sub theme_ui_buttons_hr
+{
+local ($title) = @_;
+local $rv;
+$rv .= "<b>$title</b><br>\n" if ($title);
+$rv .= "<hr>\n";
+return $rv;
+}
+
 # Popup buttons don't work
 sub theme_modules_chooser_button
 {
