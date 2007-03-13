@@ -88,9 +88,9 @@ sub theme_ui_table_row
 local ($label, $value, $cols) = @_;
 local $rv;
 $rv .= "<b>$label</b><br>\n" if (defined($label));
-$rv .= "&nbsp;&nbsp;" if (defined($label) &&
-			  $value !~ /^\s*<table/ &&
-			  $value !~ /^\s*<!--grid/);
+#$rv .= "&nbsp;&nbsp;" if (defined($label) &&
+#			  $value !~ /^\s*<table/ &&
+#			  $value !~ /^\s*<!--grid/);
 $rv .= "$value<br>\n";
 return $rv;
 }
