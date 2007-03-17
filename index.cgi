@@ -120,6 +120,15 @@ if ($hasvirt) {
 	# System or account information
 	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
+	# Package updates
+	if (&foreign_available("security-updates")) {
+		&foreign_require("security-updates", "security-updates-lib.pl");
+		@poss = &security_updates::list_possible_updates();
+		if (@poss) {
+			print "<li><a href='index_updates.cgi'>",&text('index_vupdates', scalar(@poss)),"</a><br>\n";
+			}
+		}
+
 	print "</ul>\n";
 	print "</form>\n";
 	}

@@ -15,6 +15,7 @@ index_vaddmass=Mass create
 index_vimport=Import
 index_vmigrate=Migrate
 index_vsysinfo=System information
+index_vupdates=Package Updates ($1 available)
 
 webmin_title=Webmin Modules
 webmin_incat=Modules in category $1 ..
@@ -106,3 +107,9 @@ config_section=Configuration category:
 config_change=Change
 config_return=system settings
 config_next=Save and Next
+
+updates_title=Package Updates
+updates_avail=The following Virtualmin packages have updates available :
+updates_ok=Install All Updates
+updates_none=No Virtualmin package updates are available.
+
