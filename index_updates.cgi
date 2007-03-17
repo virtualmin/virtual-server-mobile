@@ -10,13 +10,14 @@ require './ui-lib.pl';
 
 &ui_print_header(undef, $text{'updates_title'}, "", undef, 0, 1, 1);
 
-@poss = &security_updates::list_possible_updates(1);
+@poss = &security_updates::list_possible_updates(2);
 if (@poss) {
 	print &ui_form_start("security-updates/update.cgi");
 	print $text{'updates_avail'},"<p>\n";
 	print "<ul>\n";
 	foreach $p (@poss) {
 		print "<li>$p->{'name'} $p->{'version'}<br>$p->{'desc'}<br>\n";
+		print &ui_hidden("u", $p->{'name'}),"\n";
 		}
 	print "</ul>\n";
 	print &ui_form_end([ [ undef, $text{'updates_ok'} ] ]);
