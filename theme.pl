@@ -480,6 +480,26 @@ $rv .= "<hr>\n";
 return $rv;
 }
 
+# theme_ui_opt_textbox(name, value, size, option1, [option2], [disabled?],
+#		 [&extra-fields], [max])
+# Returns HTML for a text field that is optional
+sub theme_ui_opt_textbox
+{
+local ($name, $value, $size, $opt1, $opt2, $dis, $extra, $max) = @_;
+local $rv;
+$size = &ui_max_text_width($size);
+$rv .= &ui_radio($name."_def", $value eq '' ? 1 : 0,
+		 [ [ 1, $opt1 ],
+		   [ 0, $opt2 || " " ] ], $dis)."\n";
+$rv .= "<input name=\"".&quote_escape($name)."\" ".
+       "size=$size value=\"".&quote_escape($value)."\" ".
+       ($dis ? "disabled=true" : "").
+       ($max ? " maxlength=$max" : "").">\n";
+return $rv;
+}
+
+
+
 # Popup buttons don't work
 sub theme_modules_chooser_button
 {
