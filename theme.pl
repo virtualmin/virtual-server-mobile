@@ -498,7 +498,25 @@ $rv .= "<input name=\"".&quote_escape($name)."\" ".
 return $rv;
 }
 
-
+# theme_virtualmin_ui_rating_selector(name, value, max, cgi)
+sub theme_virtualmin_ui_rating_selector
+{
+local ($name, $value, $max, $cgi) = @_;
+local $rv;
+for($i=1; $i<=$max; $i++) {
+	local $char = $i <= $value ? "X" : "-";
+	if ($cgi) {
+		local $cgiv = $cgi;
+		$cgiv .= ($cgi =~ /\?/ ? "&" : "?");
+		$cgiv .= $name."=".$i;
+		$rv .= "<a href='$cgiv' id=$name$i>$char</a>";
+		}
+	else {
+		$rv .= $char;
+		}
+	}
+return $rv;
+}
 
 # Popup buttons don't work
 sub theme_modules_chooser_button
