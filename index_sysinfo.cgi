@@ -8,6 +8,7 @@ require './ui-lib.pl';
 %text = &load_language($current_theme);
 
 &ui_print_header(undef, $text{'sysinfo_title'}, "", undef, 0, 1, 1);
+$info = &virtual_server::get_collected_info();
 
 if (!&virtual_server::reseller_admin()) {
 	# Show system info
@@ -35,65 +36,49 @@ if (!&virtual_server::reseller_admin()) {
 	}
 
 if (&virtual_server::master_admin()) {
-	if (&foreign_check("proc")) {
-		# CPU load
-		&foreign_require("proc", "proc-lib.pl");
-		if (defined(&proc::get_cpu_info)) {
-			@c = &proc::get_cpu_info();
-			print &ui_table_row($text{'sysinfo_cpu'},
-				    &text('sysinfo_load', @c));
+	# CPU load
+	if ($info->{'load'}) {
+		@c = @{$info->{'load'}};
+		print &ui_table_row($text{'sysinfo_cpu'},
+			    &text('sysinfo_load', @c));
+		}
+
+	# Running processes
+	if ($info->{'procs'}) {
+		print &ui_table_row($text{'sysinfo_procs'}, $info->{'procs'});
+		}
+
+	# Real and virtual memory use
+	if ($info->{'mem'}) {
+		@m = @{$info->{'mem'}};
+		if (@m && $m[0]) {
+			print &ui_table_row($text{'sysinfo_real'},
+			    &text('sysinfo_used',
+				  &nice_size($m[0]*1024),
+				  &nice_size(($m[0]-$m[1])*1024)));
 			}
-
-		# Running processes
-		@procs = &proc::list_processes();
-		print &ui_table_row($text{'sysinfo_procs'}, scalar(@procs));
-
-		# Real and virtual memory use
-		if (defined(&proc::get_memory_info)) {
-			@m = &proc::get_memory_info();
-			if (@m && $m[0]) {
-				print &ui_table_row($text{'sysinfo_real'},
-				    &text('sysinfo_used',
-					  &nice_size($m[0]*1024),
-					  &nice_size(($m[0]-$m[1])*1024)));
-				}
-			if (@m && $m[2]) {
-				print &ui_table_row($text{'sysinfo_virt'},
-				    &text('sysinfo_used',
-					  &nice_size($m[2]*1024),
-					  &nice_size(($m[2]-$m[3])*1024)));
-				}
+		if (@m && $m[2]) {
+			print &ui_table_row($text{'sysinfo_virt'},
+			    &text('sysinfo_used',
+				  &nice_size($m[2]*1024),
+				  &nice_size(($m[2]-$m[3])*1024)));
 			}
 		}
 
 	# Disk space on local drives
-	if (&foreign_check("mount")) {
-		&foreign_require("mount", "mount-lib.pl");
-		@mounted = &mount::list_mounted();
-		$total = 0;
-		$free = 0;
-		foreach $m (@mounted) {
-			if ($m->[1] =~ /^\/dev\//) {
-				($t, $f) = &mount::disk_space($m->[2], $m->[0]);
-				if ($t) {
-					$total += $t*1024;
-					$free += $f*1024;
-					}
-				}
-			}
-		if ($total) {
-			print &ui_table_row(&text('sysinfo_disk'),
-				&text('sysinfo_used', &nice_size($total),
-						    &nice_size($total-$free)));
-			}
+	if ($info->{'disk_total'}) {
+		print &ui_table_row(&text('sysinfo_disk'),
+			&text('sysinfo_used', &nice_size($info->{'disk_total'}),
+				    &nice_size($info->{'disk_total'} -
+					       $info->{'disk_free'})));
 		}
 	print &ui_table_end();
 
 	# Show status of feature servers
-	if (&virtual_server::can_stop_servers()) {
+	if ($info->{'startstop'} && &virtual_server::can_stop_servers()) {
 		print &ui_table_start($text{'sysinfo_statusheader'},
 				      "width=100%", 2);
-		@ss = &virtual_server::get_startstop_links();
+		@ss = @{$info->{'startstop'}};
 		foreach $status (@ss) {
 			local @msgs = ( 
 			  !$status->{'status'} ?
@@ -224,19 +209,10 @@ if ((&virtual_server::master_admin() || &virtual_server::reseller_admin()) &&
 		}
 	}
 
-if (&virtual_server::master_admin() && &virtual_server::can_view_sysinfo()) {
+if (&virtual_server::master_admin() && &virtual_server::can_view_sysinfo() &&
+    $info->{'progs'}) {
 	# Show feature-specific program info
-	foreach my $f ("virtualmin",
-			@virtual_server::features) {
-		if ($virtual_server::config{$f} ||
-		    $f eq "virtualmin") {
-			local $ifunc =
-				"virtual_server::sysinfo_$f";
-			if (defined(&$ifunc)) {
-				push(@info, &$ifunc());
-				}
-			}
-		}
+	@info = @{$info->{'progs'}};
 	print &ui_table_start($text{'sysinfo_sysinfoheader'}, "width=100%", 2);
 	print "<table>\n";
 	for($i=0; $i<@info; $i++) {
