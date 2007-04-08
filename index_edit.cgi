@@ -80,10 +80,15 @@ foreach my $c (@cats) {
 @cl = defined(&virtual_server::list_visible_custom_links) ?
 	&virtual_server::list_visible_custom_links($d) : ( );
 if (@cl) {
-	print "<dt><b>$text{'edit_customlinks'}</b><br>\n";
-	print "<dd>";
-	foreach $l (@cl) {
-		print "<a href='$l->{'url'}'>$l->{'desc'}</a><br>\n";
+	@linkcats = &unique(map { $_->{'cat'} } @cl);
+	foreach my $lc (@linkcats) {
+		@catcl = grep { $_->{'cat'} eq $lc } @cl;
+		$catdesc = $catcl[0]->{'catname'} || $text{'edit_customlinks'};
+		print "<dt><b>$catdesc</b><br>\n";
+		print "<dd>";
+		foreach $l (@catcl) {
+			print "<a href='$l->{'url'}'>$l->{'desc'}</a><br>\n";
+			}
 		}
 	}
 print "</dl>\n";
