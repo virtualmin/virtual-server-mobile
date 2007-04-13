@@ -249,7 +249,13 @@ sub theme_redirect
 local ($orig, $url) = @_;
 if ($module_name eq "virtual-server" &&
     $url =~ /postsave.cgi\?dom=(\d+)/) {
+	# Show domain menu after saving
 	$url =~ s/\/([^\/]+)\/postsave.cgi/\/index_edit.cgi/g;
+	}
+elsif ($module_name eq "virtual-server" && $orig eq "" &&
+       $url =~ /^((http|https):\/\/([^\/]+))\//) {
+	# Show templates page after saving global config
+	$url = "$1/index_templates.cgi";
 	}
 print "Location: $url\n\n";
 }
@@ -426,6 +432,9 @@ if (@_ > 1) {
 		}
 	push(@links, split(/<br>/, $_[6]));
 	if (@links) {
+		if (!defined(&ui_links_row)) {
+			do '../ui-lib.pl';
+			}
 		print &ui_links_row(\@links),"<p>\n";
 		}
 	}
