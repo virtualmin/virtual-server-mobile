@@ -17,7 +17,7 @@ if (@poss) {
 	print "<ul>\n";
 	foreach $p (@poss) {
 		print "<li>$p->{'name'} $p->{'version'}<br>$p->{'desc'}<br>\n";
-		print &ui_hidden("u", $p->{'name'}),"\n";
+		print &ui_hidden("u", $p->{'update'} || $p->{'name'}),"\n";
 		}
 	print "</ul>\n";
 	print &ui_form_end([ [ undef, $text{'updates_ok'} ] ]);
