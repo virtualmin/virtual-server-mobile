@@ -14,7 +14,9 @@ require './ui-lib.pl';
 ($tlinks, $ttitles) = &virtual_server::get_template_pages();
 print "<ul>\n";
 for($i=0; $i<@$tlinks; $i++) {
-	print "<li><a href='virtual-server/$tlinks->[$i]'>",
+	$link = $tlinks->[$i];
+	$link = "virtual-server/$link" if ($link !~ /\//);
+	print "<li><a href='$link'>",
 	      "$ttitles->[$i]</a><br>\n";
 	}
 print "<li><a href='config.cgi?virtual-server'>",
