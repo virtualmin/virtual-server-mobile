@@ -123,3 +123,11 @@ updates_avail=The following Virtualmin packages have updates available :
 updates_ok=Install All Updates
 updates_none=No Virtualmin package updates are available.
 
+mail_sortby=Sort by:
+mail_desc=Desc
+mail_asc=Asc
+mail_pos=$1 to $2 of $3
+mail_none=No messages in folder
+mail_next=Next
+mail_prev=Prev
+mail_nosort=Reset
