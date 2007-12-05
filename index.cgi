@@ -1,11 +1,13 @@
 #!/usr/local/bin/perl
-# Show a menu of options (list domains, create domains, webmin)
+# Show a menu of options (list domains, create domains, webmin), or folders
+# if this is Usermin
 
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';
 %text = &load_language($current_theme);
 
+# Work out page title
 $hostname = &get_display_hostname();
 $ver = &get_webmin_version();
 &get_miniserv_config(\%miniserv);
@@ -22,13 +24,18 @@ else {
 	}
 
 # Do we have Virtualmin?
-if (&foreign_available("virtual-server")) {
+$prod = &get_product_name();
+if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	# Yes .. what can we do?
 	$hasvirt = 1;
 	&foreign_require("virtual-server", "virtual-server-lib.pl");
 	%minfo = &get_module_info("virtual-server");
 	$title = $gconfig{'nohostname'} ? $text{'vmain_title2'} :
 		&text('vmain_title', $minfo{'version'}, $hostname, $ostr);
+	}
+elsif ($prod eq 'usermin' && &foreign_available("mailbox")) {
+	# We have Usermin mail
+	$hasmail = 1;
 	}
 else {
 	# Just show Webmin title
@@ -132,12 +139,57 @@ if ($hasvirt) {
 	print "</ul>\n";
 	print "</form>\n";
 	}
+elsif ($hasmail) {
+	# Show Usermin folders
+	&foreign_require("mailbox", "mailbox-lib.pl");
+	@folders = &mailbox::list_folders_sorted();
+	$df = $mailbox::userconfig{'default_folder'};
+	$dfolder = $df ? &mailbox::find_named_folder($df, \@folders) :
+			 $folders[0];
+	print &ui_form_start("mailbox/mail_search.cgi");
+	print &ui_hidden("simple", 1);
+	print &ui_hidden("folder", $dfolder->{'index'});
 
-# Show links to Webmin module categories
+	print "<ul>\n";
+	foreach $f (@folders) {
+		$fid = &mailbox::folder_name($f);
+		$star = $f->{'type'} == 6 &&
+			$mailbox::special_folder_id &&
+			$f->{'id'} == $mailbox::special_folder_id ?
+			 "<img src=mailbox/images/special.gif border=0>" : "";
+		push(@flinks, "<a href='mailbox/index.cgi?id=$fid'>$star$f->{'name'}</a>");
+		}
+	print "<li>$text{'index_folders'}\n",join(" | ",@flinks),"<br>\n";
+
+	# Show search box
+	print "<li>$text{'index_msearch'}\n",
+	      &ui_textbox("search", undef, 10)," ",
+	      &ui_submit($text{'index_msearchok'}),"<br>\n";
+
+	# Show various links for mail/folder management
+	%mconfig = &foreign_config("mailbox");
+	$flink = $mconfig{'mail_system'} == 4 ? "mailbox/list_ifolders.cgi"
+					      : "mailbox/list_folders.cgi";
+	push(@mlinks, "<a href='$flink'>$text{'index_lfolders'}</a>");
+	push(@mlinks, "<a href='mailbox/list_addresses.cgi'>$text{'index_laddresses'}</a>");
+	if (!$mconfig{'noprefs'}) {
+		push(@mlinks, "<a href='uconfig.cgi?mailbox'>$text{'index_lprefs'}</a>");
+		}
+	if (&foreign_available("filter")) {
+		push(@mlinks, "<a href='filter/'>$text{'index_lfilter'}</a>");
+		}
+	push(@mlinks, "<a href='changepass/'>$text{'index_lpass'}</a>");
+	print "<li>$text{'index_mlinks'}\n",join(" | ",@mlinks),"<br>\n";
+
+	print "</ul>\n";
+	print &ui_form_end();
+	}
+
+# Show links to Webmin or Usermin module categories
 print "<p><ul>\n";
 @modules = &get_visible_module_infos();
 %cats = &list_categories(\@modules);
-print "<li>$text{'index_webmincats'}\n";
+print "<li>$text{'index_'.$prod.'cats'}\n";
 print join(" | ",
 	   map { "<a href='index_webmin.cgi?cat=$_'>$cats{$_}</a>" }
 	       sort { $b cmp $a } (keys %cats)),"<br>\n";
