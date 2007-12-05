@@ -90,15 +90,14 @@ $start = int($in{'start'});
 $end = $in{'start'}+$perpage-1;
 $end = scalar(@mail)-1 if ($end >= scalar(@mail));
 
-# Start of form
-print &ui_form_start("delete_mail.cgi", "post");
-print &ui_hidden("folder", $folder->{'index'});
-print &ui_hidden("mod", &modification_time($folder));
-print &ui_hidden("start", $in{'start'});
-
 # Buttons at top
 if ($userconfig{'top_buttons'} && @mail) {
+	print &ui_form_start("action_mail.cgi", "post");
+	print &ui_hidden("folder", $folder->{'index'});
+	print &ui_hidden("mod", &modification_time($folder));
+	print &ui_hidden("start", $in{'start'});
 	&text_mailbox_buttons(1, \@folders, $folder, \@mail);
+	print &ui_form_end();
 	}
 
 # Show sort links
@@ -155,7 +154,7 @@ for(my $i=$start; $i<=$end; $i++) {
 
 	# Checkbox for deleting
 	if (&editable_mail($m)) {
-		print &ui_checkbox("d", $id, " ", 0);
+		print &ui_checkbox("d", $id, "", 0);
 		}
 
 	# From and To addresses, with links
@@ -172,7 +171,10 @@ for(my $i=$start; $i<=$end; $i++) {
 
 	# Subject column, with read/special icons
 	local @icons = &message_icons($m, $folder->{'sent'}, $folder);
-	print &simplify_subject($m->{'header'}->{'subject'})."<br>\n";
+	if ($m->{'header'}->{'subject'} =~ /\S/ || @icons) {
+		print &simplify_subject($m->{'header'}->{'subject'}).
+		      join("", @icons)."<br>\n";
+		}
 
 	# Date and size 
 	print "<b>$text{'mail_date'}</b>: ".
@@ -200,6 +202,10 @@ for(my $i=$start; $i<=$end; $i++) {
 	}
 
 # Buttons at end of form
+print &ui_form_start("action_mail.cgi", "post");
+print &ui_hidden("folder", $folder->{'index'});
+print &ui_hidden("mod", &modification_time($folder));
+print &ui_hidden("start", $in{'start'});
 &text_mailbox_buttons(2, \@folders, $folder, \@mail);
 print &ui_form_end();
 
@@ -210,6 +216,7 @@ if ($userconfig{'arrows'}) {
 	}
 
 # Start section for end of page buttons, in a 3-wide grid
+# XXX replace some of these
 print "<hr>\n";
 @grid = ( );
 print "<table width=100%>\n";
@@ -299,8 +306,6 @@ print &ui_grid_table(\@grid, 3, 100,
 # Prints HTML for previous/next page arrows (text only)
 sub show_arrows
 {
-print "<form action=index.cgi>\n";
-
 # Show left arrow to go to start of folder
 if ($in{'start'}) {
 	printf "<a href='index.cgi?start=%d&folder=%d'>%s</a>\n",
@@ -354,7 +359,7 @@ else {
 if ($folder->{'msg'}) {
 	print "<br>$folder->{'msg'}\n";
 	}
-print "</form>\n";
+print "<p>\n";
 }
 
 sub text_sort_link
@@ -364,7 +369,7 @@ local ($sortfield, $sortdir) = &get_sort_field($folder);
 local $dir = $sortfield eq $field ? !$sortdir : 0;
 if ($folder->{'sortable'}) {
         return ($sortfield eq $field ? "<i>" : "").
-	       "<a href='sort.cgi?field=$field&dir=$dir&folder=$folder->{'index'}&start=$in{'start'}'>$title</a>".
+	       ("<a href='sort.cgi?field=$field&dir=$dir&folder=$folder->{'index'}&start=$in{'start'}'>$title</a>").
 	       ($sortfield eq $field ? "</i>" : "");
         }
 else {
@@ -374,68 +379,36 @@ else {
 
 # text_mailbox_buttons(number, &folders, current-folder, &mail)
 # Prints HTML for buttons to appear above or below a mail list
-# XXX text form submit links??
 sub text_mailbox_buttons
 {
 local ($num, $folders, $folder, $mail) = @_;
 local $spacer = "&nbsp;\n";
 
-# Compose button
-if ($userconfig{'open_mode'}) {
-	# Compose button needs to pop up a window
-	print &ui_submit($text{'mail_compose'}, "new", undef,
-	      "onClick='window.open(\"reply_mail.cgi?new=1\", \"compose\", \"toolbar=no,menubar=no,scrollbars=yes,width=1024,height=768\"); return false'>");
-	}
-else {
-	# Compose button can just submit and redirect
-	print &ui_submit($text{'mail_compose'}, "new");
-	}
-print $spacer;
-
-# Forward selected
+# Build actions menu
+local @acts;
+push(@acts, [ "new", $text{'mail_compose'} ]);
 if (@mail) {
-	if ($userconfig{'open_mode'}) {
-		print &ui_submit($text{'mail_forward'}, "forward", undef,
-			"onClick='args = \"folder=$folder->{'index'}\"; for(i=0; i<form.d.length; i++) { if (form.d[i].checked) { args += \"&mailforward=\"+escape(form.d[i].value); } } window.open(\"reply_mail.cgi?\"+args, \"compose\", \"toolbar=no,menubar=no,scrollbars=yes,width=1024,height=768\"); return false'>");
-		}
-	else {
-		# Forward button can just be a normal submit
-		print &ui_submit($text{'mail_forward'}, "forward");
-		}
-	print $spacer;
-	}
-
-# Mark as buttons
-if (@$mail) {
+	push(@acts, [ "forward", $text{'mail_forward'} ]);
 	foreach my $i (0 .. 2) {
-		print &ui_submit($text{'view_markas'.$i}, 'markas'.$i);
+		push(@acts, [ "markas".$i, $ttext{'mail_markas'.$i} ]);
 		}
-	print $spacer;
 	}
-	
-# Copy/move to folder
 if (@mail && @$folders > 1) {
-	print &movecopy_select($_[0], $folders, $folder);
-	print $spacer;
+	push(@acts, [ "move", $ttext{'mail_move'} ]);
+	push(@acts, [ "copy", $ttext{'mail_copy'} ]);
 	}
-
-# Delete
 if (@mail) {
-	print &ui_submit($text{'mail_delete'}, "delete");
-	print $spacer;
+	push(@acts, [ "delete", $text{'mail_delete'} ]);
 	}
-
-# Blacklist / report spam
 if (@mail && (&can_report_spam($folder) &&
     	      $userconfig{'spam_buttons'} =~ /list/ || $folder->{'spam'})) {
-	print &ui_submit($text{'mail_black'}, "black");
+	push(@acts, [ "delete", $text{'mail_black'} ]);
 	if ($userconfig{'spam_del'}) {
-		print &ui_submit($text{'view_razordel'}, "razor");
+		push(@acts, [ "razor", $text{'view_razordel'} ]);
 		}
 	else {
-		print &ui_submit($text{'view_razor'}, "razor");
+		push(@acts, [ "razor", $text{'view_razor'} ]);
 		}
-	print $spacer;
 	}
 
 # Whitelist / report ham
@@ -443,26 +416,23 @@ if (@mail && (&can_report_ham($folder) &&
 	      $userconfig{'ham_buttons'} =~ /list/ ||
 	      $folder->{'spam'})) {
 	if ($userconfig{'white_move'} && $folder->{'spam'}) {
-		print &ui_submit($text{'mail_whitemove'}, "white");
+		push(@acts, [ "white", $text{'mail_whitemove'} ]);
 		}
 	else {
-		print &ui_submit($text{'mail_white'}, "white");
+		push(@acts, [ "white", $text{'mail_white'} ]);
 		}
 	if ($userconfig{'ham_move'} && $folder->{'spam'}) {
-		print &ui_submit($text{'view_hammove'}, "ham");
+		push(@acts, [ "ham", $text{'view_hammove'} ]);
 		}
 	else {
-		print &ui_submit($text{'view_ham'}, "ham");
+		push(@acts, [ "ham", $text{'view_ham'} ]);
 		}
-	print $spacer;
 	}
 
-if ($userconfig{'open_mode'}) {
-	# Show mass open button
-	print &ui_submit($text{'mail_open'}, "new", undef,
-	      "onClick='for(i=0; i<form.d.length; i++) { if (form.d[i].checked) { window.open(\"view_mail.cgi?folder=$folder->{'index'}&idx=\"+escape(form.d[i].value), \"view\"+i, \"toolbar=no,menubar=no,scrollbars=yes,width=1024,height=768\"); } } return false'>");
-	print $spacer;
-	}
+# Actions menu
+print "<b>$ttext{'mail_actions'}</b>\n";
+print &ui_select("action", undef, \@acts);
+print &ui_submit($ttext{'mail_ok'}),"<br>\n";
 
 print "<br>\n";
 }
