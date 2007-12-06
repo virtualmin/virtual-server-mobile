@@ -26,6 +26,7 @@ index_lprefs=Mail preferences
 index_lfilter=Email filters
 index_lpass=Change password
 index_mlinks=Email links:
+index_compose=Compose
 
 webmin_title=Webmin Modules
 webmin_incat=Modules in category $1 ..

@@ -163,6 +163,7 @@ elsif ($hasmail) {
 	      &ui_submit($text{'index_msearchok'}),"<br>\n";
 
 	# Show various links for mail/folder management
+	push(@mlinks, "<a href='mailbox/reply_mail.cgi?new=1&folder=$dfolder->{'id'}'>$text{'index_compose'}</a>");
 	%mconfig = &foreign_config("mailbox");
 	$flink = $mconfig{'mail_system'} == 4 ? "mailbox/list_ifolders.cgi"
 					      : "mailbox/list_folders.cgi";

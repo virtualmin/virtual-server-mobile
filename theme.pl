@@ -6,6 +6,9 @@ $main::basic_virtualmin_domain = 1;
 # Disable other links on virtualmin module main page
 $main::basic_virtualmin_menu = 1;
 
+# Tell CGIs that uploads are not possible
+$main::no_browser_uploads = 1;
+
 sub theme_ui_post_header
 {
 local ($text) = @_;
@@ -87,7 +90,7 @@ sub theme_ui_table_row
 {
 local ($label, $value, $cols) = @_;
 local $rv;
-$rv .= "<b>$label</b><br>\n" if (defined($label));
+$rv .= "<b>$label</b><br>\n" if ($label =~ /\S/);
 #$rv .= "&nbsp;&nbsp;" if (defined($label) &&
 #			  $value !~ /^\s*<table/ &&
 #			  $value !~ /^\s*<!--grid/);
@@ -264,18 +267,27 @@ print "Location: $url\n\n";
 sub theme_ui_tabs_start
 {
 local ($tabs, $name, $sel, $border) = @_;
-local $rv;
-foreach my $t (@$tabs) {
-	$rv .= "&lt;<a href='$t->[2]'>".
-	       ($t->[0] eq $sel ? "<b>" : "").
-	       $t->[1].
-	       ($t->[0] eq $sel ? "</b>" : "").
-	       "</a>&gt;\n";
+if ($module_name eq 'mailbox' && $0 =~ /reply_mail.cgi/) {
+	# Special layout for composing email, where we can't use hiding
+	$theme_ui_tabs_current = $tabs;
+	return undef;
 	}
-$rv .= "<br>\n";
-$rv .= &ui_hidden($name, $sel)."\n";
-$main::current_selected_tab{$name} = $sel;
-return $rv;
+else {
+	# Show list of tabs
+	$theme_ui_tabs_current = undef;
+	local $rv;
+	foreach my $t (@$tabs) {
+		$rv .= "&lt;<a href='$t->[2]'>".
+		       ($t->[0] eq $sel ? "<b>" : "").
+		       $t->[1].
+		       ($t->[0] eq $sel ? "</b>" : "").
+		       "</a>&gt;\n";
+		}
+	$rv .= "<br>\n";
+	$rv .= &ui_hidden($name, $sel)."\n";
+	$main::current_selected_tab{$name} = $sel;
+	return $rv;
+	}
 }
 
 # Doesn't need to return anything for text-mode tabs
@@ -288,7 +300,12 @@ return "";
 sub theme_ui_tabs_start_tab
 {
 local ($name, $tab) = @_;
-if ($main::current_selected_tab{$name} ne $tab) {
+if ($theme_ui_tabs_current) {
+	# In mode where all tabs are shown, for composing email
+	local ($t) = grep { $_->[0] eq $tab } @$theme_ui_tabs_current;
+	#print "<b>$t->[1]</b>:\n";
+	}
+elsif ($main::current_selected_tab{$name} ne $tab) {
 	open(NULLFILE, ">$null_file");
 	$main::suppressing_tab = select(NULLFILE);
 	}
@@ -303,7 +320,12 @@ return &theme_ui_tabs_start_tab(@_);
 # If we are currently suppressing, stop it
 sub theme_ui_tabs_end_tab
 {
-if ($main::suppressing_tab) {
+if ($theme_ui_tabs_current) {
+	# End of tab in mode where we are showing all
+	print "<br>\n";
+	}
+elsif ($main::suppressing_tab) {
+	# Stop suppressing output
 	select($main::suppressing_tab);
 	$main::suppressing_tab = undef;
 	}
@@ -559,6 +581,10 @@ sub theme_date_chooser_button
 {
 return undef;
 }
+sub theme_address_button
+{
+return undef;
+}
 
 # Function overrides for Read Mail usermin module
 sub theme_left_right_align
@@ -599,11 +625,11 @@ if (!@sub) {
 else {
         print $text{'view_sub'},"\n";
         }
-print "<p>\n";
+print "<br>\n";
 }
 sub theme_show_buttons
 {
-# Show links for common actions
+# Show links for common actions on a single mail
 local %ttext = &load_language($current_theme);
 local @bacts;
 local $url = "reply_mail.cgi?id=".&urlize($in{'id'}).
@@ -665,10 +691,13 @@ if (@folders > 1) {
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=move&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_move'}</a>");
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=copy&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_copy'}</a>");
 	}
+if (!@subs) {
+	push(@bacts, "<a href='$url?delete=1'>$text{'view_delete'}</a>");
+	}
 print "<b>$ttext{'view_actions'}</b> ",
       join(" | ", @bacts),"<br>\n";
 }
-if ($module_name eq "mailbox" && $0 =~ /view_mail.cgi/) {
+if ($module_name eq "mailbox" && $0 =~ /(view|reply)_mail.cgi/) {
 	# UI overrides for viewing email
 	$main::{'left_right_align'} = \&theme_left_right_align;
 	$mailbox::{'left_right_align'} = \&theme_left_right_align;
@@ -683,6 +712,17 @@ if ($module_name eq "mailbox" && $0 =~ /view_mail.cgi/) {
 	$text{'view_noheaders'} = $ttext{'view_noheaders'};
 	$text{'view_allheaders'} = $ttext{'view_allheaders'};
 	$text{'view_raw'} = $ttext{'view_raw'};
+
+	# To supress HTML compose links
+	$text{'reply_html0'} = undef;
+	$text{'reply_html1'} = undef;
+
+	# Never use HTML editor
+	$userconfig{'head_html'} = 0;
+	$userconfig{'html_edit'} = 0;
+
+	# Only show one set of send buttons
+	$userconfig{'send_buttons'} = 0;
 	}
 
 1;
