@@ -160,3 +160,6 @@ view_noheaders=Basic
 view_allheaders=All
 view_raw=Raw
 
+folders_loc=Location:
+folders_ty=Type:
+folders_acts=Actions:

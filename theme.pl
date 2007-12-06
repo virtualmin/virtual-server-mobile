@@ -112,18 +112,26 @@ sub theme_ui_columns_start
 {
 local ($heads, $width, $noborder, $tdtags, $heading) = @_;
 local $rv;
-$rv .= "<table".($noborder ? "" : " border").
-		(defined($width) ? " width=$width%" : "").">\n";
-if ($heading) {
-	$rv .= "<font size=+1>$heading</font><br>\n";
+if ($module_name eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
+	# For folders list, use different format
+	$main::theme_ui_columns_folders = 1;
 	}
-$rv .= "<tr>\n";
-local $i;
-for($i=0; $i<@$heads; $i++) {
-	$rv .= "<th ".$tdtags->[$i]."><b>".
-	       ($heads->[$i] eq "" ? "<br>" : $heads->[$i])."</b></th>\n";
+else {
+	# Just regular plain table
+	$rv .= "<table".($noborder ? "" : " border").
+			(defined($width) ? " width=$width%" : "").">\n";
+	if ($heading) {
+		$rv .= "<font size=+1>$heading</font><br>\n";
+		}
+	$rv .= "<tr>\n";
+	local $i;
+	for($i=0; $i<@$heads; $i++) {
+		$rv .= "<th ".$tdtags->[$i]."><b>".
+	            ($heads->[$i] eq "" ? "<br>" : $heads->[$i])."</b></th>\n";
+		}
+	$rv .= "</tr>\n";
+	$main::theme_ui_columns_folders = 0;
 	}
-$rv .= "</tr>\n";
 return $rv;
 }
 
@@ -133,13 +141,32 @@ sub theme_ui_columns_row
 {
 local ($cols, $tdtags) = @_;
 local $rv;
-$rv .= "<tr>\n";
-local $i;
-for($i=0; $i<@$cols; $i++) {
-	$rv .= "<td ".$tdtags->[$i].">".
-	       ($cols->[$i] eq "" ? "<br>" : $cols->[$i])."</td>\n";
+if ($main::theme_ui_columns_folders) {
+	# Show each row of folders as a block
+	local %ttext = &load_language($current_theme);
+	local $cb = &ui_checkbox("x", "x", undef, 0, undef, 1);
+	local @c = @$cols;
+	splice(@c, 2, 0, undef) if ($0 =~ /list_ifolders.cgi/);
+	print ($c[0] || $cb);
+	print $c[1],"<br>\n";
+	if ($c[2]) {
+		print "<b>$ttext{'folders_loc'}</b> ",$c[2],"<br>\n";
+		}
+	print "<b>$ttext{'folders_ty'}</b> ",$c[3],", ",$c[4],"<br>\n";
+	if ($c[5] =~ /\S/) {
+		print "<b>$ttext{'folders_acts'}</b> ",$c[5],"<br>\n";
+		}
 	}
-$rv .= "</tr>\n";
+else {
+	# Regular table
+	$rv .= "<tr>\n";
+	local $i;
+	for($i=0; $i<@$cols; $i++) {
+		$rv .= "<td ".$tdtags->[$i].">".
+		       ($cols->[$i] eq "" ? "<br>" : $cols->[$i])."</td>\n";
+		}
+	$rv .= "</tr>\n";
+	}
 return $rv;
 }
 
@@ -166,16 +193,21 @@ sub theme_ui_checked_columns_row
 {
 local ($cols, $tdtags, $checkname, $checkvalue, $checked) = @_;
 local $rv;
-$rv .= "<tr>\n";
-$rv .= "<td ".$tdtags->[0].">".
-       &ui_checkbox($checkname, $checkvalue, undef, $checked)."</td>\n";
-local $i;
-for($i=0; $i<@$cols; $i++) {
-	$rv .= "<td ".$tdtags->[$i+1].">";
-	$rv .= ($cols->[$i] eq "" ? "<br>" : $cols->[$i]);
-	$rv .= "</td>\n";
+local $cb = &ui_checkbox($checkname, $checkvalue, undef, $checked);
+if ($main::theme_ui_columns_folders) {
+	$rv = &theme_ui_columns_row([ $cb, @$cols ], $tdtags);
 	}
-$rv .= "</tr>\n";
+else {
+	$rv .= "<tr>\n";
+	$rv .= "<td ".$tdtags->[0].">".$cb."</td>\n";
+	local $i;
+	for($i=0; $i<@$cols; $i++) {
+		$rv .= "<td ".$tdtags->[$i+1].">";
+		$rv .= ($cols->[$i] eq "" ? "<br>" : $cols->[$i]);
+		$rv .= "</td>\n";
+		}
+	$rv .= "</tr>\n";
+	}
 return $rv;
 }
 
@@ -218,6 +250,30 @@ return undef;
 sub theme_select_invert_link
 {
 return undef;
+}
+
+sub theme_ui_hidden_start
+{
+local ($title, $name, $status, $url) = @_;
+local $nstatus = $status ? 0 : 1;
+print $status ? "-" : "+";
+print " <a href='$url?$name=$nstatus'>$title</a><br>\n";
+if (!$status) {
+	open(NULLFILE, ">$null_file");
+	$main::suppressing_hidden_start = select(NULLFILE);
+	}
+else {
+	$main::suppressing_hidden_start = undef;
+	}
+}
+
+sub theme_ui_hidden_end
+{
+local ($name) = @_;
+if ($main::suppressing_hidden_start) {
+	select($main::suppressing_hidden_start);
+	}
+return "";
 }
 
 # theme_ui_links_row(&links)
