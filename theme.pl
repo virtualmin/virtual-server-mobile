@@ -50,7 +50,7 @@ for($i=0; $i+1<@_; $i+=2) {
 			}
 		$url = "$gconfig{'webprefix'}$url" if ($url =~ /^\//);
 		print "&nbsp;|\n" if ($count++);
-		print "&nbsp;<a href=\"$url\">",&text('main_return', $_[$i+1]),"</a>\n";
+		print "<a href=\"$url\">&lt;- ",&text('main_return', $_[$i+1]),"</a>\n";
 		}
 	}
 print "<br>\n";
@@ -527,6 +527,17 @@ for($i=1; $i<=$max; $i++) {
 return $rv;
 }
 
+sub theme_ui_submit
+{
+local ($label, $name, $dis, $tags) = @_;
+return "<input type=submit".
+       ($name ne '' ? " name=\"".&quote_escape($name)."\"" : "").
+       " value=\"".&quote_escape($label)."\"".
+       ($dis ? " disabled=true" : "").
+       ($tags ? " ".$tags : "")." style='font-size: 8px'>\n";
+			
+}
+
 # Popup buttons don't work
 sub theme_modules_chooser_button
 {
@@ -548,6 +559,131 @@ sub theme_date_chooser_button
 {
 return undef;
 }
+
+# Function overrides for Read Mail usermin module
+sub theme_left_right_align
+{
+return $_[0]." ".$_[1];
+}
+sub theme_show_arrows
+{
+local %ttext = &load_language($current_theme);
+if (!@sub) {
+        # Get next and previous emails, where they exist
+        local $c = &mailbox_folder_size($folder, 1);
+        local $prv = $mail->{'sortidx'} == 0 ? 0 : $mail->{'sortidx'}-1;
+        local $nxt = $mail->{'sortidx'} == $c-1 ? $c-1 : $mail->{'sortidx'}+1;
+        local @beside = &mailbox_list_mails_sorted($prv, $nxt, $folder, 1);
+
+        if ($mail->{'sortidx'} != 0) {
+                local $mailprv = $beside[$prv];
+                print "<a href='view_mail.cgi?id=",&urlize($mailprv->{'id'}),
+                      "&folder=$in{'folder'}&start=$in{'start'}'>",
+		      "&lt;$ttext{'mail_next'}</a>";
+                }
+        else {
+		print "&lt;$ttext{'mail_next'}\n";
+                }
+        print " | ",&text('view_desc', $mail->{'sortidx'}+1,
+				       $folder->{'name'})," | ";
+        if ($mail->{'sortidx'} < $c-1) {
+                local $mailnxt = $beside[$nxt];
+                print "<a href='view_mail.cgi?id=",&urlize($mailnxt->{'id'}),
+                      "&folder=$in{'folder'}&start=$in{'start'}'>",
+		      "$ttext{'mail_prev'}&gt;</a>";
+                }
+        else {
+		print "$ttext{'mail_prev'}&gt;\n";
+                }
+        }
+else {
+        print $text{'view_sub'},"\n";
+        }
+print "<p>\n";
+}
+sub theme_show_buttons
+{
+# Show links for common actions
+local %ttext = &load_language($current_theme);
+local @bacts;
+local $url = "reply_mail.cgi?id=".&urlize($in{'id'}).
+	     "&folder=".&urlize($in{'folder'}).
+	     "&body=".&urlize($in{'body'}).
+	     "&start=".&urlize($in{'start'});
+foreach my $s (@sub) {
+	$url .= "&sub=$s";
+	}
+if ($folder->{'sent'} || $folder->{'drafts'}) {
+	push(@bacts, "<a href='$url&enew=1'>$text{'view_enew'}</a>");
+	}
+else {
+	push(@bacts, "<a href='$url&reply=1'>$text{'view_reply'}</a>");
+	push(@bacts, "<a href='$url&rall=1'>$text{'view_reply2'}</a>");
+	}
+push(@bacts, "<a href='$url&new=1'>$text{'mail_compose'}</a>");
+push(@bacts, "<a href='$url&forward=1'>$text{'view_forward'}</a>");
+if (!$_[1]) {
+        # Show mark buttons, except for current mode
+        if (!$folder->{'sent'} && !$folder->{'drafts'}) {
+                $m = &get_mail_read($folder, $mail);
+                foreach $i (0 .. 2) {
+                        if ($m != $i) {
+				push(@bacts, "<a href='$url&markas$i=1'>".
+					     $ttext{'mail_markas'.$i}."</a>");
+				}
+			}
+		}
+	}
+if (!$_[1]) {
+        # Show spam and/or ham report buttons
+        if (&can_report_spam($folder) &&
+            $userconfig{'spam_buttons'} =~ /mail/) {
+                if ($userconfig{'spam_del'}) {
+			push(@bacts, "<a href='$url?razor=1'>$text{'view_razordel'}</a>");
+                        }
+                else {
+			push(@bacts, "<a href='$url?razor=1'>$text{'view_razor'}</a>");
+                        }
+                }
+        if (&can_report_ham($folder) &&
+            $userconfig{'ham_buttons'} =~ /mail/) {
+                if ($userconfig{'white_move'} && $folder->{'spam'}) {
+			push(@bacts, "<a href='$url?white=1'>$text{'view_whitemove'}</a>");
+                        }
+                else {
+			push(@bacts, "<a href='$url?white=1'>$text{'view_white'}</a>");
+                        }
+                if ($userconfig{'ham_move'} && $folder->{'spam'}) {
+			push(@bacts, "<a href='$url?ham=1'>$text{'view_hammove'}</a>");
+                        }
+                else {
+			push(@bacts, "<a href='$url?ham=1'>$text{'view_ham'}</a>");
+                        }
+                }
+        }
+if (@folders > 1) {
+	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=move&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_move'}</a>");
+	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=copy&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_copy'}</a>");
+	}
+print "<b>$ttext{'view_actions'}</b> ",
+      join(" | ", @bacts),"<br>\n";
+}
+if ($module_name eq "mailbox" && $0 =~ /view_mail.cgi/) {
+	# UI overrides for viewing email
+	$main::{'left_right_align'} = \&theme_left_right_align;
+	$mailbox::{'left_right_align'} = \&theme_left_right_align;
+	$main::{'search_link'} = sub { return "" };
+	$mailbox::{'search_link'} = sub { return "" };
+	$main::{'show_arrows'} = \&theme_show_arrows;
+	$mailbox::{'show_arrows'} = \&theme_show_arrows;
+	$main::{'show_buttons'} = \&theme_show_buttons;
+	$mailbox::{'show_buttons'} = \&theme_show_buttons;
+
+	local %ttext = &load_language($current_theme);
+	$text{'view_noheaders'} = $ttext{'view_noheaders'};
+	$text{'view_allheaders'} = $ttext{'view_allheaders'};
+	$text{'view_raw'} = $ttext{'view_raw'};
+	}
 
 1;
 

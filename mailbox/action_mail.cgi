@@ -5,10 +5,11 @@ require './mailbox-lib.pl';
 &ReadParse();
 @d = split(/\0/, $in{'d'});
 %ttext = &load_language($current_theme);
+$action = $in{'ok1'} ? $in{'action1'} : $in{'action2'};
 
-if ($in{'action'} eq 'move' || $in{'action'} eq 'copy') {
+if ($action eq 'move' || $action eq 'copy') {
 	# Show dest form
-	&ui_print_header(undef, $ttext{'action_title'.$in{'action'}}, "");
+	&ui_print_header(undef, $ttext{'action_title'.$action}, "");
 
 	print &ui_form_start("delete_mail.cgi", "post");
 	print &ui_hidden("folder", $in{'folder'});
@@ -16,7 +17,7 @@ if ($in{'action'} eq 'move' || $in{'action'} eq 'copy') {
 	foreach $d (@d) {
 		print &ui_hidden("d", $d);
 		}
-	print &ui_hidden($in{'action'}."1", 1);
+	print &ui_hidden($action."1", 1);
 
 	# Source folder
 	@folders = &list_folders_sorted();
@@ -29,17 +30,24 @@ if ($in{'action'} eq 'move' || $in{'action'} eq 'copy') {
 	print &ui_table_row($ttext{'action_dest'},
 			    &folder_select(\@mfolders, under, "mfolder1"));
 
-	print &ui_table_row($ttext{'action_sel'}, scalar(@d));
+	if (@d == 1) {
+		($mail) = &mailbox_select_mails($folder, \@d, 1);
+		print &ui_table_row($ttext{'action_sel2'},
+			&simplify_subject($mail->{'header'}->{'subject'}));
+		}
+	else {
+		print &ui_table_row($ttext{'action_sel'}, scalar(@d));
+		}
 
 	print &ui_table_end();
-	print &ui_form_end([ [ undef, $ttext{'action_'.$in{'action'}} ] ]);
+	print &ui_form_end([ [ undef, $ttext{'action_'.$action} ] ]);
 
 	&ui_print_footer("index.cgi?folder=$in{'folder'}&start=$in{'start'}",
 			 $text{'index_return'});
 	}
 else {
 	# Just redirect
-	&redirect("delete_mail.cgi?".$in{'action'}."=1".
+	&redirect("delete_mail.cgi?$action=1".
 		  "&folder=".$in{'folder'}.
 		  "&mod=".$in{'mod'}.
 		  join("", map { "&d=$_" } @d));

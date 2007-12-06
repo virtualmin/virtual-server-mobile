@@ -91,13 +91,12 @@ $end = $in{'start'}+$perpage-1;
 $end = scalar(@mail)-1 if ($end >= scalar(@mail));
 
 # Buttons at top
+print &ui_form_start("action_mail.cgi", "post");
+print &ui_hidden("folder", $folder->{'index'});
+print &ui_hidden("mod", &modification_time($folder));
+print &ui_hidden("start", $in{'start'});
 if ($userconfig{'top_buttons'} && @mail) {
-	print &ui_form_start("action_mail.cgi", "post");
-	print &ui_hidden("folder", $folder->{'index'});
-	print &ui_hidden("mod", &modification_time($folder));
-	print &ui_hidden("start", $in{'start'});
 	&text_mailbox_buttons(1, \@folders, $folder, \@mail);
-	print &ui_form_end();
 	}
 
 # Show sort links
@@ -200,12 +199,9 @@ for(my $i=$start; $i<=$end; $i++) {
                         }
 		}
 	}
+print "<p>\n" if (@mail);
 
 # Buttons at end of form
-print &ui_form_start("action_mail.cgi", "post");
-print &ui_hidden("folder", $folder->{'index'});
-print &ui_hidden("mod", &modification_time($folder));
-print &ui_hidden("start", $in{'start'});
 &text_mailbox_buttons(2, \@folders, $folder, \@mail);
 print &ui_form_end();
 
@@ -215,12 +211,46 @@ if ($userconfig{'arrows'}) {
 	&show_arrows();
 	}
 
-# Start section for end of page buttons, in a 3-wide grid
-# XXX replace some of these
-print "<hr>\n";
-@grid = ( );
-print "<table width=100%>\n";
+# Other actions
+@oacts = ( );
 
+# Address book button
+if (!$main::mailbox_no_addressbook_button) {
+	push(@oacts, "<a href='list_addresses.cgi'>".
+		     "$ttext{'mail_addresses'}</a>");
+	}
+
+# Folder management button
+if (!$main::mailbox_no_folder_button) {
+	if ($config{'mail_system'} == 4) {
+		push(@oacts, "<a href='list_ifolders.cgi'>".
+			     "$ttext{'mail_folders'}</a>");
+		}
+	else {
+		push(@oacts, "<a href='list_folders.cgi'>".
+			     "$ttext{'mail_folders'}</a>");
+		}
+	}
+
+# Sig editor
+if (&get_signature_file()) {
+	push(@oacts, "<a href='edit_sig.cgi'>$ttext{'mail_sig'}</a>");
+	}
+
+# Show button to delete all mail in folder
+if (@mail && ($folder->{'trash'} || $userconfig{'show_delall'})) {
+	push(@oacts, "<a href='delete_mail.cgi?folder=$folder->{'index'}".
+		     "&all=1&delete=1'>".
+		     ($folder->{'trash'} ? $text{'mail_deltrash'}
+                                         : $text{'mail_delall'})."</a>");
+	}
+
+if (@oacts) {
+	print "<b>$ttext{'mail_oacts'}</b> ",
+	      join(" | ", @oacts),"<p>\n";
+	}
+
+# Show search / jump actions
 if (@mail) {
 	$jumpform = (@mail > $perpage);
 	if ($folder->{'searchable'}) {
@@ -231,73 +261,35 @@ if (@mail) {
 		$ssform .= &ui_submit($text{'mail_search2'});
 		$ssform .= &ui_textbox("search", undef, 20);
 		$ssform .= &ui_form_end();
-		push(@grid, $ssform);
+		print $ssform;
 
 		# Advanced search
-		push(@grid, &ui_form_start("search_form.cgi").
-			    &ui_hidden("folder", $folder->{'index'}).
-			    &ui_submit($text{'mail_advanced'}, "advanced").
-			    &ui_form_end());
+		print &ui_form_start("search_form.cgi").
+		      &ui_hidden("folder", $folder->{'index'}).
+		      &ui_submit($text{'mail_advanced'}, "advanced").
+		      &ui_form_end();
 		}
 
 	if ($folder->{'spam'} && $folder->{'searchable'}) {
 		# Spam level search
-		push(@grid, &ui_form_start("mail_search.cgi").
-			    &ui_hidden("folder", $folder->{'index'}).
-			    &ui_hidden("spam", 1).
-			    &ui_submit($text{'mail_search3'}).
-			    &ui_textbox("score", undef, 5).
-			    &ui_form_end());
+		print &ui_form_start("mail_search.cgi").
+		      &ui_hidden("folder", $folder->{'index'}).
+		      &ui_hidden("spam", 1).
+		      &ui_submit($text{'mail_search3'}).
+		      &ui_textbox("score", undef, 5).
+		      &ui_form_end();
 		}
 	if ($jumpform) {
 		# Show page jump form
-		push(@grid, &ui_form_start("index.cgi").
-			    &ui_hidden("folder", $folder->{'index'}).
-			    &ui_submit($text{'mail_jump'}).
-			    &ui_textbox("jump", int($in{'start'} / $perpage)+1,
-					3)." $text{'mail_of'} ".
-					   (int(@mail / $perpage)+1).
-			    &ui_form_end());
+		print &ui_form_start("index.cgi").
+		      &ui_hidden("folder", $folder->{'index'}).
+		      &ui_submit($text{'mail_jump'}).
+		      &ui_textbox("jump", int($in{'start'} / $perpage)+1, 3).
+				  " $text{'mail_of'} ".
+			          (int(@mail / $perpage)+1).
+		      &ui_form_end();
 		}
 	}
-
-
-# Address book button
-if (!$main::mailbox_no_addressbook_button) {
-	push(@grid, &ui_form_start("list_addresses.cgi").
-		    &ui_submit($text{'mail_addresses'}).
-		    &ui_form_end());
-	}
-
-# Folder management button
-if (!$main::mailbox_no_folder_button) {
-	push(@grid, &ui_form_start($config{'mail_system'} == 4 ?
-				"list_ifolders.cgi" : "list_folders.cgi").
-		    &ui_submit($text{'mail_folders'}).
-	    &ui_form_end());
-	}
-
-# Sig editor
-if (&get_signature_file()) {
-	push(@grid, &ui_form_start("edit_sig.cgi").
-		    &ui_submit($text{'mail_sig'}).
-		    &ui_form_end());
-	}
-
-# Show button to delete all mail in folder
-if (@mail && ($folder->{'trash'} || $userconfig{'show_delall'})) {
-	push(@grid, &ui_form_start("delete_mail.cgi").
-		    &ui_hidden("folder", $folder->{'index'}).
-		    &ui_hidden("all", 1).
-		    &ui_submit($folder->{'trash'} ? $text{'mail_deltrash'}
-						  : $text{'mail_delall'},
-			       "delete").
-		    &ui_form_end());
-	}
-
-print &ui_grid_table(\@grid, 3, 100,
-  [ "align=left width=33%", "align=center width=33%", "align=right width=33%" ],
-  "cellpadding=0 cellspacing=0");
 
 &ui_print_footer("/", $text{'index'});
 &pop3_logout();
@@ -333,7 +325,7 @@ if (@mail) {
 	print " | ",&text('mail_pos', $s, $e, scalar(@mail))," | ";
 	}
 else {
-	print &text('mail_none');
+	print " | ",&text('mail_none')," | ";
 	}
 print "\n";
 
@@ -431,10 +423,8 @@ if (@mail && (&can_report_ham($folder) &&
 
 # Actions menu
 print "<b>$ttext{'mail_actions'}</b>\n";
-print &ui_select("action", undef, \@acts);
-print &ui_submit($ttext{'mail_ok'}),"<br>\n";
-
-print "<br>\n";
+print &ui_select("action".$num, undef, \@acts);
+print &ui_submit($ttext{'mail_ok'}, "ok".$num),"<br>\n";
 }
 
 

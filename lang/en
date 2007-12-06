@@ -131,3 +131,31 @@ mail_none=No messages in folder
 mail_next=Next
 mail_prev=Prev
 mail_nosort=Reset
+mail_actions=Mail actions:
+mail_ok=OK
+mail_move=Move
+mail_copy=Copy
+mail_markas0=Mark unread
+mail_markas1=Mark read
+mail_markas2=Mark special
+mail_oacts=Actions:
+mail_addresses=Addresses
+mail_folders=Folders
+mail_sig=Signature
+
+action_titlemove=Move Email
+action_titlecopy=Copy Email
+action_src=Source folder
+action_dest=Destination folder
+action_sel=Selected messages
+action_sel2=Selected message
+action_move=Move Now
+action_copy=Copy Now
+
+view_actions=Actions:
+view_move=Move
+view_copy=Copy
+view_noheaders=Basic
+view_allheaders=All
+view_raw=Raw
+

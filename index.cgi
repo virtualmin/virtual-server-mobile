@@ -44,6 +44,7 @@ else {
 	}
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
 
+print "<ul>\n";
 if ($hasvirt) {
 	# Check licence
 	print &virtual_server::licence_warning_message();
@@ -59,7 +60,6 @@ if ($hasvirt) {
 
 	# List Virtualmin domains
 	print "<form action=index_edit.cgi>\n";
-	print "<ul>\n";
 	print "<li><a href='index_list.cgi'>$text{'index_vmenu'}</a><br>\n";
 
 	# Modify domains
@@ -135,9 +135,6 @@ if ($hasvirt) {
 			print "<li><a href='index_updates.cgi'>",&text('index_vupdates', scalar(@poss)),"</a><br>\n";
 			}
 		}
-
-	print "</ul>\n";
-	print "</form>\n";
 	}
 elsif ($hasmail) {
 	# Show Usermin folders
@@ -150,7 +147,6 @@ elsif ($hasmail) {
 	print &ui_hidden("simple", 1);
 	print &ui_hidden("folder", $dfolder->{'index'});
 
-	print "<ul>\n";
 	foreach $f (@folders) {
 		$fid = &mailbox::folder_name($f);
 		$star = $f->{'type'} == 6 &&
@@ -181,12 +177,10 @@ elsif ($hasmail) {
 	push(@mlinks, "<a href='changepass/'>$text{'index_lpass'}</a>");
 	print "<li>$text{'index_mlinks'}\n",join(" | ",@mlinks),"<br>\n";
 
-	print "</ul>\n";
 	print &ui_form_end();
 	}
 
 # Show links to Webmin or Usermin module categories
-print "<p><ul>\n";
 @modules = &get_visible_module_infos();
 %cats = &list_categories(\@modules);
 print "<li>$text{'index_'.$prod.'cats'}\n";
