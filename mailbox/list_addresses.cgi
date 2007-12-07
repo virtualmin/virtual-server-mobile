@@ -18,7 +18,8 @@ print &ui_tabs_start_tab("mode", "users");
 print "$text{'address_desc'}<p>\n";
 foreach $a (grep { defined($_->[2]) } @addrs) {
 	print "<a href='edit_address.cgi?idx=$a->[2]'>",
-	      &html_escape($a->[0]),"</a><br>\n";
+	      &html_escape($a->[0]),"</a>\n";
+	print &compose_link($a->[0], $a->[1]),"<br>\n";
 	print "<b>$ttext{'address_name'}</b> ",&html_escape($a->[1]),"\n";
 	print "<b>$ttext{'address_type'}</b> ",
 	      $ttext{'address_type'.int($a->[3])},"<br>\n";
@@ -37,7 +38,8 @@ print &ui_tabs_start_tab("mode", "groups");
 print "$text{'address_gdesc'}<p>\n";
 foreach $a (grep { defined($_->[2]) } @gaddrs) {
 	print "<a href='edit_group.cgi?idx=$a->[2]'>",
-	      &html_escape($a->[0]),"</a><br>\n";
+	      &html_escape($a->[0]),"</a>\n";
+	print &compose_link($a->[0]),"<br>\n";
 	@mems = &split_addresses($a->[1]);
 	@mems = map { $_->[1] ? &html_escape($_->[1]) : &html_escape($_->[0]) }
 		    @mems;
@@ -58,4 +60,14 @@ print &ui_tabs_end_tab();
 print &ui_tabs_end(1);
 
 &ui_print_footer("", $text{'mail_return'});
+
+sub compose_link
+{
+local ($addr, $name) = @_;
+if ($name) {
+	$addr = "$name <$addr>";
+	}
+return "<a href='reply_mail.cgi?new=1&to=".&urlize($addr)."'>".
+       "<img src=images/mail-small.gif alt='(New..)' border=0></a>";
+}
 
