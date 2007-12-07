@@ -33,7 +33,8 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	$title = $gconfig{'nohostname'} ? $text{'vmain_title2'} :
 		&text('vmain_title', $minfo{'version'}, $hostname, $ostr);
 	}
-elsif ($prod eq 'usermin' && &foreign_available("mailbox")) {
+elsif ($prod eq 'usermin' && &foreign_available("mailbox") &&
+       &get_webmin_version() >= 1.313) {
 	# We have Usermin mail
 	$hasmail = 1;
 	}
