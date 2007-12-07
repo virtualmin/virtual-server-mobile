@@ -186,3 +186,12 @@ address_return=addressbook
 address_err=Failed to save address
 address_eemail=Missing or invalid email address
 address_egone=Entry no longer exists
+address_more=$1 more ..
+address_mems=Members:
+address_return2=nicknames
+
+group_create=Create Nickname
+group_edit=Edit Nickname
+group_header=Address nickname or group details
+group_name=Name
+group_emails=Real email addresses

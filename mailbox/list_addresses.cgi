@@ -33,8 +33,26 @@ print &ui_tabs_end_tab();
 print &ui_tabs_start_tab("mode", "groups");
 
 # Show list of groups
-# XXX
+@gaddrs = &list_address_groups();
+print "$text{'address_gdesc'}<p>\n";
+foreach $a (grep { defined($_->[2]) } @gaddrs) {
+	print "<a href='edit_group.cgi?idx=$a->[2]'>",
+	      &html_escape($a->[0]),"</a><br>\n";
+	@mems = &split_addresses($a->[1]);
+	@mems = map { $_->[1] ? &html_escape($_->[1]) : &html_escape($_->[0]) }
+		    @mems;
+	if (@mems > 3) {
+		$text{'address_more'} = $ttext{'address_more'};
+		@mems = ( @mems[0..2], &text('address_more', @mems-3) );
+		}
+	print "<b>$ttext{'address_mems'}</b> ",
+	      join(", ", @mems),"<br>\n";
+	}
 print "<p>\n";
+
+# Show link to add a group
+print &ui_links_row([
+	"<a href='edit_group.cgi?new=1'>$text{'address_gadd'}</a>" ]);
 
 print &ui_tabs_end_tab();
 print &ui_tabs_end(1);
