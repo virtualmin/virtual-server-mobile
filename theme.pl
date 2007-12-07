@@ -5,6 +5,7 @@ $main::basic_virtualmin_domain = 1;
 
 # Disable other links on virtualmin module main page
 $main::basic_virtualmin_menu = 1;
+$main::nocreate_virtualmin_menu = 1;
 
 # Tell CGIs that uploads are not possible
 $main::no_browser_uploads = 1;
