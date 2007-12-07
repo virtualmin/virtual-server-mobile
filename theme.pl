@@ -769,25 +769,25 @@ if (!$_[1]) {
         if (&can_report_spam($folder) &&
             $userconfig{'spam_buttons'} =~ /mail/) {
                 if ($userconfig{'spam_del'}) {
-			push(@bacts, "<a href='$url?razor=1'>$text{'view_razordel'}</a>");
+			push(@bacts, "<a href='$url&razor=1'>$text{'view_razordel'}</a>");
                         }
                 else {
-			push(@bacts, "<a href='$url?razor=1'>$text{'view_razor'}</a>");
+			push(@bacts, "<a href='$url&razor=1'>$text{'view_razor'}</a>");
                         }
                 }
         if (&can_report_ham($folder) &&
             $userconfig{'ham_buttons'} =~ /mail/) {
                 if ($userconfig{'white_move'} && $folder->{'spam'}) {
-			push(@bacts, "<a href='$url?white=1'>$text{'view_whitemove'}</a>");
+			push(@bacts, "<a href='$url&white=1'>$text{'view_whitemove'}</a>");
                         }
                 else {
-			push(@bacts, "<a href='$url?white=1'>$text{'view_white'}</a>");
+			push(@bacts, "<a href='$url&white=1'>$text{'view_white'}</a>");
                         }
                 if ($userconfig{'ham_move'} && $folder->{'spam'}) {
-			push(@bacts, "<a href='$url?ham=1'>$text{'view_hammove'}</a>");
+			push(@bacts, "<a href='$url&ham=1'>$text{'view_hammove'}</a>");
                         }
                 else {
-			push(@bacts, "<a href='$url?ham=1'>$text{'view_ham'}</a>");
+			push(@bacts, "<a href='$url&ham=1'>$text{'view_ham'}</a>");
                         }
                 }
         }
@@ -796,7 +796,7 @@ if (@folders > 1) {
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=copy&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_copy'}</a>");
 	}
 if (!@subs) {
-	push(@bacts, "<a href='$url?delete=1'>$text{'view_delete'}</a>");
+	push(@bacts, "<a href='$url&delete=1'>$text{'view_delete'}</a>");
 	}
 print "<b>$ttext{'view_actions'}</b> ",
       join(" | ", @bacts),"<br>\n";
