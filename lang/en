@@ -195,3 +195,7 @@ group_edit=Edit Nickname
 group_header=Address nickname or group details
 group_name=Name
 group_emails=Real email addresses
+
+filter_act=Action:
+filter_move=Move:
+

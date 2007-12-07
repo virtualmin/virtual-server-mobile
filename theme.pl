@@ -115,6 +115,7 @@ local ($heads, $width, $noborder, $tdtags, $heading) = @_;
 local $rv;
 $main::theme_ui_columns_folders = 0;
 $main::theme_ui_columns_search = 0;
+$main::theme_ui_columns_filter = 0;
 if ($module_name eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
 	# For folders list, use different format
 	$main::theme_ui_columns_folders = 1;
@@ -122,6 +123,10 @@ if ($module_name eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
 elsif ($module_name eq 'mailbox' && $0 =~ /search_form.cgi/) {
 	# For search form
 	$main::theme_ui_columns_search = 1;
+	}
+elsif ($module_name eq 'filter' && $0 =~ /index.cgi/) {
+	# For filter list
+	$main::theme_ui_columns_filter = 1;
 	}
 else {
 	# Just regular plain table
@@ -173,6 +178,29 @@ elsif ($main::theme_ui_columns_search) {
 	$rv .= "<b>$ttext{'search_field'}</b> ".$cols->[1]."<br>\n";
 	$rv .= "<b>$ttext{'search_text'}</b> ".$cols->[4].$neg."<br>\n";
 	}
+elsif ($main::theme_ui_columns_filter) {
+	# Show each filter as a block
+	local %ttext = &load_language($current_theme);
+	local $cb = &ui_checkbox("x", "x", undef, 0, undef, 1);
+	$rv .= ($cols->[0] || $cb);
+	local $cond = $cols->[1];
+	if ($cond =~ /^<([^>]*)>(.*)<\/a>$/) {
+		local ($href, $txt) = ($1, $2);
+		if (length($txt) > 40) {
+			$txt = substr($txt, 0, 40);
+			if ($txt =~ /<[^>]*$/) {
+				$txt .= ">";	# Close HTML
+				}
+			$txt .= "..";
+			}
+		$cond = "<$href>$txt</a>";
+		}
+	$rv .= $cond."<br>\n";
+	$rv .= "<b>$ttext{'filter_act'}</b> $cols->[2]<br>\n";
+	if ($cols->[3]) {
+		$rv .= "<b>$ttext{'filter_move'}</b> $cols->[3]<br>\n";
+		}
+	}
 else {
 	# Regular table
 	$rv .= "<tr>\n";
@@ -210,7 +238,7 @@ sub theme_ui_checked_columns_row
 local ($cols, $tdtags, $checkname, $checkvalue, $checked) = @_;
 local $rv;
 local $cb = &ui_checkbox($checkname, $checkvalue, undef, $checked);
-if ($main::theme_ui_columns_folders) {
+if ($main::theme_ui_columns_folders || $main::theme_ui_columns_filter) {
 	$rv = &theme_ui_columns_row([ $cb, @$cols ], $tdtags);
 	}
 else {
@@ -251,7 +279,8 @@ return $rv;
 # Returns HTML to end a table started by ui_columns_start
 sub theme_ui_columns_end
 {
-if ($main::theme_ui_columns_folders || $main::theme_ui_columns_search) {
+if ($main::theme_ui_columns_folders || $main::theme_ui_columns_search ||
+    $main::theme_ui_columns_filter) {
 	return "";
 	}
 return "</table>\n";
