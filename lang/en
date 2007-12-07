@@ -163,3 +163,10 @@ view_raw=Raw
 folders_loc=Location:
 folders_ty=Type:
 folders_acts=Actions:
+
+search_field=Field:
+search_cond=Condition:
+search_text=Text :
+search_neg=Negate
+search_and=All must match
+search_or=Any can match

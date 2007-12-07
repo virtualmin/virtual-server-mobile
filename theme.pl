@@ -112,9 +112,15 @@ sub theme_ui_columns_start
 {
 local ($heads, $width, $noborder, $tdtags, $heading) = @_;
 local $rv;
+$main::theme_ui_columns_folders = 0;
+$main::theme_ui_columns_search = 0;
 if ($module_name eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
 	# For folders list, use different format
 	$main::theme_ui_columns_folders = 1;
+	}
+elsif ($module_name eq 'mailbox' && $0 =~ /search_form.cgi/) {
+	# For search form
+	$main::theme_ui_columns_search = 1;
 	}
 else {
 	# Just regular plain table
@@ -130,7 +136,6 @@ else {
 	            ($heads->[$i] eq "" ? "<br>" : $heads->[$i])."</b></th>\n";
 		}
 	$rv .= "</tr>\n";
-	$main::theme_ui_columns_folders = 0;
 	}
 return $rv;
 }
@@ -147,15 +152,25 @@ if ($main::theme_ui_columns_folders) {
 	local $cb = &ui_checkbox("x", "x", undef, 0, undef, 1);
 	local @c = @$cols;
 	splice(@c, 2, 0, undef) if ($0 =~ /list_ifolders.cgi/);
-	print ($c[0] || $cb);
-	print $c[1],"<br>\n";
+	$rv .= ($c[0] || $cb);
+	$rv .= $c[1]."<br>\n";
 	if ($c[2]) {
-		print "<b>$ttext{'folders_loc'}</b> ",$c[2],"<br>\n";
+		$rv .= "<b>$ttext{'folders_loc'}</b> ".$c[2]."<br>\n";
 		}
-	print "<b>$ttext{'folders_ty'}</b> ",$c[3],", ",$c[4],"<br>\n";
+	$rv .= "<b>$ttext{'folders_ty'}</b> ".$c[3].", ".$c[4]."<br>\n";
 	if ($c[5] =~ /\S/) {
-		print "<b>$ttext{'folders_acts'}</b> ",$c[5],"<br>\n";
+		$rv .= "<b>$ttext{'folders_acts'}</b> ".$c[5]."<br>\n";
 		}
+	}
+elsif ($main::theme_ui_columns_search) {
+	# Show each search term as a block
+	local %ttext = &load_language($current_theme);
+	local $neg = $cols->[2];
+	if ($neg =~ /(neg_\d+)/) {
+		$neg = &ui_checkbox("$1", 1, $ttext{'search_neg'}, 0);
+		}
+	$rv .= "<b>$ttext{'search_field'}</b> ".$cols->[1]."<br>\n";
+	$rv .= "<b>$ttext{'search_text'}</b> ".$cols->[4].$neg."<br>\n";
 	}
 else {
 	# Regular table
@@ -235,6 +250,9 @@ return $rv;
 # Returns HTML to end a table started by ui_columns_start
 sub theme_ui_columns_end
 {
+if ($main::theme_ui_columns_folders || $main::theme_ui_columns_search) {
+	return "";
+	}
 return "</table>\n";
 }
 
@@ -753,7 +771,8 @@ if (!@subs) {
 print "<b>$ttext{'view_actions'}</b> ",
       join(" | ", @bacts),"<br>\n";
 }
-if ($module_name eq "mailbox" && $0 =~ /(view|reply)_mail.cgi/) {
+if ($module_name eq "mailbox" &&
+    $0 =~ /((view|reply)_mail.cgi|search_form.cgi)/) {
 	# UI overrides for viewing email
 	$main::{'left_right_align'} = \&theme_left_right_align;
 	$mailbox::{'left_right_align'} = \&theme_left_right_align;
@@ -768,6 +787,8 @@ if ($module_name eq "mailbox" && $0 =~ /(view|reply)_mail.cgi/) {
 	$text{'view_noheaders'} = $ttext{'view_noheaders'};
 	$text{'view_allheaders'} = $ttext{'view_allheaders'};
 	$text{'view_raw'} = $ttext{'view_raw'};
+	$text{'sform_and'} = $ttext{'search_and'};
+	$text{'sform_or'} = $ttext{'search_or'};
 
 	# To supress HTML compose links
 	$text{'reply_html0'} = undef;
