@@ -20,7 +20,9 @@ foreach $a (grep { defined($_->[2]) } @addrs) {
 	print "<a href='edit_address.cgi?idx=$a->[2]'>",
 	      &html_escape($a->[0]),"</a>\n";
 	print &compose_link($a->[0], $a->[1]),"<br>\n";
-	print "<b>$ttext{'address_name'}</b> ",&html_escape($a->[1]),"\n";
+	print "<b>$ttext{'address_name'}</b> ",
+	      $a->[1] =~ /\S/ ? &html_escape($a->[1])
+			      : "<i>$ttext{'address_none'}</i>","\n";
 	print "<b>$ttext{'address_type'}</b> ",
 	      $ttext{'address_type'.int($a->[3])},"<br>\n";
 	}
