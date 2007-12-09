@@ -118,6 +118,8 @@ config_section=Configuration category:
 config_change=Change
 config_return=system settings
 config_next=Save and Next
+config_nnext=Next
+config_nprev=Prev
 
 updates_title=Package Updates
 updates_avail=The following Virtualmin packages have updates available :
@@ -189,6 +191,7 @@ address_egone=Entry no longer exists
 address_more=$1 more ..
 address_mems=Members:
 address_return2=nicknames
+address_none=None
 
 group_create=Create Nickname
 group_edit=Edit Nickname
