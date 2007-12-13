@@ -664,6 +664,28 @@ return "<input type=submit".
 			
 }
 
+# On the mail sending page, use a text box for addresses to save space
+sub theme_ui_textarea
+{
+local ($name, $value, $rows, $cols, $wrap, $dis, $tags) = @_;
+if ($module_name eq "mailbox" && $0 =~ /reply_mail.cgi/ &&
+    ($name eq "to" || $name eq "cc" || $name eq "bcc")) {
+	$value =~ s/\n/ /g;
+	return &ui_textbox($name, $value, $cols, $dis, undef, $tags);
+	}
+else {
+	$cols = &ui_max_text_width($cols, 1);
+	return "<textarea name=\"".&quote_escape($name)."\" ".
+	       "rows=$rows cols=$cols".($wrap ? " wrap=$wrap" : "").
+	       ($dis ? " disabled=true" : "").
+	       ($tags ? " $tags" : "").">".
+	       &html_escape($value).
+	       "</textarea>";
+	}
+}
+
+
+
 # Popup buttons don't work
 sub theme_modules_chooser_button
 {
