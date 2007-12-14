@@ -189,6 +189,18 @@ print "<li>$text{'index_'.$prod.'cats'}\n";
 print join(" | ",
 	   map { "<a href='index_webmin.cgi?cat=$_'>$cats{$_}</a>" }
 	       sort { $b cmp $a } (keys %cats)),"<br>\n";
+
+# Show logout link
+if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
+	if ($main::session_id) {
+		print "<li><a href='session_login.cgi?logout=1'>",
+		      "$text{'main_logout'}</a><br>";
+		}
+	else {
+		print "<li><a href=switch_user.cgi>$text{'main_switch'}</a><br>";
+		}
+	}
+
 print "</ul>\n";
 
 &ui_print_footer();
