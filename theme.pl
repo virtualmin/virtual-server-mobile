@@ -849,6 +849,7 @@ if ($module_name eq "mailbox" &&
 	# Never use HTML editor
 	$userconfig{'head_html'} = 0;
 	$userconfig{'html_edit'} = 0;
+	$userconfig{'view_html'} = 1;
 
 	# Only show one set of send buttons
 	$userconfig{'send_buttons'} = 0;
