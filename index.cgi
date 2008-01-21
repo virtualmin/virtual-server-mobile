@@ -154,7 +154,13 @@ elsif ($hasmail) {
 			$mailbox::special_folder_id &&
 			$f->{'id'} == $mailbox::special_folder_id ?
 			 "<img src=mailbox/images/special.gif border=0>" : "";
-		push(@flinks, "<a href='mailbox/index.cgi?id=$fid'>$star$f->{'name'}</a>");
+		$umsg = "";
+		if (defined(&mailbox::should_show_unread) &&
+		    &mailbox::should_show_unread($f)) {
+			local ($c, $u) = &mailbox::mailbox_folder_unread($f);
+			$umsg = "&nbsp;($u)" if ($u);
+			}
+		push(@flinks, "<a href='mailbox/index.cgi?id=$fid'>$star$f->{'name'}$umsg</a>");
 		}
 	print "<li>$text{'index_folders'}\n",join(" | ",@flinks),"<br>\n";
 
