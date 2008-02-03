@@ -17,6 +17,7 @@ index_vimport=Import
 index_vmigrate=Migrate
 index_vsysinfo=System information
 index_vupdates=Package Updates ($1 available)
+index_vnf=Show new Virtualmin features
 index_folders=Mail folders:
 index_msearch=Search inbox:
 index_msearchok=OK
@@ -201,4 +202,6 @@ group_emails=Real email addresses
 
 filter_act=Action:
 filter_move=Move:
+
+newfeatures_title=New Virtualmin Features
 

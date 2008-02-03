@@ -128,6 +128,12 @@ if ($hasvirt) {
 	# System or account information
 	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
+	# New features, if any
+	if (defined(&virtual_server::get_new_features_html) &&
+	    ($newhtml = &virtual_server::get_new_features_html())) {
+		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
+		}
+
 	# Package updates
 	if (&foreign_available("security-updates")) {
 		&foreign_require("security-updates", "security-updates-lib.pl");
