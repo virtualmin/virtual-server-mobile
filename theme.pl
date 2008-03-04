@@ -767,6 +767,8 @@ foreach my $s (@sub) {
 	}
 if ($folder->{'sent'} || $folder->{'drafts'}) {
 	push(@bacts, "<a href='$url&enew=1'>$text{'view_enew'}</a>");
+	push(@bacts, "<a href='$url&ereply=1'>$text{'view_reply'}</a>");
+	push(@bacts, "<a href='$url&erall=1'>$text{'view_reply2'}</a>");
 	}
 else {
 	push(@bacts, "<a href='$url&reply=1'>$text{'view_reply'}</a>");
