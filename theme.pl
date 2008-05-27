@@ -857,5 +857,26 @@ if ($module_name eq "mailbox" &&
 	$userconfig{'send_buttons'} = 0;
 	}
 
+sub theme_virtualmin_ui_show_cron_time
+{
+local ($name, $job, $offmsg) = @_;
+&foreign_require("cron", "cron-lib.pl");
+local $rv;
+local $mode = !$job ? 0 : $job->{'special'} ? 1 : 2;
+local $hidden = $mode == 2 ?
+        join(" ", $job->{'mins'}, $job->{'hours'},
+                  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
+return &ui_radio_table($name, $mode,
+         [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
+           [ 1, $text{'cron_special'},
+                   &ui_select($name."_special", $job->{'special'},
+                      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
+                            ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
+                      ]) ],
+           [ 2, $text{'cron_cron'},
+                   &ui_textbox($name."_hidden", $hidden) ],
+         ]);
+}
+
 1;
 

@@ -7,6 +7,7 @@ index_vbackup=Backup virtual servers:
 index_vbackup1=Backup
 index_vbackup2=Scheduled
 index_vbackup3=Restore
+index_vbackup4=Schedules
 index_webmincats=Webmin categories:
 index_usermincats=Usermin categories:
 index_vcreate=Create server:

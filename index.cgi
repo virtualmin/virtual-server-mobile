@@ -121,7 +121,12 @@ if ($hasvirt) {
 	if (&virtual_server::can_backup_domains()) {
 		print "<li>$text{'index_vbackup'}\n";
 		print "<a href='virtual-server/backup_form.cgi'>$text{'index_vbackup1'}</a> |\n";
-		print "<a href='virtual-server/backup_form.cgi?sched=1'>$text{'index_vbackup2'}</a> |\n";
+		if (-r "$virtual_server::module_root_directory/list_sched.cgi"){
+			print "<a href='virtual-server/list_sched.cgi'>$text{'index_vbackup4'}</a> |\n";
+			}
+		else {
+			print "<a href='virtual-server/backup_form.cgi?sched=1'>$text{'index_vbackup2'}</a> |\n";
+			}
 		print "<a href='virtual-server/restore_form.cgi'>$text{'index_vbackup3'}</a><br>\n";
 		}
 
