@@ -118,16 +118,13 @@ if ($hasvirt) {
 		}
 
 	# Backup / restore
-	if (&virtual_server::can_backup_domains()) {
+	($blinks, $btitles) = &virtual_server::get_backup_actions();
+	if (@$blinks) {
 		print "<li>$text{'index_vbackup'}\n";
-		print "<a href='virtual-server/backup_form.cgi'>$text{'index_vbackup1'}</a> |\n";
-		if (-r "$virtual_server::module_root_directory/list_sched.cgi"){
-			print "<a href='virtual-server/list_sched.cgi'>$text{'index_vbackup4'}</a> |\n";
+		for($i=0; $i<@$blinks; $i++) {
+			print "<a href='virtual-server/$blinks->[$i]'>$btitles->[$i]</a>";
+			print $i == @$blinks-1 ? "<br>\n" : " | ";
 			}
-		else {
-			print "<a href='virtual-server/backup_form.cgi?sched=1'>$text{'index_vbackup2'}</a> |\n";
-			}
-		print "<a href='virtual-server/restore_form.cgi'>$text{'index_vbackup3'}</a><br>\n";
 		}
 
 	# System or account information
