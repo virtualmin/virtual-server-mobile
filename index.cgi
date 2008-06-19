@@ -81,50 +81,32 @@ if ($hasvirt) {
 						"realdoms");
 		($aleft, $areason, $amax) = &virtual_server::count_domains(
 						"aliasdoms");
-		if ($dleft == 0) {
+		if ($dleft == 0 && $aleft == 0) {
 			# Cannot add
 			}
 		elsif (!&virtual_server::can_create_master_servers() &&
 		       &virtual_server::can_create_sub_servers()) {
 			# Can just create own sub-server
-			push(@clinks, "<a href='virtual-server/domain_form.cgi'>$text{'index_vaddsub'}</a>");
+			print "<li><a href='virtual-server/domain_form.cgi'>$text{'index_vaddsub'}</a><br>\n";
 			}
 		elsif (&virtual_server::can_create_master_servers()) {
 			# Can create master or sub-server
-			push(@clinks, "<a href='virtual-server/domain_form.cgi'>$text{'index_vadddom'}</a>");
-			}
-		if ((&virtual_server::can_create_sub_servers() ||
-		     &virtual_server::can_create_master_servers()) && $dleft &&
-		    $virtual_server::virtualmin_pro) {
-			# Can create from batch file
-			push(@clinks, "<a href='virtual-server/mass_create_form.cgi'>$text{'index_vaddmass'}</a>");
-			}
-		if (&virtual_server::can_import_servers()) {
-			# Can import server
-			push(@clinks, "<a href='virtual-server/import_form.cgi'>$text{'index_vimport'}</a>");
-			}
-		if (&virtual_server::can_migrate_servers()) {
-			push(@clinks, "<a href='virtual-server/migrate_form.cgi'>$text{'index_vmigrate'}</a>");
-			}
-		if (@clinks) {
-			print "<li>$text{'index_vcreate'}\n";
-			print join(" | ", @clinks),"<br>\n";
+			print "<li><a href='virtual-server/domain_form.cgi'>$text{'index_vadddom'}</a><br>\n";
 			}
 		}
 
-	# System settings
-	if (&virtual_server::can_edit_templates()) {
-		print "<li><a href='index_templates.cgi'>$text{'index_vtemplates'}</a><br>\n";
-		}
-
-	# Backup / restore
-	($blinks, $btitles) = &virtual_server::get_backup_actions();
-	if (@$blinks) {
-		print "<li>$text{'index_vbackup'}\n";
-		for($i=0; $i<@$blinks; $i++) {
-			print "<a href='virtual-server/$blinks->[$i]'>$btitles->[$i]</a>";
-			print $i == @$blinks-1 ? "<br>\n" : " | ";
+	# Template-level links
+	@buts = &virtual_server::get_all_global_links();
+	@buts = grep { $_->{'icon'} ne 'index' } @buts;
+	@tcats = &unique(map { $_->{'cat'} } @buts);
+	foreach my $tc (@tcats) {
+		@incat = grep { $_->{'cat'} eq $tc } @buts;
+		print "<li>";
+		if ($tc) {
+			print "$incat[0]->{'catname'}:\n";
 			}
+		@clinks = map { my $t = $_->{'target'} ? "target=$_->{'target'}" : ""; "<a href='$_->{'url'}' $target>$_->{'title'}</a>" } @incat;
+		print &ui_links_row(\@clinks);
 		}
 
 	# System or account information

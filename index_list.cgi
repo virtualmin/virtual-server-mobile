@@ -10,7 +10,7 @@ require './ui-lib.pl';
 &ui_print_header(undef, $text{'list_title'}, "", undef, 0, 1, 1);
 
 @alldoms = &virtual_server::list_domains();
-@doms = grep { &virtual_server::can_edit_domain($_) } @alldoms;
+@doms = &virtual_server::list_visible_domains();
 if (@doms) {
 	# Show domains
 	print "<ul>\n";
