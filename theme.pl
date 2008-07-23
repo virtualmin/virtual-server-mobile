@@ -1,4 +1,10 @@
 # Theme-level UI override functions
+# XXX IUI support
+#	XXX single toolbar with one back link
+#	XXX module config link
+#	XXX default div
+#	XXX forms are all squished
+#	XXX back link
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -30,7 +36,7 @@ return "";
 sub theme_footer
 {
 local $i;
-local $count = 0;
+local @links;
 for($i=0; $i+1<@_; $i+=2) {
 	local $url = $_[$i];
 	if ($url ne '/' || !$tconfig{'noindex'}) {
@@ -53,11 +59,29 @@ for($i=0; $i+1<@_; $i+=2) {
 			$url = "/index_edit.cgi?dom=$2";
 			}
 		$url = "$gconfig{'webprefix'}$url" if ($url =~ /^\//);
-		print "&nbsp;|\n" if ($count++);
-		print "<a href=\"$url\">&lt;- ",&text('main_return', $_[$i+1]),"</a>\n";
+		push(@links, [ $url, &text('main_return', $_[$i+1]) ]);
 		}
 	}
-print "<br>\n";
+if (&theme_use_iui()) {
+	# Close main body div
+	if (!$theme_iui_no_default_div) {
+		print "</div>\n";
+		}
+	# Output as IUI toolbar
+	# Disabled for now
+	if (@links && 0) {
+		print "<div class='toolbar'>\n";
+		foreach my $l (@links) {
+			print "<a id='backButton' class='button' href='$l->[0]'></a>\n";
+			}
+		print "</div>\n";
+		}
+	}
+else {
+	# As bar-separated list
+	print &ui_links_row(
+		[ map { "<a href='$_->[0]'>&lt;- $_->[1]</a>" } @links ]);
+	}
 if (!$_[$i]) {
 	print "</body></html>\n";
 	}
@@ -338,17 +362,20 @@ return @nn ? join(" | ", @nn)."<br>\n" : "";
 sub theme_ui_print_header
 {
 local ($subtext, @args) = @_;
-local $re = $text{'indom'} ||
-	    $virtual_server::text{'indom'};
-$re =~ s/\$1/\(\\S+\)/;
-if ($subtext =~ /$re/) {
-	$args[0] .= " [$1]";
-	&header(@args);
+if (!&theme_use_iui()) {
+	# Put domain name after title
+	local $re = $text{'indom'} ||
+		    $virtual_server::text{'indom'};
+	$re =~ s/\$1/\(\\S+\)/;
+	if ($subtext =~ /$re/) {
+		$args[0] .= " [$1]";
+		&header(@args);
+		return;
+		}
 	}
-else {
-	&header(@args);
-	print &ui_post_header($subtext);
-	}
+# Any domain name is on its own line
+&header(@args);
+print &ui_post_header($subtext);
 }
 
 sub theme_redirect
@@ -482,12 +509,24 @@ local $os_type = $gconfig{'real_os_type'} ? $gconfig{'real_os_type'}
 					  : $gconfig{'os_type'};
 local $os_version = $gconfig{'real_os_version'} ? $gconfig{'real_os_version'}
 					        : $gconfig{'os_version'};
+
+# Head section with title
 print "<head>\n";
 if ($charset) {
 	print "<meta http-equiv=\"Content-Type\" ",
 	      "content=\"text/html; Charset=$charset\">\n";
 	}
+if (&theme_use_iui()) {
+	# CSS and Javascript headers for IUI
+	print "<meta name='viewport' content='width=320; ".
+	      "initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'/>\n";
+	print "<style type='text/css' media='screen'>".
+	      "\@import '/iui/iui.css';</style>\n";
+	print "<script type='application/x-javascript' ".
+              "src='/iui/iui.js'></script>\n";
+	}
 if (@_ > 0) {
+	# Output page title
 	local $title = $_[0];
         if ($gconfig{'showlogin'} && $remote_user) {
         	$title = $remote_user." : ".$title;
@@ -496,15 +535,81 @@ if (@_ > 0) {
 	print $_[7] if ($_[7]);
 	}
 print "</head>\n";
+
+# Start of the body
 local $bgcolor = "ffffff";
 local $link = "0000ee";
 local $text = "000000";
 local $dir = $current_lang_info->{'dir'} ? "dir=\"$current_lang_info->{'dir'}\""
 					 : "";
-print "<body bgcolor=#$bgcolor link=#$link vlink=#$link text=#$text $dir $_[8]>\n";
+if (&theme_use_iui()) {
+	print "<body $dir $_[8]>\n";
+	}
+else {
+	print "<body bgcolor=#$bgcolor link=#$link vlink=#$link ".
+	      "text=#$text $dir $_[8]>\n";
+	}
 local $hostname = &get_display_hostname();
 local $version = &get_webmin_version();
-if (@_ > 1) {
+
+if (@_ > 1 && &theme_use_iui()) {
+	# For IUI
+	# Buttons at the top for navigation back
+	local @toolbar;
+	if ($_[0]) {
+		push(@toolbar, "<h1 id='pageTitle'>$_[0]</h1>");
+		}
+
+	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
+	    $module_name ne "virtual-server") {
+		# Module index
+		local $idx = $module_info{'index_link'};
+		local $mi = $module_index_link || "/$module_name/$idx";
+		local $mt = $module_index_name || $text{'header_module'};
+		push(@toolbar,
+			"<a class='button indexButton' href='$mi'>$mt</a>");
+		}
+
+	if (ref($_[2]) eq "ARRAY" && !$ENV{'ANONYMOUS_USER'} &&
+	    !$tconfig{'nohelp'}) {
+		# Help in other module
+		push(@toolbar, "<a id='helpButton' class='button' ".
+		      "href='/help.cgi/$_[2]->[0]/$_[2]->[1]'>".
+		      "$text{'header_help'}</a>");
+		}
+	elsif (defined($_[2]) && !$ENV{'ANONYMOUS_USER'} &&
+	       !$tconfig{'nohelp'}) {
+		# Page help
+		push(@toolbar, "<a id='helpButton' class='button' ".
+		      "href='/help.cgi/$module_name/$_[2]'>".
+		      "$text{'header_help'}</a>");
+		}
+
+	if ($_[3]) {
+		# Module Config
+		local %access = &get_module_acl();
+		if (!$access{'noconfig'} && !$config{'noprefs'}) {
+			local $cprog = $user_module_config_directory ?
+					"uconfig.cgi" : "config.cgi";
+			push(@toolbar, "<a class='button indexButton' ".
+			      "href='/$cprog?$module_name'>".
+			      "$text{'header_config'}</a>");
+			}
+		}
+
+	if (@toolbar) {
+		print "<div class='toolbar'>\n";
+		print join("\n", @toolbar),"\n";
+		print "</div>\n";
+		}
+
+	# Open default div for page text
+	if (!$theme_iui_no_default_div) {
+		print "<div class='panel' selected='true' title='$_[0]'>\n";
+		}
+	}
+else {
+	# For other mobile browsers
 	# Show the title
 	print "<center><b>$_[0]</b>";
 	print "<br>$_[9]\n" if ($_[9]);
@@ -518,6 +623,7 @@ if (@_ > 1) {
 		}
 	if (!$_[5] && !$tconfig{'noindex'} &&
 	    $module_name ne "virtual-server") {
+		# Logout or switch user
 		local @avail = &get_available_module_infos(1);
 		local $nolo = $ENV{'ANONYMOUS_USER'} ||
 			      $ENV{'SSL_USER'} || $ENV{'LOCAL_USER'} ||
@@ -535,6 +641,7 @@ if (@_ > 1) {
 		}
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
 	    $module_name ne "virtual-server") {
+		# Module index
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";
 		local $mt = $module_index_name || $text{'header_module'};
@@ -542,13 +649,16 @@ if (@_ > 1) {
 		}
 	if (ref($_[2]) eq "ARRAY" && !$ENV{'ANONYMOUS_USER'} &&
 	    !$tconfig{'nohelp'}) {
+		# Help in other module
 		push(@links, &hlink($text{'header_help'}, $_[2]->[0], $_[2]->[1]));
 		}
 	elsif (defined($_[2]) && !$ENV{'ANONYMOUS_USER'} &&
 	       !$tconfig{'nohelp'}) {
+		# Page help
 		push(@links, &hlink($text{'header_help'}, $_[2]));
 		}
 	if ($_[3]) {
+		# Module Config
 		local %access = &get_module_acl();
 		if (!$access{'noconfig'} && !$config{'noprefs'}) {
 			local $cprog = $user_module_config_directory ?
@@ -556,6 +666,8 @@ if (@_ > 1) {
 			push(@links, "<a href=\"$gconfig{'webprefix'}/$cprog?$module_name\">$text{'header_config'}</a>");
 			}
 		}
+
+	# Print all links as a list
 	push(@links, split(/<br>/, $_[6]));
 	if (@links) {
 		if (!defined(&ui_links_row)) {
@@ -876,6 +988,11 @@ return &ui_radio_table($name, $mode,
            [ 2, $text{'cron_cron'},
                    &ui_textbox($name."_hidden", $hidden) ],
          ]);
+}
+
+sub theme_use_iui
+{
+return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod/;
 }
 
 1;
