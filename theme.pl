@@ -1,10 +1,18 @@
 # Theme-level UI override functions
 # XXX IUI support
 #	XXX module config link
-#	XXX default div
 #	XXX forms are all squished
-#	XXX main page should use IUI list
 #	XXX support just Webmin
+#	XXX toolbar title too small?
+#	XXX all forms look odd!
+#	XXX back links not always working?
+#		XXX index.cgi needs to force a total re-draw
+#		XXX toolbar stuff is preserved when it shouldn't be (ie. config)
+#	XXX create form is incomplete?
+#	XXX links on index_edit.cgi sometimes lead to pages with bad links
+#		XXX use IUI totally?
+#	XXX tables should be nicer
+#	XXX tabs too
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -41,7 +49,7 @@ for($i=0; $i+1<@_; $i+=2) {
 	local $url = $_[$i];
 	if ($url ne '/' || !$tconfig{'noindex'}) {
 		if ($url eq '/') {
-			$url = "/?cat=$module_info{'category'}";
+			$url = "/";
 			}
 		elsif ($url eq '' && $module_name eq 'virtual-server' ||
 		       $url eq '/virtual-server/') {
@@ -70,16 +78,24 @@ if (&theme_use_iui()) {
 
 	# Output toolbar, if needed
 	if (@links) {
+		# Use first link from footer
 		$theme_iui_toolbar_index = $links[$#links]->[0];
 		}
+	if (!$theme_iui_no_default_div && !$theme_iui_toolbar_index) {
+		# For pages other than the main index, always have a backlink
+		$theme_iui_toolbar_index = "/";
+		}
 	if ($theme_iui_toolbar_title || $theme_iui_toolbar_index ||
-	    $theme_iui_toolbar_button) {
+	    $theme_iui_toolbar_button || $theme_iui_no_default_div) {
 		print "<div class='toolbar'>\n";
 		if ($theme_iui_toolbar_title) {
 			print "<h1 id='pageTitle'></h1>\n";
 			}
 		if ($theme_iui_toolbar_index) {
-			print "<a class='button indexButton' href='$theme_iui_toolbar_index'>Back</a>\n";
+			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Back</a>\n";
+			}
+		if ($theme_iui_no_default_div) {
+			print "<a id='backButton' class='button' href='#'></a>\n";
 			}
 		if ($theme_iui_toolbar_button) {
 			print "<a class='button' href='$theme_iui_toolbar_button->[0]'>$theme_iui_toolbar_button->[1]</a>\n";
@@ -586,14 +602,13 @@ if (@_ > 1 && &theme_use_iui()) {
 	    !$tconfig{'nohelp'}) {
 		# Help in other module
 		$theme_iui_toolbar_button = [ "/help.cgi/$_[2]->[0]/$_[2]->[1]",
-					      $text{'header_help'} ];
+					      "Help" ];
 		}
 	elsif (defined($_[2]) && !$ENV{'ANONYMOUS_USER'} &&
 	       !$tconfig{'nohelp'}) {
 		# Page help
 		$theme_iui_toolbar_button = [
-			"/help.cgi/$module_name/$_[2]->[1]",
-			$text{'header_help'} ];
+			"/help.cgi/$module_name/$_[2]->[1]", "Help" ];
 		}
 
 	if ($_[3]) {
@@ -603,7 +618,7 @@ if (@_ > 1 && &theme_use_iui()) {
 			local $cprog = $user_module_config_directory ?
 					"uconfig.cgi" : "config.cgi";
 			$theme_iui_toolbar_button =
-			    [ "/$cprog?$module_name", $text{'header_config'} ];
+			    [ "/$cprog?$module_name", "Config" ];
 			}
 		}
 

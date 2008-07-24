@@ -17,7 +17,8 @@ if (@doms) {
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
 		#$prog = &virtual_server::can_config_domain($d) ?
 		#		"edit_domain.cgi" : "view_domain.cgi";
-		print "<li><a href='index_edit.cgi?dom=$d->{'id'}'>$d->{'dom'}</a>\n";
+		print "<li><a href='index_edit.cgi?dom=$d->{'id'}'>",
+			&virtual_server::show_domain_name($d),</a>\n";
 		}
 	print "</ul>\n";
 	}

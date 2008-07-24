@@ -51,6 +51,7 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 
 	# Other Virtualmin info
 	@buts = &virtual_server::get_all_global_links();
+	@tcats = &unique(map { $_->{'cat'} } @buts);
 	$newhtml = &virtual_server::get_new_features_html();
 	if (&foreign_available("security-updates")) {
 		&foreign_require("security-updates", "security-updates-lib.pl");
@@ -67,6 +68,10 @@ else {
 	$title = $gconfig{'nohostname'} ? $text{'main_title2'} :
 			&text('main_title', $ver, $hostname, $ostr);
 	}
+
+# Get Webmin modules
+@modules = &get_visible_module_infos();
+%cats = &list_categories(\@modules);
 
 $theme_iui_no_default_div = 1;
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
@@ -136,16 +141,16 @@ if ($hasvirt) {
 		}
 
 	# System or account information
-	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
+	print "<li><a href='index_sysinfo.cgi' target=_self>$text{'index_vsysinfo'}</a><br>\n";
 
 	# New features, if any
 	if ($newhtml) {
-		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
+		print "<li><a href='index_nf.cgi' target=_self>$text{'index_vnf'}</a><br>\n";
 		}
 
 	# Package updates
 	if (@poss) {
-		print "<li><a href='index_updates.cgi'>",
+		print "<li><a href='index_updates.cgi' target=_self>",
 		      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
 		}
 	}
@@ -201,8 +206,6 @@ elsif ($hasmail) {
 	}
 
 # Show links to Webmin or Usermin module categories
-@modules = &get_visible_module_infos();
-%cats = &list_categories(\@modules);
 print "<li>$text{'index_'.$prod.'cats'}\n";
 print join(" | ",
 	   map { "<a href='index_webmin.cgi?cat=$_'>$cats{$_}</a>" }
@@ -228,10 +231,12 @@ sub generate_iui_main_menu
 # XXX licence error / warning
 
 # First menu
-print "<div id='main' title='$title' selected='true'>\n";
+print "<ul id='main' title='$title' selected='true'>\n";
 if ($hasvirt) {
 	# List/edit links
-	print "<li><a href='#domains'>$text{'index_vmenu'}</a></li>\n";
+	if (@editdoms) {
+		print "<li><a href='#domains'>$text{'index_vmenu'}</a></li>\n";
+		}
 	if (@configdoms) {
 		print "<li><a href='virtual-server/index.cgi'>".
 		      "$text{'index_vindex'}</a></li>\n";
@@ -252,7 +257,7 @@ if ($hasvirt) {
 
 	# Link to templates
 	if (@buts) {
-		print <li><a href='#global'>$text{'index_vglobal'}</a></li>\n";
+		print "<li><a href='#global'>$text{'index_vglobal'}</a></li>\n";
 		}
 
 	# System info
@@ -271,31 +276,86 @@ if ($hasvirt) {
 	}
 
 # Webmin modules
-print "<li><a href='#modules'>",
-      $prod eq 'usermin' ? $text{'index_umodules'} : $text{'index_wmodules'},
-      "</a></li>\n";
-print "</div>\n";
+local $modules_title = $prod eq 'usermin' ? $text{'index_umodules'}
+					  : $text{'index_wmodules'};
+print "<li><a href='#modules'>$modules_title</a></li>\n";
+
+# Logout link, if possible
+if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
+	if ($main::session_id) {
+		print "<li><a href='session_login.cgi?logout=1'>",
+		      "$text{'main_logout'}</a></li>";
+		}
+	else {
+		print "<li><a href=switch_user.cgi>",
+		      "$text{'main_switch'}</a></li>";
+		}
+	}
+
+print "</ul>\n";
 
 # Virtualmin domains menu
-if ($hasvirt) {
-	# XXX
+if ($hasvirt && @editdoms) {
+	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
+	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
+		print "<li><a href='index_edit.cgi?dom=$d->{'id'}' target=_self>",&virtual_server::show_domain_name($d),"</a></li>\n";
+		}
+	print "</ul>\n";
 	}
 
 # Popup for domain search
 if ($hasvirt) {
-	# XXX
+	print "<form id='dsearch' class='dialog' action='index_edit.cgi' method='post' target=_self>\n";
+	print "<fieldset>\n";
+	print "<h1>$text{'index_vdsearch'}</h1>\n";
+	print "<a class='button leftButton' type='cancel'>$text{'cancel'}</a>\n";
+	print "<a class='button blueButton' type='submit'>$text{'index_vdsearchok'}</a>\n";
+	print "<label>$text{'index_vdsearchdom'}</label>\n";
+	print "<input id=search type=text name=search>\n";
+	print "</fieldset>\n";
+	print "</form>\n";
 	}
 
-# Template-level options
+# Template-level categories
 if ($hasvirt) {
-	# XXX
+	print "<ul id='global' title='$text{'index_vglobal'}'>\n";
+	foreach my $tc (@tcats) {
+		local @incat = grep { $_->{'cat'} eq $tc } @buts;
+		print "<li><a href='#global_$tc'>",
+		      "$incat[0]->{'catname'}</a></li>\n";
+		}
+	print "</ul>\n";
+	}
+
+# Template-options in categories
+if ($hasvirt) {
+	foreach my $tc (@tcats) {
+		local @incat = grep { $_->{'cat'} eq $tc } @buts;
+		print "<ul id='global_$tc' title='$incat[0]->{'catname'}'>\n";
+		foreach my $t (@incat) {
+			print "<li><a href='$t->{'url'}' target=_self>",
+			      "$t->{'title'}</a></li>\n";
+			}
+		print "</ul>\n";
+		}
 	}
 
 # Webmin categories
-# XXX
+print "<ul id='modules' title='$modules_title'>\n";
+foreach my $c (sort { $b cmp $a } (keys %cats)) {
+	print "<li><a href='#cat_$c'>$cats{$c}</a></li>\n";
+	}
+print "</ul>\n";
 
 # Webmin modules in categories
-# XXX
+foreach my $c (sort { $b cmp $a } (keys %cats)) {
+	local @incat = grep { $_->{'category'} eq $c } @modules;
+	print "<ul id='cat_$c' title='$cats{$c}'>\n";
+	foreach my $m (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @incat) {
+		print "<li><a href='$m->{'dir'}/' target=_self>$m->{'desc'}</a></li>\n";
+		}
+	print "</ul>\n";
+	}
 }
 
 

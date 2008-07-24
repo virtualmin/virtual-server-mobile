@@ -17,8 +17,11 @@ if (defined($in{'search'})) {
 		}
 	$d || &error(&text('edit_esearch', "<tt>$in{'search'}</tt>"));
 	}
-else {
+elsif ($in{'dom'}) {
 	$d = &virtual_server::get_domain($in{'dom'});
+	}
+else {
+	&error($text{'edit_enone'});
 	}
 &virtual_server::can_edit_domain($d) ||
 	&error(&text('edit_ecannot', $d->{'dom'}));
