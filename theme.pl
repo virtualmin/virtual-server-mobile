@@ -1,10 +1,10 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX single toolbar with one back link
 #	XXX module config link
 #	XXX default div
 #	XXX forms are all squished
-#	XXX back link
+#	XXX main page should use IUI list
+#	XXX support just Webmin
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -67,12 +67,22 @@ if (&theme_use_iui()) {
 	if (!$theme_iui_no_default_div) {
 		print "</div>\n";
 		}
-	# Output as IUI toolbar
-	# Disabled for now
-	if (@links && 0) {
+
+	# Output toolbar, if needed
+	if (@links) {
+		$theme_iui_toolbar_index = $links[$#links]->[0];
+		}
+	if ($theme_iui_toolbar_title || $theme_iui_toolbar_index ||
+	    $theme_iui_toolbar_button) {
 		print "<div class='toolbar'>\n";
-		foreach my $l (@links) {
-			print "<a id='backButton' class='button' href='$l->[0]'></a>\n";
+		if ($theme_iui_toolbar_title) {
+			print "<h1 id='pageTitle'></h1>\n";
+			}
+		if ($theme_iui_toolbar_index) {
+			print "<a class='button indexButton' href='$theme_iui_toolbar_index'>Back</a>\n";
+			}
+		if ($theme_iui_toolbar_button) {
+			print "<a class='button' href='$theme_iui_toolbar_button->[0]'>$theme_iui_toolbar_button->[1]</a>\n";
 			}
 		print "</div>\n";
 		}
@@ -552,13 +562,16 @@ else {
 local $hostname = &get_display_hostname();
 local $version = &get_webmin_version();
 
+# These get used by the footer function
+$theme_iui_toolbar_title = undef;
+$theme_iui_toolbar_index = undef;
+$theme_iui_toolbar_button = undef;
+
 if (@_ > 1 && &theme_use_iui()) {
 	# For IUI
-	# Buttons at the top for navigation back
-	local @toolbar;
-	if ($_[0]) {
-		push(@toolbar, "<h1 id='pageTitle'>$_[0]</h1>");
-		}
+
+	# Save entries for toolbar, for rendering in footer
+	$theme_iui_toolbar_title = $_[0];
 
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
 	    $module_name ne "virtual-server") {
@@ -566,23 +579,21 @@ if (@_ > 1 && &theme_use_iui()) {
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";
 		local $mt = $module_index_name || $text{'header_module'};
-		push(@toolbar,
-			"<a class='button indexButton' href='$mi'>$mt</a>");
+		$theme_iui_toolbar_index = $mi;
 		}
 
 	if (ref($_[2]) eq "ARRAY" && !$ENV{'ANONYMOUS_USER'} &&
 	    !$tconfig{'nohelp'}) {
 		# Help in other module
-		push(@toolbar, "<a id='helpButton' class='button' ".
-		      "href='/help.cgi/$_[2]->[0]/$_[2]->[1]'>".
-		      "$text{'header_help'}</a>");
+		$theme_iui_toolbar_button = [ "/help.cgi/$_[2]->[0]/$_[2]->[1]",
+					      $text{'header_help'} ];
 		}
 	elsif (defined($_[2]) && !$ENV{'ANONYMOUS_USER'} &&
 	       !$tconfig{'nohelp'}) {
 		# Page help
-		push(@toolbar, "<a id='helpButton' class='button' ".
-		      "href='/help.cgi/$module_name/$_[2]'>".
-		      "$text{'header_help'}</a>");
+		$theme_iui_toolbar_button = [
+			"/help.cgi/$module_name/$_[2]->[1]",
+			$text{'header_help'} ];
 		}
 
 	if ($_[3]) {
@@ -591,16 +602,9 @@ if (@_ > 1 && &theme_use_iui()) {
 		if (!$access{'noconfig'} && !$config{'noprefs'}) {
 			local $cprog = $user_module_config_directory ?
 					"uconfig.cgi" : "config.cgi";
-			push(@toolbar, "<a class='button indexButton' ".
-			      "href='/$cprog?$module_name'>".
-			      "$text{'header_config'}</a>");
+			$theme_iui_toolbar_button =
+			    [ "/$cprog?$module_name", $text{'header_config'} ];
 			}
-		}
-
-	if (@toolbar) {
-		print "<div class='toolbar'>\n";
-		print join("\n", @toolbar),"\n";
-		print "</div>\n";
 		}
 
 	# Open default div for page text

@@ -32,6 +32,30 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	%minfo = &get_module_info("virtual-server");
 	$title = $gconfig{'nohostname'} ? $text{'vmain_title2'} :
 		&text('vmain_title', $minfo{'version'}, $hostname, $ostr);
+
+	# Get domains and allowed actions
+	@doms = &virtual_server::list_domains();
+	@configdoms = grep { &virtual_server::can_config_domain($_) } @doms;
+	@editdoms = grep { &virtual_server::can_edit_domain($_) } @doms;
+	if (&virtual_server::can_create_master_servers() ||
+	    &virtual_server::can_create_sub_servers()) {
+		($dleft, $dreason, $dmax) =
+			&virtual_server::count_domains("realdoms");
+		($aleft, $areason, $amax) =
+			&virtual_server::count_domains("aliasdoms");
+		$dom_create_mode = $dleft == 0 && $aleft == 0 ? 0 :
+			!&virtual_server::can_create_master_servers() &&
+			&virtual_server::can_create_sub_servers() ? 1 :
+			&virtual_server::can_create_master_servers() ? 2 : 0;
+		}
+
+	# Other Virtualmin info
+	@buts = &virtual_server::get_all_global_links();
+	$newhtml = &virtual_server::get_new_features_html();
+	if (&foreign_available("security-updates")) {
+		&foreign_require("security-updates", "security-updates-lib.pl");
+		@poss = &security_updates::list_possible_updates();
+		}
 	}
 elsif ($prod eq 'usermin' && &foreign_available("mailbox") &&
        &get_webmin_version() >= 1.313) {
@@ -43,8 +67,22 @@ else {
 	$title = $gconfig{'nohostname'} ? $text{'main_title2'} :
 			&text('main_title', $ver, $hostname, $ostr);
 	}
+
+$theme_iui_no_default_div = 1;
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
 
+if (&theme_use_iui()) {
+	&generate_iui_main_menu();
+	}
+else {
+	&generate_mobile_main_menu();
+	}
+
+&ui_print_footer();
+
+# Generate a list of links for mobile devices
+sub generate_mobile_main_menu
+{
 print "<ul>\n";
 if ($hasvirt) {
 	# Check licence
@@ -64,8 +102,6 @@ if ($hasvirt) {
 	print "<li><a href='index_list.cgi'>$text{'index_vmenu'}</a><br>\n";
 
 	# Modify domains
-	@configdoms = grep { &virtual_server::can_config_domain($_) }
-			   &virtual_server::list_domains();
 	if (@configdoms) {
 		print "<li><a href='virtual-server/index.cgi'>$text{'index_vindex'}</a><br>\n";
 		}
@@ -75,28 +111,18 @@ if ($hasvirt) {
 	      &ui_submit($text{'index_veditok'}),"<br>\n";
 
 	# Create server
-	if (&virtual_server::can_create_master_servers() ||
-	    &virtual_server::can_create_sub_servers()) {
-		($dleft, $dreason, $dmax) = &virtual_server::count_domains(
-						"realdoms");
-		($aleft, $areason, $amax) = &virtual_server::count_domains(
-						"aliasdoms");
-		if ($dleft == 0 && $aleft == 0) {
-			# Cannot add
-			}
-		elsif (!&virtual_server::can_create_master_servers() &&
-		       &virtual_server::can_create_sub_servers()) {
-			# Can just create own sub-server
-			print "<li><a href='virtual-server/domain_form.cgi'>$text{'index_vaddsub'}</a><br>\n";
-			}
-		elsif (&virtual_server::can_create_master_servers()) {
-			# Can create master or sub-server
-			print "<li><a href='virtual-server/domain_form.cgi'>$text{'index_vadddom'}</a><br>\n";
-			}
+	if ($dom_create_mode == 1) {
+		# Can just create own sub-server
+		print "<li><a href='virtual-server/domain_form.cgi'>",
+		      "$text{'index_vaddsub'}</a><br>\n";
+		}
+	elsif ($dom_create_mode == 2) {
+		# Can create master or sub-server
+		print "<li><a href='virtual-server/domain_form.cgi'>",
+		      "$text{'index_vadddom'}</a><br>\n";
 		}
 
 	# Template-level links
-	@buts = &virtual_server::get_all_global_links();
 	@buts = grep { $_->{'icon'} ne 'index' } @buts;
 	@tcats = &unique(map { $_->{'cat'} } @buts);
 	foreach my $tc (@tcats) {
@@ -113,18 +139,14 @@ if ($hasvirt) {
 	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
 	# New features, if any
-	if (defined(&virtual_server::get_new_features_html) &&
-	    ($newhtml = &virtual_server::get_new_features_html())) {
+	if ($newhtml) {
 		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
 		}
 
 	# Package updates
-	if (&foreign_available("security-updates")) {
-		&foreign_require("security-updates", "security-updates-lib.pl");
-		@poss = &security_updates::list_possible_updates();
-		if (@poss) {
-			print "<li><a href='index_updates.cgi'>",&text('index_vupdates', scalar(@poss)),"</a><br>\n";
-			}
+	if (@poss) {
+		print "<li><a href='index_updates.cgi'>",
+		      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
 		}
 	}
 elsif ($hasmail) {
@@ -196,8 +218,84 @@ if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
 		print "<li><a href=switch_user.cgi>$text{'main_switch'}</a><br>";
 		}
 	}
-
 print "</ul>\n";
+}
 
-&ui_print_footer();
+# Generate links for Virtualmin and Webmin, plus sub-links for domains, using
+# IUI lists
+sub generate_iui_main_menu
+{
+# XXX licence error / warning
+
+# First menu
+print "<div id='main' title='$title' selected='true'>\n";
+if ($hasvirt) {
+	# List/edit links
+	print "<li><a href='#domains'>$text{'index_vmenu'}</a></li>\n";
+	if (@configdoms) {
+		print "<li><a href='virtual-server/index.cgi'>".
+		      "$text{'index_vindex'}</a></li>\n";
+		}
+	print "<li><a href='#dsearch'>$text{'index_vdsearch'}</a></li>\n";
+
+	# Create links
+	if ($dom_create_mode == 1) {
+		# Can just create own sub-server
+		print "<li><a href='virtual-server/domain_form.cgi'>",
+		      "$text{'index_vaddsub'}</a></li>\n";
+		}
+	elsif ($dom_create_mode == 2) {
+		# Can create master or sub-server
+		print "<li><a href='virtual-server/domain_form.cgi'>",
+		      "$text{'index_vadddom'}</a></li>\n";
+		}
+
+	# Link to templates
+	if (@buts) {
+		print <li><a href='#global'>$text{'index_vglobal'}</a></li>\n";
+		}
+
+	# System info
+	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a></li>\n";
+
+	# New features, if any
+	if ($newhtml) {
+		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a></li>\n";
+		}
+
+	# Package updates
+	if (@poss) {
+		print "<li><a href='index_updates.cgi'>",
+		      &text('index_vupdates', scalar(@poss)),"</a></li>\n";
+		}
+	}
+
+# Webmin modules
+print "<li><a href='#modules'>",
+      $prod eq 'usermin' ? $text{'index_umodules'} : $text{'index_wmodules'},
+      "</a></li>\n";
+print "</div>\n";
+
+# Virtualmin domains menu
+if ($hasvirt) {
+	# XXX
+	}
+
+# Popup for domain search
+if ($hasvirt) {
+	# XXX
+	}
+
+# Template-level options
+if ($hasvirt) {
+	# XXX
+	}
+
+# Webmin categories
+# XXX
+
+# Webmin modules in categories
+# XXX
+}
+
 
