@@ -6,30 +6,24 @@ $pragma_no_cache = 1;
 require './web-lib.pl';
 require './ui-lib.pl';
 &init_config();
+&load_theme_library();
+
+# Set testing cookie
 &ReadParse();
-if ($gconfig{'loginbanner'} && $ENV{'HTTP_COOKIE'} !~ /banner=1/ &&
-    !$in{'logout'} && !$in{'failed'} && !$in{'timed_out'}) {
-	# Show pre-login HTML page
-	print "Set-Cookie: banner=1; path=/\r\n";
-	&PrintHeader();
-	$url = $in{'page'};
-	open(BANNER, $gconfig{'loginbanner'});
-	while(<BANNER>) {
-		s/LOGINURL/$url/g;
-		print;
-		}
-	close(BANNER);
-	return;
-	}
 $sec = uc($ENV{'HTTPS'}) eq 'ON' ? "; secure" : "";
 &get_miniserv_config(\%miniserv);
 $sidname = $miniserv{'sidname'} || "sid";
 print "Set-Cookie: banner=0; path=/$sec\r\n" if ($gconfig{'loginbanner'});
 print "Set-Cookie: $sidname=x; path=/$sec\r\n" if ($in{'logout'});
 print "Set-Cookie: testing=1; path=/$sec\r\n";
-&ui_print_unbuffered_header(undef, undef, undef, undef, undef, 1, 1, undef,
-			    undef, "onLoad='document.forms[0].pass.value = \"\"; document.forms[0].user.focus()'");
 
+# Page title
+$title = &theme_use_iui() ? $text{'session_header'} : undef;
+&ui_print_unbuffered_header(undef, $title, undef, undef, undef, 1, 1, undef,
+	undef, "onLoad='document.forms[0].pass.value = \"\"; ".
+	       "document.forms[0].user.focus()'");
+
+# Show any error message
 if (defined($in{'failed'})) {
 	print &ui_subheading($text{'session_failed'});
 	}
@@ -45,7 +39,9 @@ print "$text{'session_prefix'}\n";
 print &ui_form_start("$gconfig{'webprefix'}/session_login.cgi", "post");
 print &ui_hidden("page", $in{'page'});
 
-print &ui_table_start($text{'session_header'}, undef, 2);
+# Start of table for form
+print &ui_table_start(&theme_use_iui() ? undef : $text{'session_header'},
+	undef, 2);
 
 if ($gconfig{'realname'}) {
 	$host = &get_display_hostname();

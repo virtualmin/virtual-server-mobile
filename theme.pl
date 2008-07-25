@@ -1,15 +1,10 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX forms are all squished
 #	XXX support just Webmin
-#	XXX toolbar title too small?
-#	XXX all forms look odd!
 #	XXX back links not always working?
 #		XXX some odd toolbar boxes in index_edit.cgi
 #	XXX tables should be nicer
 #	XXX tabs too
-#	XXX text boxes don't start on left?
-#	XXX login page
 #	XXX Usermin support
 #	XXX VM2 support
 
@@ -91,15 +86,25 @@ if (&theme_use_iui()) {
 		# Use first link from footer
 		$theme_iui_toolbar_index = $links[0]->[0];
 		}
-	if (!$theme_iui_no_default_div && !$theme_iui_toolbar_index) {
+	if (!$theme_iui_no_default_div && !$theme_iui_toolbar_index &&
+	    $remote_user) {
 		# For pages other than the main index, always have a backlink
+		# (assuming we are logged in)
 		$theme_iui_toolbar_index = "/";
 		}
 	if ($theme_iui_toolbar_title || $theme_iui_toolbar_index ||
 	    $theme_iui_toolbar_button || $theme_iui_no_default_div) {
 		print "<div class='toolbar'>\n";
 		if ($theme_iui_toolbar_title) {
-			print "<h1 id='pageTitle'></h1>\n";
+			# Title of page, full width if no buttons
+			if ($theme_iui_toolbar_index ||
+			    $theme_iui_no_default_div ||
+			    $theme_iui_toolbar_button) {
+				print "<h1 id='pageTitle'></h1>\n";
+				}
+			else {
+				print "<h2 id='pageTitle'></h2>\n";
+				}
 			}
 		if ($theme_iui_toolbar_index) {
 			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Back</a>\n";
@@ -553,9 +558,9 @@ if (&theme_use_iui()) {
 	print "<meta name='viewport' content='width=320; ".
 	      "initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'/>\n";
 	print "<style type='text/css' media='screen'>".
-	      "\@import '/iui/iui.css';</style>\n";
+	      "\@import '/unauthenticated/iui/iui.css';</style>\n";
 	print "<script type='application/x-javascript' ".
-              "src='/iui/iui.js'></script>\n";
+              "src='/unauthenticated/iui/iui.js'></script>\n";
 	print "<link rel='apple-touch-icon' href='/unauthenticated/iphone-icon.png'>\n";
 	}
 }
@@ -1078,6 +1083,12 @@ if (&theme_use_iui() && !$theme_iui_no_default_div) {
 	print "</div>\n";
 	}
 print "</body></html>\n";
+}
+
+sub theme_hlink
+{
+local $mod = $_[2] ? $_[2] : $module_name;
+return "<a href='/help.cgi/$mod/$_[1]'>$_[0]</a>";
 }
 
 1;

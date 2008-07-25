@@ -69,6 +69,22 @@ body > .toolbar {
     color: #FFFFFF;
 }
 
+.toolbar > h2 {
+    position: absolute;
+    overflow: hidden;
+    left: 50%;
+    margin: 1px 0 0 -150px;
+    height: 45px;
+    font-size: 20px;
+    width: 290px;
+    font-weight: bold;
+    text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #FFFFFF;
+}
+
 body[orient="landscape"] > .toolbar > h1 {
     margin-left: -125px;
     width: 250px;
@@ -242,9 +258,9 @@ body > .dialog {
 input {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    width: 100%;
-    margin: 8px 0 0 0;
-    padding: 6px 6px 6px 44px;
+    //width: 100%;
+    margin: 4px 0 0 0;
+    //padding: 6px 6px 6px 44px;
     font-size: 16px;
     font-weight: normal;
 }
