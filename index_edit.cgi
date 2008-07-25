@@ -6,6 +6,7 @@ require './web-lib.pl';
 require './ui-lib.pl';
 &foreign_require("virtual-server", "virtual-server-lib.pl");
 &ReadParse();
+&load_theme_library();
 %text = &load_language($current_theme);
 
 # Find the domain
@@ -26,34 +27,82 @@ else {
 &virtual_server::can_edit_domain($d) ||
 	&error(&text('edit_ecannot', $d->{'dom'}));
 
-&ui_print_header(&virtual_server::domain_in($d),
+# Show page title. In IUI mode, there is no default <div> (since we generate
+# a list below), and no domain name (since it is in the menu list)
+$theme_iui_no_default_div = 1;
+&ui_print_header(&theme_use_iui() ? undef : &virtual_server::domain_in($d),
 		 $text{'edit_title'}, "", undef, 0, 1, 1);
 
 # Get all available actions for this domain
 @buts = &virtual_server::get_all_domain_links($d);
-
-# Show objects category at top level
 my @incat = grep { $_->{'cat'} eq 'objects' } @buts;
-foreach my $b (@incat) {
-	print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
-	}
-print "<p>\n";
-
-# Show other categories
-print "<dl>\n";
 my @cats = &unique(map { $_->{'cat'} } @buts);
-foreach my $c (@cats) {
-	next if ($c eq 'objects');
-	my @incat = grep { $_->{'cat'} eq $c } @buts;
-	print "<dt><b>$incat[0]->{'catname'}</b><br>\n";
-	print "<dd>";
+
+if (&theme_use_iui()) {
+	# Show as IUI category and link menus
+	print "<ul id='edit' title='$text{'edit_title'}' selected='true'>\n";
+
+	print "<li>",&virtual_server::domain_in($d),"</li>\n";
+
+	# Objects category first, at top level
+	foreach my $b (@incat) {
+		print "<li><a href='$b->{'url'}' target=_self>$b->{'title'}</a></li>\n";
+		}
+
+	# Menus for other categories
+	foreach my $c (@cats) {
+		next if ($c eq 'objects');
+		my @incat = grep { $_->{'cat'} eq $c } @buts;
+		print "<li><a href='#editcat_$c'>$incat[0]->{'catname'}</a></li>\n";
+		}
+
+	print "</ul>\n";
+
+	# Lists for other categories
+	foreach my $c (@cats) {
+		next if ($c eq 'objects');
+		my @incat = grep { $_->{'cat'} eq $c } @buts;
+		print "<ul id='editcat_$c' title='$incat[0]->{'catname'}'>\n";
+		foreach my $b (@incat) {
+			print "<li><a href='$b->{'url'}' target=_self>$b->{'title'}</a></li>\n";
+			}
+		print "</ul>\n";
+		}
+
+	if ($in{'main'}) {
+		# IUI will provide a nice back link
+		&ui_print_footer();
+		}
+	else {
+		# Need to create one
+		&ui_print_footer("/", "Index");
+		}
+	}
+else {
+	# Show all one one page, for other mobile browsers
+
+	# Show objects category at top level
 	foreach my $b (@incat) {
 		print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
 		}
-	}
-print "</dl>\n";
+	print "<p>\n";
 
-&ui_print_footer($in{'search'} ? ( ) : ( "index_list.cgi",
-					 $text{'list_return'} ),
-		 "/", $text{'index'});
+	# Show other categories
+	print "<dl>\n";
+	foreach my $c (@cats) {
+		next if ($c eq 'objects');
+		my @incat = grep { $_->{'cat'} eq $c } @buts;
+		print "<dt><b>$incat[0]->{'catname'}</b><br>\n";
+		print "<dd>";
+		foreach my $b (@incat) {
+			print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
+			}
+		}
+	print "</dl>\n";
+
+	&ui_print_footer($in{'search'} ? ( ) : ( "index_list.cgi",
+						 $text{'list_return'} ),
+			 "/", $text{'index'});
+	}
+
 

@@ -57,6 +57,9 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 		&foreign_require("security-updates", "security-updates-lib.pl");
 		@poss = &security_updates::list_possible_updates();
 		}
+	$lwarn = &virtual_server::licence_warning_message();
+	$configcheck = &virtual_server::need_config_check() &&
+		       &virtual_server::can_check_config();
 	}
 elsif ($prod eq 'usermin' && &foreign_available("mailbox") &&
        &get_webmin_version() >= 1.313) {
@@ -91,11 +94,10 @@ sub generate_mobile_main_menu
 print "<ul>\n";
 if ($hasvirt) {
 	# Check licence
-	print &virtual_server::licence_warning_message();
+	print $lwarn;
 
 	# See if module config needs to be checked
-	if (&virtual_server::need_config_check() &&
-	    &virtual_server::can_check_config()) {
+	if ($configcheck) {
 		print &ui_form_start("virtual-server/check.cgi");
 		print "<b>$virtual_server::text{'index_needcheck'}</b><p>\n";
 		print &ui_submit($virtual_server::text{'index_srefresh'});
@@ -141,11 +143,11 @@ if ($hasvirt) {
 		}
 
 	# System or account information
-	print "<li><a href='index_sysinfo.cgi' target=_self>$text{'index_vsysinfo'}</a><br>\n";
+	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
 	# New features, if any
 	if ($newhtml) {
-		print "<li><a href='index_nf.cgi' target=_self>$text{'index_vnf'}</a><br>\n";
+		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
 		}
 
 	# Package updates
@@ -228,12 +230,17 @@ print "</ul>\n";
 # IUI lists
 sub generate_iui_main_menu
 {
-# XXX licence error / warning
-
 # First menu
 print "<ul id='main' title='$title' selected='true'>\n";
 if ($hasvirt) {
 	# List/edit links
+	if ($lwarn) {
+		print "<li><a href='#license'>* $text{'index_vwarn'}</a></li>\n";
+		}
+	if ($configcheck) {
+		print "<li><a href='virtual-server/check.cgi' target=_self>",
+		      "* $virtual_server::text{'index_srefresh'}</a></li>\n";
+		}
 	if (@editdoms) {
 		print "<li><a href='#domains'>$text{'index_vmenu'}</a></li>\n";
 		}
@@ -261,11 +268,12 @@ if ($hasvirt) {
 		}
 
 	# System info
-	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a></li>\n";
+	print "<li><a href='index_sysinfo.cgi' target=_self>",
+	      "$text{'index_vsysinfo'}</a></li>\n";
 
 	# New features, if any
 	if ($newhtml) {
-		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a></li>\n";
+		print "<li><a href='#newfeat'>$text{'index_vnf'}</a></li>\n";
 		}
 
 	# Package updates
@@ -294,11 +302,26 @@ if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
 
 print "</ul>\n";
 
+# License warning page
+if ($hasvirt && $lwarn) {
+	print "<div id='license' class='panel' title='$text{'index_vwarn'}'>\n";
+	print $lwarn;
+	print "</div>\n";
+	}
+
+# New features panel
+if ($newhtml) {
+	print "<div id='newfeat' class='panel' title='$text{'index_vnf'}'>\n";
+	print $newhtml;
+	print "</div>\n";
+	}
+
 # Virtualmin domains menu
 if ($hasvirt && @editdoms) {
 	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
-		print "<li><a href='index_edit.cgi?dom=$d->{'id'}' target=_self>",&virtual_server::show_domain_name($d),"</a></li>\n";
+		print "<li><a href='index_edit.cgi?dom=$d->{'id'}&main=1'>",
+			&virtual_server::show_domain_name($d),"</a></li>\n";
 		}
 	print "</ul>\n";
 	}

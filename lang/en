@@ -1,4 +1,5 @@
 index_vmenu=List virtual servers
+index_vwarn=License Warning
 index_vindex=Update virtual servers
 index_vedit=Edit server:
 index_veditok=OK

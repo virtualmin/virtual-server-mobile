@@ -1,18 +1,15 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX module config link
 #	XXX forms are all squished
 #	XXX support just Webmin
 #	XXX toolbar title too small?
 #	XXX all forms look odd!
 #	XXX back links not always working?
-#		XXX index.cgi needs to force a total re-draw
-#		XXX toolbar stuff is preserved when it shouldn't be (ie. config)
+#		XXX some odd toolbar boxes in index_edit.cgi
 #	XXX create form is incomplete?
-#	XXX links on index_edit.cgi sometimes lead to pages with bad links
-#		XXX use IUI totally?
 #	XXX tables should be nicer
 #	XXX tabs too
+#	XXX text boxes don't start on left?
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -29,7 +26,9 @@ sub theme_ui_post_header
 local ($text) = @_;
 local $rv;
 if ($text) {
+	$rv .= "<div type=panel>\n" if ($theme_iui_no_default_div);
 	$rv .= "<b>$text</b><p>\n";
+	$rv .= "</div>\n" if ($theme_iui_no_default_div);
 	}
 return $rv;
 }
@@ -79,7 +78,7 @@ if (&theme_use_iui()) {
 	# Output toolbar, if needed
 	if (@links) {
 		# Use first link from footer
-		$theme_iui_toolbar_index = $links[$#links]->[0];
+		$theme_iui_toolbar_index = $links[0]->[0];
 		}
 	if (!$theme_iui_no_default_div && !$theme_iui_toolbar_index) {
 		# For pages other than the main index, always have a backlink
@@ -92,13 +91,14 @@ if (&theme_use_iui()) {
 			print "<h1 id='pageTitle'></h1>\n";
 			}
 		if ($theme_iui_toolbar_index) {
-			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Back</a>\n";
+			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Index</a>\n";
 			}
 		if ($theme_iui_no_default_div) {
 			print "<a id='backButton' class='button' href='#'></a>\n";
 			}
 		if ($theme_iui_toolbar_button) {
-			print "<a class='button' href='$theme_iui_toolbar_button->[0]'>$theme_iui_toolbar_button->[1]</a>\n";
+			local $t = $theme_iui_toolbar_button->[0] =~ /help.cgi/ ? "" : "target=_self";
+			print "<a class='button' href='$theme_iui_toolbar_button->[0]' $t>$theme_iui_toolbar_button->[1]</a>\n";
 			}
 		print "</div>\n";
 		}
@@ -389,7 +389,7 @@ sub theme_ui_print_header
 {
 local ($subtext, @args) = @_;
 if (!&theme_use_iui()) {
-	# Put domain name after title
+	# Put domain name in title, with [ ]
 	local $re = $text{'indom'} ||
 		    $virtual_server::text{'indom'};
 	$re =~ s/\$1/\(\\S+\)/;
@@ -527,6 +527,20 @@ for(my $i=0; $i<@$elements; $i++) {
 return $rv;
 }
 
+sub theme_print_iui_head
+{
+if (&theme_use_iui()) {
+        # CSS and Javascript headers for IUI
+	print "<meta name='viewport' content='width=320; ".
+	      "initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'/>\n";
+	print "<style type='text/css' media='screen'>".
+	      "\@import '/iui/iui.css';</style>\n";
+	print "<script type='application/x-javascript' ".
+              "src='/iui/iui.js'></script>\n";
+	print "<link rel='apple-touch-icon' href='/unauthenticated/iphone-icon.png'>\n";
+	}
+}
+
 sub theme_header
 {
 print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
@@ -542,15 +556,7 @@ if ($charset) {
 	print "<meta http-equiv=\"Content-Type\" ",
 	      "content=\"text/html; Charset=$charset\">\n";
 	}
-if (&theme_use_iui()) {
-	# CSS and Javascript headers for IUI
-	print "<meta name='viewport' content='width=320; ".
-	      "initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'/>\n";
-	print "<style type='text/css' media='screen'>".
-	      "\@import '/iui/iui.css';</style>\n";
-	print "<script type='application/x-javascript' ".
-              "src='/iui/iui.js'></script>\n";
-	}
+&theme_print_iui_head();
 if (@_ > 0) {
 	# Output page title
 	local $title = $_[0];
@@ -608,7 +614,7 @@ if (@_ > 1 && &theme_use_iui()) {
 	       !$tconfig{'nohelp'}) {
 		# Page help
 		$theme_iui_toolbar_button = [
-			"/help.cgi/$module_name/$_[2]->[1]", "Help" ];
+			"/help.cgi/$module_name/$_[2]", "Help" ];
 		}
 
 	if ($_[3]) {
@@ -1012,6 +1018,47 @@ return &ui_radio_table($name, $mode,
 sub theme_use_iui
 {
 return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod/;
+}
+
+sub theme_popup_header
+{
+print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
+print "<html>\n";
+print "<head>\n";
+&theme_print_iui_head();
+print "<title>$_[0]</title>\n";
+print $_[1];
+print "</head>\n";
+local $bgcolor = defined($tconfig{'cs_page'}) ? $tconfig{'cs_page'} :
+		 defined($gconfig{'cs_page'}) ? $gconfig{'cs_page'} : "ffffff";
+local $link = defined($tconfig{'cs_link'}) ? $tconfig{'cs_link'} :
+	      defined($gconfig{'cs_link'}) ? $gconfig{'cs_link'} : "0000ee";
+local $text = defined($tconfig{'cs_text'}) ? $tconfig{'cs_text'} : 
+	      defined($gconfig{'cs_text'}) ? $gconfig{'cs_text'} : "000000";
+local $bgimage = defined($tconfig{'bgimage'}) ? "background=$tconfig{'bgimage'}"
+					      : "";
+if (&theme_use_iui()) {
+	print "<body $_[2]>\n";
+	print "<div class='toolbar'>\n";
+	print "<h1 id='pageTitle'>$_[0]</h1>\n";
+	print "<a id='backButton' class='button' href='#'></a>\n";
+	print "</div>\n";
+	if (!$theme_iui_no_default_div) {
+		print "<div class='panel' selected='true' title='$_[0]'>\n";
+		}
+	}
+else {
+	print "<body id='popup' bgcolor=#$bgcolor link=#$link vlink=#$link ",
+	      "text=#$text $bgimage $tconfig{'inbody'} $_[2]>\n";
+	}
+}
+
+sub theme_popup_footer
+{
+if (&theme_use_iui() && !$theme_iui_no_default_div) {
+	print "</div>\n";
+	}
+print "</body></html>\n";
 }
 
 1;
