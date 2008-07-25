@@ -6,10 +6,12 @@
 #	XXX all forms look odd!
 #	XXX back links not always working?
 #		XXX some odd toolbar boxes in index_edit.cgi
-#	XXX create form is incomplete?
 #	XXX tables should be nicer
 #	XXX tabs too
 #	XXX text boxes don't start on left?
+#	XXX login page
+#	XXX Usermin support
+#	XXX VM2 support
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -52,8 +54,17 @@ for($i=0; $i+1<@_; $i+=2) {
 			}
 		elsif ($url eq '' && $module_name eq 'virtual-server' ||
 		       $url eq '/virtual-server/') {
-			# Don't bother with virtualmin menu
-			next;
+			# Don't bother with virtualmin menu, unless the current
+			# page is view/edit_domain.cgi, in which case link
+			# back to index_edit.cgi
+			if ($0 =~ /(view|edit)_domain.cgi/ &&
+			    $in{'dom'} &&
+			    $module_name eq 'virtual-server') {
+				$url = "/index_edit.cgi?dom=$in{'dom'}";
+				}
+			else {
+				next;
+				}
 			}
 		elsif ($url eq '' && $module_name) {
 			$url = "/$module_name/$module_info{'index_link'}";
@@ -91,7 +102,7 @@ if (&theme_use_iui()) {
 			print "<h1 id='pageTitle'></h1>\n";
 			}
 		if ($theme_iui_toolbar_index) {
-			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Index</a>\n";
+			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Back</a>\n";
 			}
 		if ($theme_iui_no_default_div) {
 			print "<a id='backButton' class='button' href='#'></a>\n";
@@ -155,6 +166,14 @@ sub theme_ui_hidden_table_start
 {
 local ($heading, $tabletags, $cols, $name, $status) = @_;
 return &theme_ui_table_start($heading, $tabletags, $cols);
+}
+
+# theme_ui_hidden_table_end
+# Just outputs a normal table end, as mobile browsers don't support CSS
+sub theme_ui_hidden_table_end
+{
+local ($heading, $tabletags, $cols, $name, $status) = @_;
+return &theme_ui_table_end($heading, $tabletags, $cols);
 }
 
 # theme_ui_columns_start(&headings, [width-percent], [noborder], [&tdtags], [heading])
