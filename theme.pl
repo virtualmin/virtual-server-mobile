@@ -7,6 +7,7 @@
 #	XXX tabs too
 #	XXX Usermin support
 #	XXX VM2 support
+#	XXX system info page is odd
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;

@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Show system or account information
 
+$trust_unknown_referers = 1;
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';

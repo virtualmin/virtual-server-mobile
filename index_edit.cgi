@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Show all available options for some domain
 
+$trust_unknown_referers = 1;
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';
@@ -16,7 +17,8 @@ if (defined($in{'search'})) {
 		$d = &virtual_server::get_domain_by("user", $in{'search'},
 						    "parent", undef);
 		}
-	$d || &error(&text('edit_esearch', "<tt>$in{'search'}</tt>"));
+	$d || &error(&text('edit_esearch',
+		"<tt>".&html_escape($in{'search'})."</tt>"));
 	}
 elsif ($in{'dom'}) {
 	$d = &virtual_server::get_domain($in{'dom'});

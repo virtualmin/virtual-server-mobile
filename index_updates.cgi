@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Show a list of packages available for update
 
+$trust_unknown_referers = 1;
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';

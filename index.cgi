@@ -51,6 +51,7 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 
 	# Other Virtualmin info
 	@buts = &virtual_server::get_all_global_links();
+	@buts = grep { $_->{'icon'} ne 'index' } @buts;		# Skip dom list
 	@tcats = &unique(map { $_->{'cat'} } @buts);
 	$newhtml = &virtual_server::get_new_features_html();
 	if (&foreign_available("security-updates")) {
