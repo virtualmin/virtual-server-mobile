@@ -156,16 +156,14 @@ if (@doms) {
 
 	# Show counts for features, including maxes
 	my $i = 0;
-	print "<table>\n";
 	foreach my $f ("doms", "dns", "web", "ssl", "mail",
 		       "dbs", "users", "aliases") {
 		local $cur = int($fcount{$f});
 		local ($extra, $reason, $max) =
 			&virtual_server::count_feature($f);
-		print "<tr> <td><b>",$text{'sysinfo_f'.$f},"</b>\n";
-		print "<td>",($extra < 0 ? $cur : &text('sysinfo_out', $cur, $max)),"</td> </tr>\n";
+		print &ui_table_row($text{'sysinfo_f'.$f},
+			$extra < 0 ? $cur : &text('sysinfo_out', $cur, $max));
 		}
-	print "</table>\n";
 	print &ui_table_end();
 	}
 
@@ -215,12 +213,9 @@ if (&virtual_server::master_admin() && &virtual_server::can_view_sysinfo() &&
 	# Show feature-specific program info
 	@info = @{$info->{'progs'}};
 	print &ui_table_start($text{'sysinfo_sysinfoheader'}, "width=100%", 2);
-	print "<table>\n";
 	for($i=0; $i<@info; $i++) {
-		print "<tr> <td><b>$info[$i]->[0]</b></td>\n";
-		print "<td>$info[$i]->[1]</td> </tr>\n";
+		print &ui_table_row($info[$i]->[0], $info[$i]->[1]);
 		}
-	print "<table>\n";
 	print &ui_table_end();
 	}
 

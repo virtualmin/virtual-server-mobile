@@ -1,13 +1,12 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX support just Webmin
 #	XXX back links not always working?
 #		XXX some odd toolbar boxes in index_edit.cgi
 #	XXX tables should be nicer
 #	XXX tabs too
 #	XXX Usermin support
 #	XXX VM2 support
-#	XXX system info page is odd
+#	XXX send beta to Alan Dobkin
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;

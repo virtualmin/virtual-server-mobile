@@ -60,6 +60,8 @@ templates_check=Re-Check Config
 
 vmain_title=Virtualmin $1 on $2 ($3)
 vmain_title2=Virtualmin
+main_title=Webmin $1 on $2 ($3)
+main_title2=Webmin
 
 sysinfo_title=System Information
 sysinfo_header0=System

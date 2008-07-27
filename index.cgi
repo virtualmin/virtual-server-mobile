@@ -73,6 +73,19 @@ else {
 			&text('main_title', $ver, $hostname, $ostr);
 	}
 
+# Logout link and title
+$logout_link = $logout_title = undef;
+if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
+	if ($main::session_id) {
+		$logout_link = "session_login.cgi?logout=1";
+		$logout_title = $text{'main_logout'};
+		}
+	else {
+		$logout_link = "switch_user.cgi";
+		$logout_title = $text{'main_switch'};
+		}
+	}
+
 # Get Webmin modules
 @modules = &get_visible_module_infos();
 %cats = &list_categories(\@modules);
@@ -215,14 +228,8 @@ print join(" | ",
 	       sort { $b cmp $a } (keys %cats)),"<br>\n";
 
 # Show logout link
-if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
-	if ($main::session_id) {
-		print "<li><a href='session_login.cgi?logout=1'>",
-		      "$text{'main_logout'}</a><br>";
-		}
-	else {
-		print "<li><a href=switch_user.cgi>$text{'main_switch'}</a><br>";
-		}
+if ($logout_link) {
+	print "<li><a href='$logout_link'>$logout_title</a><br>\n";
 	}
 print "</ul>\n";
 }
@@ -231,8 +238,12 @@ print "</ul>\n";
 # IUI lists
 sub generate_iui_main_menu
 {
+local $haswebmin = !$hasvirt && !$hasvm2 && !$hasmail;
+
 # First menu
-print "<ul id='main' title='$title' selected='true'>\n";
+if (!$haswebmin) {
+	print "<ul id='main' title='$title' selected='true'>\n";
+	}
 if ($hasvirt) {
 	# List/edit links
 	if ($lwarn) {
@@ -284,24 +295,21 @@ if ($hasvirt) {
 		}
 	}
 
-# Webmin modules
-local $modules_title = $prod eq 'usermin' ? $text{'index_umodules'}
-					  : $text{'index_wmodules'};
-print "<li><a href='#modules'>$modules_title</a></li>\n";
-
-# Logout link, if possible
-if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
-	if ($main::session_id) {
-		print "<li><a href='session_login.cgi?logout=1'>",
-		      "$text{'main_logout'}</a></li>";
-		}
-	else {
-		print "<li><a href=switch_user.cgi>",
-		      "$text{'main_switch'}</a></li>";
-		}
+# Webmin modules link
+if (!$haswebmin) {
+	local $modules_title = $prod eq 'usermin' ? $text{'index_umodules'}
+						  : $text{'index_wmodules'};
+	print "<li><a href='#modules'>$modules_title</a></li>\n";
 	}
 
-print "</ul>\n";
+# Logout link, if possible
+if ($logout_link && !$haswebmin) {
+	print "<li><a href='$logout_link'>$logout_title</a></li>\n";
+	}
+
+if (!$haswebmin) {
+	print "</ul>\n";
+	}
 
 # License warning page
 if ($hasvirt && $lwarn) {
@@ -365,9 +373,18 @@ if ($hasvirt) {
 	}
 
 # Webmin categories
-print "<ul id='modules' title='$modules_title'>\n";
+if ($haswebmin) {
+	print "<ul id='modules' title='$title' selected='true'>\n";
+	}
+else {
+	print "<ul id='modules' title='$modules_title'>\n";
+	}
 foreach my $c (sort { $b cmp $a } (keys %cats)) {
 	print "<li><a href='#cat_$c'>$cats{$c}</a></li>\n";
+	}
+# With logout link, if in Webmin-only mode
+if ($logout_link && $haswebmin) {
+	print "<li><a href='$logout_link'>$logout_title</a></li>\n";
 	}
 print "</ul>\n";
 
