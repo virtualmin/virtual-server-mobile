@@ -6,8 +6,7 @@
 #		XXX make like Facebook site
 #	XXX Usermin support
 #	XXX VM2 support
-#	XXX yes/no could use iPhone slider thing
-#	XXX iPhone-style submit button
+#	XXX icons_table is ugly
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -408,6 +407,29 @@ local @nn = grep { $_ ne "" } @$links;
 return @nn ? join(" | ", @nn)."<br>\n" : "";
 }
 
+sub theme_ui_yesno_radio
+{
+local ($name, $value, $yes, $no, $dis) = @_;
+$yes = 1 if (!defined($yes));
+$no = 0 if (!defined($no));
+$value = int($value);
+if (&theme_use_iui()) {
+	# iPhone-style slider
+	local $rv;
+	local $tog = $value == $yes ? "true" : "false";
+	$rv .= "<div class='row'><div id='${name}_toggle' class='toggle' toggled='$tog' onClick='var h = document.getElementById(\"$name\"); h.value = getAttribute(\"toggled\") == \"true\" ? \"$yes\" : \"$no\";'><span class='thumb'></span><span class='toggleOn'>$text{'yes'}</span><span class='toggleOff'>$text{'no'}</span></div></div>";
+	$rv .= "<input type=hidden name=\"".&quote_escape($name)."\" ".
+	       "id=\"".&quote_escape($name)."\" ".
+	       "value=\"".&quote_escape($value)."\">";
+	return $rv;
+	}
+else {
+	# Regular input
+	return &ui_radio($name, $value, [ [ $yes, $text{'yes'} ],
+					  [ $no, $text{'no'} ] ], $dis);
+	}
+}
+
 # theme_ui_print_header(subtext, args...)
 # If called with "In domain XXX" as the subtext, put it after the title
 sub theme_ui_print_header
@@ -546,6 +568,11 @@ sub theme_icons_table
 {
 local ($links, $titles, $icons, $cols, $href, $w, $h, $befores, $afters) = @_;
 local $i;
+if (&theme_use_iui()) {
+	# For iPhone, use it's nice list
+	print "</div>\n";
+	}
+# For other devices, just an HTML list
 print "<ul>\n";
 for($i=0; $i<@$links; $i++) {
 	print "<li>";
@@ -557,9 +584,17 @@ for($i=0; $i<@$links; $i++) {
 		print $titles->[$i];
 		}
 	print $afters->[$i];
-	print "<br>\n";
+	if (&theme_use_iui()) {
+		print "</li>\n";
+		}
+	else {
+		print "<br>\n";
+		}
 	}
 print "</ul>\n";
+if (&theme_use_iui()) {
+	print "<div class='panel'>\n";
+	}
 }
 
 # Doesn't bother with a grid, just put everything in one column
@@ -840,12 +875,12 @@ return $rv;
 sub theme_ui_submit
 {
 local ($label, $name, $dis, $tags) = @_;
+local $style = &theme_use_iui() ? "" : "style='font-size: 8px'";
 return "<input type=submit".
        ($name ne '' ? " name=\"".&quote_escape($name)."\"" : "").
        " value=\"".&quote_escape($label)."\"".
        ($dis ? " disabled=true" : "").
-       ($tags ? " ".$tags : "")." style='font-size: 8px'>\n";
-			
+       ($tags ? " ".$tags : "")." ".$style.">\n";
 }
 
 # On the mail sending page, use a text box for addresses to save space

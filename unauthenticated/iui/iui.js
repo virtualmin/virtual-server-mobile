@@ -194,7 +194,7 @@ addEventListener("click", function(event)
     if (div && hasClass(div, "toggle"))
     {
         div.setAttribute("toggled", div.getAttribute("toggled") != "true");
-        event.preventDefault();        
+        //event.preventDefault();        
     }
 }, true);
 

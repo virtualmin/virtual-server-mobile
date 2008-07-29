@@ -319,7 +319,7 @@ fieldset > .row:last-child {
 .row > .toggle {
     position: absolute;
     top: 6px;
-    right: 6px;
+    /*right: 6px;*/
     width: 100px;
     height: 28px;
 }
