@@ -90,6 +90,8 @@ body[orient="landscape"] > .toolbar > h1 {
     width: 250px;
 }
 
+/* XXX need same for h2? */
+
 .button {
     position: absolute;
     overflow: hidden;
@@ -386,6 +388,38 @@ fieldset > .row:last-child {
     font-weight: bold;
     color: #4d4d70;
     text-shadow: rgba(255, 255, 255, 0.75) 2px 2px 0;
+}
+
+/************************************************************************************************/
+
+body > div > .tabsbar {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border-bottom: 1px solid #2d3642;
+    border-top: 1px solid #6d84a2;
+    padding: 2px;
+    /*height: 32px; */
+    background: url(toolbar.png) #6d84a2 repeat-x;
+}
+
+.tabshead {
+    overflow: hidden;
+    font-size: 16px;
+    text-align: left;
+    text-overflow: ellipsis;
+    color: #000000;
+    width: 30px
+}
+
+.tabssel {
+    overflow: hidden;
+    font-size: 16px;
+    text-align: left;
+    text-overflow: ellipsis;
+    color: #ffffff;
+    font-weight: bold;
+    width: 30px
 }
 
 /************************************************************************************************/

@@ -1,5 +1,5 @@
 desc=Virtualmin Mobile Theme
 depends=1.328 virtual-server/3.59
-version=1.6
+version=1.7
 usermin=1
 webmin=1

@@ -1,12 +1,13 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX back links not always working?
-#		XXX some odd toolbar boxes in index_edit.cgi
-#	XXX tables should be nicer
+#	XXX column tables should be nicer
 #	XXX tabs too
+#		XXX use JS to hide/show
+#		XXX make like Facebook site
 #	XXX Usermin support
 #	XXX VM2 support
-#	XXX send beta to Alan Dobkin
+#	XXX yes/no could use iPhone slider thing
+#	XXX iPhone-style submit button
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -453,6 +454,20 @@ if ($module_name eq 'mailbox' && $0 =~ /reply_mail.cgi/) {
 	$theme_ui_tabs_current = $tabs;
 	return undef;
 	}
+elsif (&theme_use_iui()) {
+	# For IUI, show tabs as a spaced row of links
+	local $rv;
+	$rv .= "<div class=tabsbar>\n";
+	$rv .= "<table width=100%><tr>";
+	local $pc = int(100 / scalar(@$tabs));
+	foreach my $t (@$tabs) {
+		my $c = $t->[0] eq $sel ? "tabssel" : "tabshead";
+		$rv .= "<td><a href='$t->[2]' class='$c'>$t->[1]</a></td>\n";
+		}
+	$rv .= "</tr></table>\n";
+	$rv .= "</div>\n";
+	return $rv;
+	}
 else {
 	# Show list of tabs
 	$theme_ui_tabs_current = undef;
@@ -486,6 +501,10 @@ if ($theme_ui_tabs_current) {
 	local ($t) = grep { $_->[0] eq $tab } @$theme_ui_tabs_current;
 	#print "<b>$t->[1]</b>:\n";
 	}
+elsif (&theme_use_iui()) {
+	# Outputting the tab, but with CSS for hiding
+	# XXX
+	}
 elsif ($main::current_selected_tab{$name} ne $tab) {
 	open(NULLFILE, ">$null_file");
 	$main::suppressing_tab = select(NULLFILE);
@@ -504,6 +523,10 @@ sub theme_ui_tabs_end_tab
 if ($theme_ui_tabs_current) {
 	# End of tab in mode where we are showing all
 	print "<br>\n";
+	}
+elsif (&theme_use_iui()) {
+	# Close he tab, but with CSS for hiding
+	# XXX
 	}
 elsif ($main::suppressing_tab) {
 	# Stop suppressing output
