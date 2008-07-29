@@ -4,9 +4,9 @@
 #	XXX tabs too
 #		XXX use JS to hide/show
 #		XXX make like Facebook site
-#	XXX Usermin support
+#	XXX Usermin mailbox module support
 #	XXX VM2 support
-#	XXX icons_table is ugly
+#	XXX tables could be nicer (background color / header)
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -146,7 +146,12 @@ return $rv;
 # The end of a table started by ui_table_start
 sub theme_ui_table_end
 {
-return "<hr>\n";
+if (&theme_use_iui()) {
+	return "";
+	}
+else {
+	return "<hr>\n";
+	}
 }
 
 
@@ -568,33 +573,24 @@ sub theme_icons_table
 {
 local ($links, $titles, $icons, $cols, $href, $w, $h, $befores, $afters) = @_;
 local $i;
-if (&theme_use_iui()) {
-	# For iPhone, use it's nice list
-	print "</div>\n";
-	}
 # For other devices, just an HTML list
 print "<ul>\n";
 for($i=0; $i<@$links; $i++) {
-	print "<li>";
+	print "<li class='iconList'>";
 	print $befores->[$i];
 	if ($links->[$i]) {
-		print "<a href='$links->[$i]' $href>$titles->[$i]</a>";
+		print "<a href='$links->[$i]' $href class='iconLink'>$titles->[$i]</a>";
 		}
 	else {
 		print $titles->[$i];
 		}
 	print $afters->[$i];
-	if (&theme_use_iui()) {
-		print "</li>\n";
-		}
-	else {
+	if (!&theme_use_iui()) {
 		print "<br>\n";
 		}
+	print "</li>\n";
 	}
 print "</ul>\n";
-if (&theme_use_iui()) {
-	print "<div class='panel'>\n";
-	}
 }
 
 # Doesn't bother with a grid, just put everything in one column
