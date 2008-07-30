@@ -356,7 +356,8 @@ if (!$haswebmin) {
 
 # Logout link, if possible
 if ($logout_link && !$haswebmin) {
-	print "<li><a href='$logout_link'>$logout_title</a></li>\n";
+	print "<li><a href='$logout_link' target=_self>",
+	      "$logout_title</a></li>\n";
 	}
 
 if (!$haswebmin) {
@@ -461,7 +462,7 @@ if ($hasvm2 && @$gcats) {
 if ($hasvm2 && @servers) {
 	print "<ul id='servers' title='$text{'index_v2menu'}'>\n";
 	foreach my $s (sort { lc($a->{'host'}) cmp lc($b->{'host'}) }@servers) {
-		print "<li><a href='index_system.cgi?id=$s->{'id'}&main=1' ",
+		print "<li><a href='index_system.cgi?id=$s->{'id'}' ",
 		      "target=_self>",$s->{'host'},"</a></li>\n";
 		}
 	print "</ul>\n";
@@ -503,7 +504,8 @@ foreach my $c (sort { $b cmp $a } (keys %cats)) {
 	}
 # With logout and system info links, if in Webmin-only mode
 if ($logout_link && $haswebmin) {
-	print "<li><a href='$logout_link'>$logout_title</a></li>\n";
+	print "<li><a href='$logout_link' target=_self>",
+	      "$logout_title</a></li>\n";
 	}
 if ($haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",

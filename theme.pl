@@ -6,6 +6,8 @@
 #	XXX tables could be nicer (background color / header)
 #	XXX domain searching, iPhone and mobile
 #	XXX system info page needs to support VM2 and mailboxes and Webmin-only
+#	XXX VM2 creation
+#	XXX VM2 post-save refresh url and links back to edit_serv.cgi
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -16,6 +18,11 @@ $main::nocreate_virtualmin_menu = 1;
 
 # Tell CGIs that uploads are not possible
 $main::no_browser_uploads = 1;
+
+# The theme will provide links for VM2
+$main::vm2_no_create_links = 1;
+$main::vm2_no_edit_buttons = 1;
+$main::vm2_no_global_links = 1;
 
 sub theme_ui_post_header
 {

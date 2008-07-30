@@ -60,6 +60,9 @@ edit_view=Virtual Server Details
 edit_customlinks=Custom Links
 edit_enone=No virtual server specified!
 
+system_title=Manage VM2 System
+system_egone=System no longer exists!
+
 templates_title=System Settings
 templates_ecannot=You are not allowed to edit system settings
 templates_check=Re-Check Config
