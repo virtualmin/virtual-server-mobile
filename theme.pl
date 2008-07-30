@@ -1,9 +1,6 @@
 # Theme-level UI override functions
 # XXX IUI support
 #	XXX column tables should be nicer
-#	XXX tabs too
-#		XXX use JS to hide/show
-#		XXX make like Facebook site
 #	XXX Usermin mailbox module support
 #	XXX VM2 support
 #	XXX tables could be nicer (background color / header)
@@ -146,12 +143,7 @@ return $rv;
 # The end of a table started by ui_table_start
 sub theme_ui_table_end
 {
-if (&theme_use_iui()) {
-	return "";
-	}
-else {
-	return "<hr>\n";
-	}
+return "<hr>\n";
 }
 
 
@@ -483,16 +475,17 @@ if ($module_name eq 'mailbox' && $0 =~ /reply_mail.cgi/) {
 	}
 elsif (&theme_use_iui()) {
 	# For IUI, show tabs as a spaced row of links
+	$main::ui_tabs_selected = $sel;
 	local $rv;
-	$rv .= "<div class=tabsbar>\n";
-	$rv .= "<table width=100%><tr>";
+	$rv .= "<div class=tabsBody>";
+	$rv .= "<table width=100% border=0 cellpadding=0 cellspacing=0 class=tabsTable><tr>\n";
 	local $pc = int(100 / scalar(@$tabs));
 	foreach my $t (@$tabs) {
-		my $c = $t->[0] eq $sel ? "tabssel" : "tabshead";
-		$rv .= "<td><a href='$t->[2]' class='$c'>$t->[1]</a></td>\n";
+		my $c = $t->[0] eq $sel ? "tabsSel" : "tabsUnSel";
+		$rv .= "<td class='$c' id='tab_$t->[0]'><a href='' class='tabsLink' onClick='return selectTab(\"$name\", \"$t->[0]\")'>$t->[1]</a></td>\n";
 		}
 	$rv .= "</tr></table>\n";
-	$rv .= "</div>\n";
+	$rv .= "<div class=tabsContent>";
 	return $rv;
 	}
 else {
@@ -516,7 +509,13 @@ else {
 # Doesn't need to return anything for text-mode tabs
 sub theme_ui_tabs_end
 {
-return "";
+if (&theme_use_iui()) {
+	# Close big div for whole tab set
+	return "</div></div>\n";
+	}
+else {
+	return "";
+	}
 }
 
 # When in text mode, suppress output unless the named tab is selected
@@ -530,7 +529,9 @@ if ($theme_ui_tabs_current) {
 	}
 elsif (&theme_use_iui()) {
 	# Outputting the tab, but with CSS for hiding
-	# XXX
+	local $defclass = $tab eq $main::ui_tabs_selected ?
+				"tabVisible" : "tabHidden";
+	return "<div id='div_$tab' class='$defclass'>\n";
 	}
 elsif ($main::current_selected_tab{$name} ne $tab) {
 	open(NULLFILE, ">$null_file");
@@ -549,11 +550,11 @@ sub theme_ui_tabs_end_tab
 {
 if ($theme_ui_tabs_current) {
 	# End of tab in mode where we are showing all
-	print "<br>\n";
+	return "<br>\n";
 	}
 elsif (&theme_use_iui()) {
-	# Close he tab, but with CSS for hiding
-	# XXX
+	# Close the tab, but with CSS for hiding
+	return "</div>\n";
 	}
 elsif ($main::suppressing_tab) {
 	# Stop suppressing output

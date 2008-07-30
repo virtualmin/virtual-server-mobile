@@ -291,7 +291,7 @@ input {
 body > .panel {
     box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    padding: 10px;
+    padding: 10px 5px 5px 5px;
     background: #c8c8c8 url(pinstripes.png);
 }
 
@@ -411,34 +411,47 @@ fieldset > .row:last-child {
 
 /************************************************************************************************/
 
-body > div > .tabsbar {
-    box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    border-bottom: 1px solid #2d3642;
-    border-top: 1px solid #6d84a2;
-    padding: 2px;
-    /*height: 32px; */
-    background: url(toolbar.png) #6d84a2 repeat-x;
+.tabsTable {
+    border: 0;
+    margin-bottom: 5;
 }
 
-.tabshead {
-    overflow: hidden;
-    font-size: 16px;
-    text-align: left;
-    text-overflow: ellipsis;
+.tabsSel {
+    background: #eeeeee;
+    padding: 2px 2px 2px 2px;
+}
+
+.tabsSel > a {
     color: #000000;
-    width: 30px
+    text-decoration: none;
 }
 
-.tabssel {
-    overflow: hidden;
-    font-size: 16px;
-    text-align: left;
-    text-overflow: ellipsis;
-    color: #ffffff;
-    font-weight: bold;
-    width: 30px
+.tabsUnSel {
+    background: #cccccc;
+    padding: 2px 2px 2px 2px;
+}
+
+.tabsUnSel > a {
+    color: #000000;
+    text-decoration: none;
+}
+
+.tabVisible {
+    display: inline;
+}
+
+.tabHidden {
+    display: none;
+}
+
+.tabsBody {
+    background: #eeeeee;
+    margin-top: 0;
+}
+
+.tabsContent {
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 /************************************************************************************************/

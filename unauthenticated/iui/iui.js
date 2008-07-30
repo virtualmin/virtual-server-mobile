@@ -176,6 +176,10 @@ addEventListener("click", function(event)
             link.setAttribute("selected", "progress");
             iui.showPageByHref(link.href, null, null, link, unselect);
         }
+	else if (link.className == "tabsLink")
+	{
+	    return;
+	}
         else if (!link.target)
         {
             link.setAttribute("selected", "progress");
@@ -381,3 +385,28 @@ function $(id) { return document.getElementById(id); }
 function ddd() { console.log.apply(console, arguments); }
 
 })();
+
+/* Used to hide and show blocks based on tab selections */
+function selectTab(name, tab)
+{
+var div = document.getElementById("div_"+tab);
+var tab = document.getElementById("tab_"+tab);
+tab.className = "tabsSel";
+div.className = "tabVisible";
+var divpar = div.parentNode;
+var tabpar = tab.parentNode;
+for(var i=0; i<divpar.childNodes.length; i++) {
+	var divch = divpar.childNodes[i];
+	if (divch.className == "tabVisible" && divch != div) {
+		divch.className = "tabHidden";
+		}
+	}
+for(var i=0; i<tabpar.childNodes.length; i++) {
+	var tabch = tabpar.childNodes[i];
+	if (tabch.className == "tabsSel" && tabch != tab) {
+		tabch.className = "tabsUnSel";
+		}
+	}
+return false;
+}
+
