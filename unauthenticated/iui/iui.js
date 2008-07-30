@@ -329,7 +329,10 @@ function preloadImages()
 
 function submitForm(form)
 {
-    iui.showPageByHref(form.action || "POST", encodeForm(form), form.method);
+    if (hasClass(form, "normalSubmit"))
+      form.submit();
+    else
+      iui.showPageByHref(form.action || "POST", encodeForm(form), form.method);
 }
 
 function encodeForm(form)

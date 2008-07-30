@@ -54,10 +54,6 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	@buts = grep { $_->{'icon'} ne 'index' } @buts;		# Skip dom list
 	@tcats = &unique(map { $_->{'cat'} } @buts);
 	$newhtml = &virtual_server::get_new_features_html();
-	if (&foreign_available("security-updates")) {
-		&foreign_require("security-updates", "security-updates-lib.pl");
-		@poss = &security_updates::list_possible_updates();
-		}
 	$lwarn = &virtual_server::licence_warning_message();
 	$configcheck = &virtual_server::need_config_check() &&
 		       &virtual_server::can_check_config();
@@ -86,7 +82,13 @@ if ($prod eq 'webmin' && &foreign_available("server-manager")) {
 		push(@$gicons, undef);
 		push(@$gcats, 'settings');
 		}
-	# XXX
+	$newv2html = &server_manager::get_new_features_html();
+	}
+
+# Check for package updates
+if (($hasvirt || $hasvm2) && &foreign_available("security-updates")) {
+	&foreign_require("security-updates", "security-updates-lib.pl");
+	@poss = &security_updates::list_possible_updates();
 	}
 
 # Check for Usermin mail
@@ -306,19 +308,9 @@ if ($hasvirt) {
 		print "<li><a href='#global'>$text{'index_vglobal'}</a></li>\n";
 		}
 
-	# System info
-	print "<li><a href='index_sysinfo.cgi' target=_self>",
-	      "$text{'index_vsysinfo'}</a></li>\n";
-
 	# New features, if any
 	if ($newhtml) {
 		print "<li><a href='#newfeat'>$text{'index_vnf'}</a></li>\n";
-		}
-
-	# Package updates
-	if (@poss) {
-		print "<li><a href='index_updates.cgi'>",
-		      &text('index_vupdates', scalar(@poss)),"</a></li>\n";
 		}
 	}
 
@@ -332,13 +324,21 @@ if ($hasvm2) {
 	print "<li><a href='#ssearch'>$text{'index_vssearch'}</a></li>\n";
 
 	# Link to VM2 global settings
-	# XXX
+	if (@$gcats) {
+		print "<li><a href='#v2global'>",
+		      "$text{'index_v2global'}</a></li>\n";
+		}
 
 	# VM2 new features, if any
-	# XXX
+	if ($newv2html) {
+		print "<li><a href='#newv2feat'>$text{'index_v2nf'}</a></li>\n";
+		}
+	}
 
-	# VM2 package updates
-	# XXX
+# Package updates
+if (@poss) {
+	print "<li><a href='index_updates.cgi'>",
+	      "* ",&text('index_vupdates', scalar(@poss)),"</a></li>\n";
 	}
 
 # Webmin modules link
@@ -346,6 +346,12 @@ if (!$haswebmin) {
 	local $modules_title = $prod eq 'usermin' ? $text{'index_umodules'}
 						  : $text{'index_wmodules'};
 	print "<li><a href='#modules'>$modules_title</a></li>\n";
+	}
+
+# System info
+if (!$haswebmin) {
+	print "<li><a href='index_sysinfo.cgi' target=_self>",
+	      "$text{'index_vsysinfo'}</a></li>\n";
 	}
 
 # Logout link, if possible
@@ -377,7 +383,7 @@ if ($newhtml) {
 if ($hasvirt && @editdoms) {
 	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
-		print "<li><a href='index_edit.cgi?dom=$d->{'id'}&main=1' ",
+		print "<li><a href='index_edit.cgi?dom=$d->{'id'}' ",
 		      "target=_self>",
 		      &virtual_server::show_domain_name($d),"</a></li>\n";
 		}
@@ -386,11 +392,13 @@ if ($hasvirt && @editdoms) {
 
 # Popup for domain search
 if ($hasvirt) {
-	print "<form id='dsearch' class='dialog' action='index_search.cgi' method='post' target=_self>\n";
+	print "<form id='dsearch' class='dialog normalSubmit' action='index_search.cgi' method='post' target=_self>\n";
 	print "<fieldset>\n";
 	print "<h1>$text{'index_vdsearch'}</h1>\n";
-	print "<a class='button leftButton' type='cancel'>$text{'cancel'}</a>\n";
-	print "<a class='button blueButton' type='submit'>$text{'index_vdsearchok'}</a>\n";
+	print "<a class='button leftButton' type='cancel' ",
+	      "onClick='cancelDialog(form)'>$text{'cancel'}</a>\n";
+	print "<a class='button blueButton' type='submit' ",
+	      "onClick='submitForm(form)'>$text{'index_vdsearchok'}</a>\n";
 	print "<label>$text{'index_vdsearchdom'}</label>\n";
 	print "<input id=search type=text name=search>\n";
 	print "</fieldset>\n";
@@ -423,6 +431,32 @@ if ($hasvirt) {
 
 #################################### VM2
 
+# VM2 global categories
+if ($hasvm2 && @$gcats) {
+	print "<ul id='v2global' title='$text{'index_v2global'}'>\n";
+	foreach my $c (&unique(@$gcats)) {
+		print "<li><a href='#v2global_$c'>",
+		      $server_manager::text{'cat_'.$c} || $text{'left_vm2'.$c},
+		      "</a></li>\n";
+		}
+	print "</ul>\n";
+	}
+
+# VM2 global options in categories
+if ($hasvm2 && @$gcats) {
+	foreach my $c (&unique(@$gcats)) {
+		print "<ul id='v2global_$c' title='",
+		      $server_manager::text{'cat_'.$c} || $text{'left_vm2'.$c},
+		      "'>\n";
+		for(my $i=0; $i<@$glinks; $i++) {
+			next if ($gcats->[$i] ne $c);
+			print "<li><a href='$glinks->[$i]' target=_self>",
+			      "$gtitles->[$i]</a></li>\n";
+			}
+		print "</ul>\n";
+		}
+	}
+
 # VM2 systems menu
 if ($hasvm2 && @servers) {
 	print "<ul id='servers' title='$text{'index_v2menu'}'>\n";
@@ -433,13 +467,22 @@ if ($hasvm2 && @servers) {
 	print "</ul>\n";
 	}
 
+# New VM2 features panel
+if ($newv2html) {
+	print "<div id='newv2feat' class='panel' title='$text{'index_v2nf'}'>";
+	print $newv2html;
+	print "</div>\n";
+	}
+
 # Popup for VM2 system search
 if ($hasvm2) {
-	print "<form id='ssearch' class='dialog' action='index_ssearch.cgi' method='post' target=_self>\n";
+	print "<form id='ssearch' class='dialog normalSubmit' action='index_ssearch.cgi' method='post' target=_self>\n";
 	print "<fieldset>\n";
 	print "<h1>$text{'index_vssearch'}</h1>\n";
-	print "<a class='button leftButton' type='cancel'>$text{'cancel'}</a>\n";
-	print "<a class='button blueButton' type='submit'>$text{'index_vdsearchok'}</a>\n";
+	print "<a class='button leftButton' type='cancel' ",
+	      "onClick='cancelDialog(form)'>$text{'cancel'}</a>\n";
+	print "<a class='button blueButton' type='submit' ",
+	      "onClick='submitForm(form)'>$text{'index_vdsearchok'}</a>\n";
 	print "<label>$text{'index_vssearchserver'}</label>\n";
 	print "<input id=search type=text name=search>\n";
 	print "</fieldset>\n";
@@ -458,9 +501,13 @@ else {
 foreach my $c (sort { $b cmp $a } (keys %cats)) {
 	print "<li><a href='#cat_$c'>$cats{$c}</a></li>\n";
 	}
-# With logout link, if in Webmin-only mode
+# With logout and system info links, if in Webmin-only mode
 if ($logout_link && $haswebmin) {
 	print "<li><a href='$logout_link'>$logout_title</a></li>\n";
+	}
+if ($haswebmin) {
+	print "<li><a href='index_sysinfo.cgi' target=_self>",
+	      "$text{'index_vsysinfo'}</a></li>\n";
 	}
 print "</ul>\n";
 

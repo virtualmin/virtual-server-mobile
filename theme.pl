@@ -5,6 +5,7 @@
 #	XXX VM2 support
 #	XXX tables could be nicer (background color / header)
 #	XXX domain searching, iPhone and mobile
+#	XXX system info page needs to support VM2 and mailboxes and Webmin-only
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -43,6 +44,7 @@ for($i=0; $i+1<@_; $i+=2) {
 	local $url = $_[$i];
 	if ($url ne '/' || !$tconfig{'noindex'}) {
 		if ($url eq '/') {
+			# Don't change link to /
 			$url = "/";
 			}
 		elsif ($url eq '' && $module_name eq 'virtual-server' ||
@@ -59,6 +61,19 @@ for($i=0; $i+1<@_; $i+=2) {
 				next;
 				}
 			}
+		elsif ($url eq '' && $module_name eq 'server-manager' ||
+		       $url eq '/server-manager/') {
+			# Don't bother with VM2 menu, unless the current page
+			# is edit_serv.cgi
+			if ($0 =~ /edit_serv.cgi/ &&
+			    $in{'id'} &&
+			    $module_name eq 'server-manager') {
+				$url = "/index_system.cgi?id=$in{'id'}";
+				}
+			else {
+				next;
+				}
+			}
 		elsif ($url eq '' && $module_name) {
 			$url = "/$module_name/$module_info{'index_link'}";
 			}
@@ -68,6 +83,10 @@ for($i=0; $i+1<@_; $i+=2) {
 		elsif ($url =~ /(edit|view)_domain.cgi\?dom=(\d+)/) {
 			# Force links back to edit form to domain options list
 			$url = "/index_edit.cgi?dom=$2";
+			}
+		elsif ($url =~ /edit_serv.cgi\?id=(\d+)/) {
+			# Force links back to edit form to system options list
+			$url = "/index_system.cgi?id=$1";
 			}
 		$url = "$gconfig{'webprefix'}$url" if ($url =~ /^\//);
 		push(@links, [ $url, &text('main_return', $_[$i+1]) ]);
@@ -676,7 +695,8 @@ if (@_ > 1 && &theme_use_iui()) {
 	$theme_iui_toolbar_title = $_[0];
 
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
-	    $module_name ne "virtual-server") {
+	    $module_name ne "virtual-server" &&
+	    $module_name ne "server-manager") {
 		# Module index
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";
@@ -724,10 +744,11 @@ else {
 	local @links;
 	if ($ENV{'HTTP_WEBMIN_SERVERS'} && !$tconfig{'framed'}) {
 		push(@links, "<a href='$ENV{'HTTP_WEBMIN_SERVERS'}'>".
-		      	     "$text{'header_servers'}</a>");
+			     "$text{'header_servers'}</a>");
 		}
 	if (!$_[5] && !$tconfig{'noindex'} &&
-	    $module_name ne "virtual-server") {
+	    $module_name ne "virtual-server" &&
+	    $module_name ne "server-manager") {
 		# Logout or switch user
 		local @avail = &get_available_module_infos(1);
 		local $nolo = $ENV{'ANONYMOUS_USER'} ||
@@ -745,7 +766,8 @@ else {
 			}
 		}
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
-	    $module_name ne "virtual-server") {
+	    $module_name ne "virtual-server" &&
+	    $module_name ne "server-manager") {
 		# Module index
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";
@@ -938,36 +960,36 @@ sub theme_show_arrows
 {
 local %ttext = &load_language($current_theme);
 if (!@sub) {
-        # Get next and previous emails, where they exist
-        local $c = &mailbox_folder_size($folder, 1);
-        local $prv = $mail->{'sortidx'} == 0 ? 0 : $mail->{'sortidx'}-1;
-        local $nxt = $mail->{'sortidx'} == $c-1 ? $c-1 : $mail->{'sortidx'}+1;
-        local @beside = &mailbox_list_mails_sorted($prv, $nxt, $folder, 1);
+	# Get next and previous emails, where they exist
+	local $c = &mailbox_folder_size($folder, 1);
+	local $prv = $mail->{'sortidx'} == 0 ? 0 : $mail->{'sortidx'}-1;
+	local $nxt = $mail->{'sortidx'} == $c-1 ? $c-1 : $mail->{'sortidx'}+1;
+	local @beside = &mailbox_list_mails_sorted($prv, $nxt, $folder, 1);
 
-        if ($mail->{'sortidx'} != 0) {
-                local $mailprv = $beside[$prv];
-                print "<a href='view_mail.cgi?id=",&urlize($mailprv->{'id'}),
-                      "&folder=$in{'folder'}&start=$in{'start'}'>",
+	if ($mail->{'sortidx'} != 0) {
+		local $mailprv = $beside[$prv];
+		print "<a href='view_mail.cgi?id=",&urlize($mailprv->{'id'}),
+		      "&folder=$in{'folder'}&start=$in{'start'}'>",
 		      "&lt;$ttext{'mail_next'}</a>";
-                }
-        else {
+		}
+	else {
 		print "&lt;$ttext{'mail_next'}\n";
-                }
-        print " | ",&text('view_desc', $mail->{'sortidx'}+1,
+		}
+	print " | ",&text('view_desc', $mail->{'sortidx'}+1,
 				       $folder->{'name'})," | ";
-        if ($mail->{'sortidx'} < $c-1) {
-                local $mailnxt = $beside[$nxt];
-                print "<a href='view_mail.cgi?id=",&urlize($mailnxt->{'id'}),
-                      "&folder=$in{'folder'}&start=$in{'start'}'>",
+	if ($mail->{'sortidx'} < $c-1) {
+		local $mailnxt = $beside[$nxt];
+		print "<a href='view_mail.cgi?id=",&urlize($mailnxt->{'id'}),
+		      "&folder=$in{'folder'}&start=$in{'start'}'>",
 		      "$ttext{'mail_prev'}&gt;</a>";
-                }
-        else {
+		}
+	else {
 		print "$ttext{'mail_prev'}&gt;\n";
-                }
-        }
+		}
+	}
 else {
-        print $text{'view_sub'},"\n";
-        }
+	print $text{'view_sub'},"\n";
+	}
 print "<br>\n";
 }
 sub theme_show_buttons
@@ -994,11 +1016,11 @@ else {
 push(@bacts, "<a href='$url&new=1'>$text{'mail_compose'}</a>");
 push(@bacts, "<a href='$url&forward=1'>$text{'view_forward'}</a>");
 if (!$_[1]) {
-        # Show mark buttons, except for current mode
-        if (!$folder->{'sent'} && !$folder->{'drafts'}) {
-                $m = &get_mail_read($folder, $mail);
-                foreach $i (0 .. 2) {
-                        if ($m != $i) {
+	# Show mark buttons, except for current mode
+	if (!$folder->{'sent'} && !$folder->{'drafts'}) {
+		$m = &get_mail_read($folder, $mail);
+		foreach $i (0 .. 2) {
+			if ($m != $i) {
 				push(@bacts, "<a href='$url&markas$i=1'>".
 					     $ttext{'mail_markas'.$i}."</a>");
 				}
@@ -1006,32 +1028,32 @@ if (!$_[1]) {
 		}
 	}
 if (!$_[1]) {
-        # Show spam and/or ham report buttons
-        if (&can_report_spam($folder) &&
-            $userconfig{'spam_buttons'} =~ /mail/) {
-                if ($userconfig{'spam_del'}) {
+	# Show spam and/or ham report buttons
+	if (&can_report_spam($folder) &&
+	    $userconfig{'spam_buttons'} =~ /mail/) {
+		if ($userconfig{'spam_del'}) {
 			push(@bacts, "<a href='$url&razor=1'>$text{'view_razordel'}</a>");
-                        }
-                else {
+			}
+		else {
 			push(@bacts, "<a href='$url&razor=1'>$text{'view_razor'}</a>");
-                        }
-                }
-        if (&can_report_ham($folder) &&
-            $userconfig{'ham_buttons'} =~ /mail/) {
-                if ($userconfig{'white_move'} && $folder->{'spam'}) {
+			}
+		}
+	if (&can_report_ham($folder) &&
+	    $userconfig{'ham_buttons'} =~ /mail/) {
+		if ($userconfig{'white_move'} && $folder->{'spam'}) {
 			push(@bacts, "<a href='$url&white=1'>$text{'view_whitemove'}</a>");
-                        }
-                else {
+			}
+		else {
 			push(@bacts, "<a href='$url&white=1'>$text{'view_white'}</a>");
-                        }
-                if ($userconfig{'ham_move'} && $folder->{'spam'}) {
+			}
+		if ($userconfig{'ham_move'} && $folder->{'spam'}) {
 			push(@bacts, "<a href='$url&ham=1'>$text{'view_hammove'}</a>");
-                        }
-                else {
+			}
+		else {
 			push(@bacts, "<a href='$url&ham=1'>$text{'view_ham'}</a>");
-                        }
-                }
-        }
+			}
+		}
+	}
 if (@folders > 1) {
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=move&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_move'}</a>");
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=copy&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_copy'}</a>");
@@ -1081,18 +1103,18 @@ local ($name, $job, $offmsg) = @_;
 local $rv;
 local $mode = !$job ? 0 : $job->{'special'} ? 1 : 2;
 local $hidden = $mode == 2 ?
-        join(" ", $job->{'mins'}, $job->{'hours'},
-                  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
+	join(" ", $job->{'mins'}, $job->{'hours'},
+		  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
 return &ui_radio_table($name, $mode,
-         [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
-           [ 1, $text{'cron_special'},
-                   &ui_select($name."_special", $job->{'special'},
-                      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
-                            ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
-                      ]) ],
-           [ 2, $text{'cron_cron'},
-                   &ui_textbox($name."_hidden", $hidden) ],
-         ]);
+	 [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
+	   [ 1, $text{'cron_special'},
+		   &ui_select($name."_special", $job->{'special'},
+		      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
+			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
+		      ]) ],
+	   [ 2, $text{'cron_cron'},
+		   &ui_textbox($name."_hidden", $hidden) ],
+	 ]);
 }
 
 sub theme_use_iui
