@@ -62,13 +62,42 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	$configcheck = &virtual_server::need_config_check() &&
 		       &virtual_server::can_check_config();
 	}
-elsif ($prod eq 'usermin' && &foreign_available("mailbox") &&
-       &get_webmin_version() >= 1.313) {
-	# We have Usermin mail
+
+# Check for VM2
+if ($prod eq 'webmin' && &foreign_available("server-manager")) {
+	$hasvm2 = 1;
+	&foreign_require("server-manager", "server-manager-lib.pl");
+	%m2info = &get_module_info("virtual-server");
+	$title = $gconfig{'nohostname'} ? $text{'v2main_title2'} :
+		&text('v2main_title', $minfo{'version'}, $hostname, $ostr);
+
+	# Get systems and allowed actions
+	@servers = &server_manager::list_available_managed_servers_sorted();
+
+	# Other VM2 info
+	@vservers = grep { $_->{'status'} eq 'virt' } @servers;
+	($glinks, $gtitles, $gicons, $gcats) =
+		&server_manager::get_global_links(scalar(@vservers));
+	$glinks = [ map { "server-manager/$_" } @$glinks ];
+	$gcats = [ map { $_ || "settings" } @$gcats ];
+	if (!$server_manager::access{'noconfig'}) {
+		push(@$glinks, "config.cgi?server-manager");
+		push(@$gtitles, $text{'header_config'});
+		push(@$gicons, undef);
+		push(@$gcats, 'settings');
+		}
+	# XXX
+	}
+
+# Check for Usermin mail
+if ($prod eq 'usermin' && &foreign_available("mailbox")) {
+	# XXX title?
 	$hasmail = 1;
 	}
-else {
-	# Just show Webmin title
+
+$haswebmin = !$hasvirt && !$hasvm2 && !$hasmail;
+if ($haswebmin) {
+	# Just show Webmin or Usermin title
 	$title = $gconfig{'nohostname'} ? $text{'main_title2'} :
 			&text('main_title', $ver, $hostname, $ostr);
 	}
@@ -119,7 +148,7 @@ if ($hasvirt) {
 		}
 
 	# List Virtualmin domains
-	print "<form action=index_edit.cgi>\n";
+	print "<form action=index_search.cgi>\n";
 	print "<li><a href='index_list.cgi'>$text{'index_vmenu'}</a><br>\n";
 
 	# Modify domains
@@ -128,7 +157,7 @@ if ($hasvirt) {
 		}
 
 	# Configure a domain
-	print "<li>$text{'index_vedit'} ",&ui_textbox("search", undef, 15)," ",
+	print "<li>$text{'index_vfind'} ",&ui_textbox("search", undef, 15)," ",
 	      &ui_submit($text{'index_veditok'}),"<br>\n";
 
 	# Create server
@@ -238,8 +267,6 @@ print "</ul>\n";
 # IUI lists
 sub generate_iui_main_menu
 {
-local $haswebmin = !$hasvirt && !$hasvm2 && !$hasmail;
-
 # First menu
 if (!$haswebmin) {
 	print "<ul id='main' title='$title' selected='true'>\n";
@@ -295,6 +322,25 @@ if ($hasvirt) {
 		}
 	}
 
+# VM2-specific options
+if ($hasvm2) {
+	# XXX license warning
+	if (@servers) {
+		print "<li><a href='#servers'>$text{'index_v2menu'}</a></li>\n";
+		print "<li><a href='server-manager/index.cgi'>$text{'index_v2index'}</a></li>\n";
+		}
+	print "<li><a href='#ssearch'>$text{'index_vssearch'}</a></li>\n";
+
+	# Link to VM2 global settings
+	# XXX
+
+	# VM2 new features, if any
+	# XXX
+
+	# VM2 package updates
+	# XXX
+	}
+
 # Webmin modules link
 if (!$haswebmin) {
 	local $modules_title = $prod eq 'usermin' ? $text{'index_umodules'}
@@ -310,6 +356,8 @@ if ($logout_link && !$haswebmin) {
 if (!$haswebmin) {
 	print "</ul>\n";
 	}
+
+#################################### Virtualmin
 
 # License warning page
 if ($hasvirt && $lwarn) {
@@ -338,7 +386,7 @@ if ($hasvirt && @editdoms) {
 
 # Popup for domain search
 if ($hasvirt) {
-	print "<form id='dsearch' class='dialog' action='index_edit.cgi' method='post' target=_self>\n";
+	print "<form id='dsearch' class='dialog' action='index_search.cgi' method='post' target=_self>\n";
 	print "<fieldset>\n";
 	print "<h1>$text{'index_vdsearch'}</h1>\n";
 	print "<a class='button leftButton' type='cancel'>$text{'cancel'}</a>\n";
@@ -373,7 +421,34 @@ if ($hasvirt) {
 		}
 	}
 
-# Webmin categories
+#################################### VM2
+
+# VM2 systems menu
+if ($hasvm2 && @servers) {
+	print "<ul id='servers' title='$text{'index_v2menu'}'>\n";
+	foreach my $s (sort { lc($a->{'host'}) cmp lc($b->{'host'}) }@servers) {
+		print "<li><a href='index_system.cgi?id=$s->{'id'}&main=1' ",
+		      "target=_self>",$s->{'host'},"</a></li>\n";
+		}
+	print "</ul>\n";
+	}
+
+# Popup for VM2 system search
+if ($hasvm2) {
+	print "<form id='ssearch' class='dialog' action='index_ssearch.cgi' method='post' target=_self>\n";
+	print "<fieldset>\n";
+	print "<h1>$text{'index_vssearch'}</h1>\n";
+	print "<a class='button leftButton' type='cancel'>$text{'cancel'}</a>\n";
+	print "<a class='button blueButton' type='submit'>$text{'index_vdsearchok'}</a>\n";
+	print "<label>$text{'index_vssearchserver'}</label>\n";
+	print "<input id=search type=text name=search>\n";
+	print "</fieldset>\n";
+	print "</form>\n";
+	}
+
+#################################### Webmin
+
+# Webmin categories, which may be the first menu
 if ($haswebmin) {
 	print "<ul id='modules' title='$title' selected='true'>\n";
 	}

@@ -11,16 +11,7 @@ require './ui-lib.pl';
 %text = &load_language($current_theme);
 
 # Find the domain
-if (defined($in{'search'})) {
-	$d = &virtual_server::get_domain_by("dom", $in{'search'});
-	if (!$d) {
-		$d = &virtual_server::get_domain_by("user", $in{'search'},
-						    "parent", undef);
-		}
-	$d || &error(&text('edit_esearch',
-		"<tt>".&html_escape($in{'search'})."</tt>"));
-	}
-elsif ($in{'dom'}) {
+if ($in{'dom'}) {
 	$d = &virtual_server::get_domain($in{'dom'});
 	}
 else {

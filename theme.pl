@@ -4,6 +4,7 @@
 #	XXX Usermin mailbox module support
 #	XXX VM2 support
 #	XXX tables could be nicer (background color / header)
+#	XXX domain searching, iPhone and mobile
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;

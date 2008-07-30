@@ -1,11 +1,15 @@
 index_vmenu=List virtual servers
+index_v2menu=List VM2 systems
 index_vwarn=License Warning
 index_vindex=Update virtual servers
-index_vedit=Edit server:
+index_v2index=Update VM2 systems
+index_vfind=Find server:
 index_veditok=OK
 index_vdsearch=Find and edit server
+index_vssearch=Find and edit system
 index_vdsearchok=Edit
 index_vdsearchdom=Domain
+index_vssearchserver=System
 index_vdsearchuser=Username
 index_vglobal=Virtualmin settings
 index_vtemplates=System settings
@@ -60,6 +64,8 @@ templates_check=Re-Check Config
 
 vmain_title=Virtualmin $1 on $2 ($3)
 vmain_title2=Virtualmin
+v2main_title=VM2 $1 on $2 ($3)
+v2main_title2=VM2
 main_title=Webmin $1 on $2 ($3)
 main_title2=Webmin
 
@@ -217,3 +223,5 @@ filter_move=Move:
 
 newfeatures_title=New Virtualmin Features
 
+search_title=Search servers
+search_none=No virtual servers matching $1 found.
