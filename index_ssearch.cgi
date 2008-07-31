@@ -11,6 +11,7 @@ require './ui-lib.pl';
 
 # Find by domain name or username
 $s = $in{'search'};
+$s =~ s/^\s+//; $s =~ s/\s+$//;
 @allservers = &server_manager::list_available_managed_servers_sorted();
 @servers = grep { $_->{'host'} eq $s } @allservers;
 if (!@servers) {

@@ -11,6 +11,7 @@ require './ui-lib.pl';
 
 # Find by domain name or username
 $s = $in{'search'};
+$s =~ s/^\s+//; $s =~ s/\s+$//;
 @alldoms = &virtual_server::list_visible_domains();
 @doms = grep { $_->{'dom'} eq $s ||
 	       !$_->{'parent'} && $_->{'user'} eq $s } @alldoms;

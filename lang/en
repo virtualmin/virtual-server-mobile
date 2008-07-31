@@ -13,6 +13,7 @@ index_vssearchserver=System
 index_vdsearchuser=Username
 index_vglobal=Virtualmin settings
 index_v2global=VM2 settings
+index_v2create=Create VM2 system
 index_vtemplates=System settings
 index_vbackup=Backup virtual servers:
 index_vbackup1=Backup
@@ -62,6 +63,7 @@ edit_enone=No virtual server specified!
 
 system_title=Manage VM2 System
 system_egone=System no longer exists!
+system_status=Status
 
 templates_title=System Settings
 templates_ecannot=You are not allowed to edit system settings

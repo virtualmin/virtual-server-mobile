@@ -3,11 +3,9 @@
 #	XXX column tables should be nicer
 #	XXX Usermin mailbox module support
 #	XXX VM2 support
-#	XXX tables could be nicer (background color / header)
-#	XXX domain searching, iPhone and mobile
+#		XXX other mobile devices
+#	XXX tables could be nicer (background color / header, collapsing)
 #	XXX system info page needs to support VM2 and mailboxes and Webmin-only
-#	XXX VM2 creation
-#	XXX VM2 post-save refresh url and links back to edit_serv.cgi
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -1174,6 +1172,12 @@ sub theme_hlink
 {
 local $mod = $_[2] ? $_[2] : $module_name;
 return "<a href='/help.cgi/$mod/$_[1]'>$_[0]</a>";
+}
+
+# Turn off javascript redirects
+sub theme_js_redirect
+{
+return "";
 }
 
 1;

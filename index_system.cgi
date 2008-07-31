@@ -22,7 +22,7 @@ $theme_iui_no_default_div = 1;
 		 $text{'system_title'}, "", undef, 0, 1, 1);
 
 # Get all available actions for this server
-@buts = &server_manager::get_server_actions($s);
+@buts = grep { $_ ne '' } &server_manager::get_server_actions($s);
 my @cats = &unique(map { $_->{'cat'} } @buts);
 
 if (&theme_use_iui()) {
@@ -30,6 +30,8 @@ if (&theme_use_iui()) {
 	print "<ul id='system' title='$text{'system_title'}' ",
 	      "selected='true'>\n";
 	print "<li>",&server_manager::server_in($s),"</li>\n";
+	print "<li style='font-size:12px'>$text{'system_status'} : ",
+	      &server_manager::describe_status($s, 1, 1),"</li>\n";
 
 	# Menus for categories, with no-category links at top level
 	foreach my $c (@cats) {

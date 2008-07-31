@@ -83,6 +83,8 @@ if ($prod eq 'webmin' && &foreign_available("server-manager")) {
 		push(@$gcats, 'settings');
 		}
 	$newv2html = &server_manager::get_new_features_html();
+	@clinks = &server_manager::get_available_create_links();
+	@clinks = sort { $b->{'create'} <=> $a->{'create'} } @clinks;
 	}
 
 # Check for package updates
@@ -183,8 +185,8 @@ if ($hasvirt) {
 		if ($tc) {
 			print "$incat[0]->{'catname'}:\n";
 			}
-		@clinks = map { my $t = $_->{'target'} ? "target=$_->{'target'}" : ""; "<a href='$_->{'url'}' $target>$_->{'title'}</a>" } @incat;
-		print &ui_links_row(\@clinks);
+		my @catlinks = map { my $t = $_->{'target'} ? "target=$_->{'target'}" : ""; "<a href='$_->{'url'}' $target>$_->{'title'}</a>" } @incat;
+		print &ui_links_row(\@catlinks);
 		}
 
 	# System or account information
@@ -329,6 +331,12 @@ if ($hasvm2) {
 		      "$text{'index_v2global'}</a></li>\n";
 		}
 
+	# Link to VM2 creation links
+	if (@clinks) {
+		print "<li><a href='#v2create'>",
+		      "$text{'index_v2create'}</a></li>\n";
+		}
+
 	# VM2 new features, if any
 	if ($newv2html) {
 		print "<li><a href='#newv2feat'>$text{'index_v2nf'}</a></li>\n";
@@ -456,6 +464,17 @@ if ($hasvm2 && @$gcats) {
 			}
 		print "</ul>\n";
 		}
+	}
+
+# VM2 create links
+if ($hasvm2 && @clinks) {
+	print "<ul id='v2create' title='$text{'index_v2create'}'>\n";
+	foreach my $c (@clinks) {
+		my $form = $c->{'create'} ? 'create_form.cgi' : 'add_form.cgi';
+		print "<li><a href='/server-manager/$form?type=$c->{'type'}' ",
+		      "target=_self>",$c->{'desc'},"</a></li>\n";
+		}
+	print "</ul>\n";
 	}
 
 # VM2 systems menu
