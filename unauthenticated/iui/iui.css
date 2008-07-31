@@ -293,6 +293,7 @@ body > .panel {
     -webkit-box-sizing: border-box;
     padding: 10px 5px 5px 5px;
     background: #c8c8c8 url(pinstripes.png);
+    font-size: 12px;
 }
 
 .panel > fieldset {

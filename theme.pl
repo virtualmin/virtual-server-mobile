@@ -900,7 +900,8 @@ return $rv;
 sub theme_ui_submit
 {
 local ($label, $name, $dis, $tags) = @_;
-local $style = &theme_use_iui() ? "" : "style='font-size: 8px'";
+local $style = &theme_use_iui() ? "style='font-size: 12px'"
+				: "style='font-size: 8px'";
 return "<input type=submit".
        ($name ne '' ? " name=\"".&quote_escape($name)."\"" : "").
        " value=\"".&quote_escape($label)."\"".
