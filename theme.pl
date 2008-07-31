@@ -6,6 +6,7 @@
 #		XXX other mobile devices
 #	XXX tables could be nicer (background color / header, collapsing)
 #	XXX system info page needs to support VM2 and mailboxes and Webmin-only
+#	XXX apply links in Apache module
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;

@@ -90,7 +90,10 @@ body[orient="landscape"] > .toolbar > h1 {
     width: 250px;
 }
 
-/* XXX need same for h2? */
+body[orient="landscape"] > .toolbar > h2 {
+    margin-left: -240px;
+    width: 470px;
+}
 
 .button {
     position: absolute;
