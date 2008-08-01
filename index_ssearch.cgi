@@ -33,7 +33,7 @@ if (@servers) {
 	print "<ul title='$text{'ssearch_title'}' selected=true>\n";
 	foreach my $s (@servers) {
 		print "<li><a href='index_system.cgi?id=$s->{'id'}' ",
-		      "target=_self>$s->{'host'}</a></li>\n";
+		      "target=_self>$s->{'short_host'}</a></li>\n";
 		}
 	print "</ul>\n";
 	}

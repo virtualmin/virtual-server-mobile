@@ -482,7 +482,7 @@ if ($hasvm2 && @servers) {
 	print "<ul id='servers' title='$text{'index_v2menu'}'>\n";
 	foreach my $s (sort { lc($a->{'host'}) cmp lc($b->{'host'}) }@servers) {
 		print "<li><a href='index_system.cgi?id=$s->{'id'}' ",
-		      "target=_self>",$s->{'host'},"</a></li>\n";
+		      "target=_self>",$s->{'short_host'},"</a></li>\n";
 		}
 	print "</ul>\n";
 	}
