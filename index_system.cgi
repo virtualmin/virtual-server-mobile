@@ -75,26 +75,35 @@ if (&theme_use_iui()) {
 	}
 else {
 	# Show all one one page, for other mobile browsers
-
-	# Show objects category at top level
-	foreach my $b (@incat) {
-		print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
-		}
-	print "<p>\n";
-
-	# Show other categories
-	print "<dl>\n";
+	print "<ul>\n";
+	print "<li>$text{'system_status'} : ",
+	      &server_manager::describe_status($s, 1, 1),"<br>\n";
 	foreach my $c (@cats) {
-		next if ($c eq 'objects');
 		my @incat = grep { $_->{'cat'} eq $c } @buts;
-		print "<dt><b>$incat[0]->{'catname'}</b><br>\n";
-		print "<dd>";
-		foreach my $b (@incat) {
-			print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
+		if (!$c) {
+			# No-category links at top level
+			foreach my $b (@incat) {
+				$url = &system_action_url($b, $s);
+				print "<li><a href='$url'>",
+				      "$b->{'desc'}</a><br>\n";
+				}
+			}
+		else {
+			# Other category and links in it
+			print "<li><b>",
+			      $server_manager::text{'cat_'.$c},"</b><br>\n";
+			print "<ul>\n";
+			foreach my $b (@incat) {
+				$url = &system_action_url($b, $s);
+				print "<li><a href='$url'>",
+				      "$b->{'desc'}</a><br>\n";
+				}
+			print "</ul>\n";
 			}
 		}
-	print "</dl>\n";
+	print "</ul>\n";
 
+	# XXX correct?
 	&ui_print_footer($in{'search'} ? ( ) : ( "index_list.cgi",
 						 $text{'list_return'} ),
 			 "/", $text{'index'});

@@ -144,8 +144,8 @@ if (&theme_use_iui()) {
 	}
 else {
 	# As bar-separated list
-	print &ui_links_row(
-		[ map { "<a href='$_->[0]'>&lt;- $_->[1]</a>" } @links ]);
+	print join("&nbsp;|&nbsp;",
+		   map { "<a href='$_->[0]'>&lt;- $_->[1]</a>" } @links),"\n";
 	}
 if (!$_[$i]) {
 	print "</body></html>\n";

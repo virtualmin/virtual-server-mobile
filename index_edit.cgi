@@ -75,23 +75,24 @@ else {
 	# Show all one one page, for other mobile browsers
 
 	# Show objects category at top level
+	print "<ul>\n";
 	foreach my $b (@incat) {
-		print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
+		print "<li><a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
 		}
 	print "<p>\n";
 
 	# Show other categories
-	print "<dl>\n";
 	foreach my $c (@cats) {
 		next if ($c eq 'objects');
 		my @incat = grep { $_->{'cat'} eq $c } @buts;
-		print "<dt><b>$incat[0]->{'catname'}</b><br>\n";
-		print "<dd>";
+		print "<li><b>$incat[0]->{'catname'}</b><br>\n";
+		print "<ul>";
 		foreach my $b (@incat) {
-			print "<a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
+			print "<li><a href='$b->{'url'}'>$b->{'title'}</a><br>\n";
 			}
+		print "</ul>\n";
 		}
-	print "</dl>\n";
+	print "</ul>\n";
 
 	&ui_print_footer($in{'search'} ? ( ) : ( "index_list.cgi",
 						 $text{'list_return'} ),

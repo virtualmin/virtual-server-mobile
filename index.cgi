@@ -180,13 +180,14 @@ if ($hasvirt) {
 	@buts = grep { $_->{'icon'} ne 'index' } @buts;
 	@tcats = &unique(map { $_->{'cat'} } @buts);
 	foreach my $tc (@tcats) {
-		@incat = grep { $_->{'cat'} eq $tc } @buts;
-		print "<li>";
-		if ($tc) {
-			print "$incat[0]->{'catname'}:\n";
+		my @incat = grep { $_->{'cat'} eq $tc } @buts;
+		print "<li><b>$incat[0]->{'catname'}</b>\n";
+		print "<ul>\n";
+		foreach my $c (@incat) {
+			my $t = $c->{'target'} ? "target=$c->{'target'}" : "";
+			print "<li><a href='$c->{'url'}' $t>$c->{'title'}</a><br>\n";
 			}
-		my @catlinks = map { my $t = $_->{'target'} ? "target=$_->{'target'}" : ""; "<a href='$_->{'url'}' $target>$_->{'title'}</a>" } @incat;
-		print &ui_links_row(\@catlinks);
+		print "</ul>\n";
 		}
 
 	# System or account information
@@ -196,14 +197,22 @@ if ($hasvirt) {
 	if ($newhtml) {
 		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
 		}
-
-	# Package updates
-	if (@poss) {
-		print "<li><a href='index_updates.cgi' target=_self>",
-		      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
-		}
 	}
-elsif ($hasmail) {
+
+# VM2 options
+if ($hasvm2) {
+	print "<p>\n" if ($hasvirt);	# Spacer
+
+	# XXX list systems, etc..
+	}
+
+# Package updates
+if (@poss) {
+	print "<li><a href='index_updates.cgi' target=_self>",
+	      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
+	}
+
+if ($hasmail) {
 	# Show Usermin folders
 	&foreign_require("mailbox", "mailbox-lib.pl");
 	@folders = &mailbox::list_folders_sorted();
@@ -255,10 +264,12 @@ elsif ($hasmail) {
 	}
 
 # Show links to Webmin or Usermin module categories
-print "<li>$text{'index_'.$prod.'cats'}\n";
-print join(" | ",
-	   map { "<a href='index_webmin.cgi?cat=$_'>$cats{$_}</a>" }
-	       sort { $b cmp $a } (keys %cats)),"<br>\n";
+print "<li><b>",$text{'index_'.$prod.'cats'},"</b><br>\n";
+print "<ul>\n";
+foreach my $c (sort { $b cmp $a } (keys %cats)) {
+	print "<li><a href='index_webmin.cgi?cat=$c'>$cats{$c}</a><br>\n";
+	}
+print "</ul>\n";
 
 # Show logout link
 if ($logout_link) {
@@ -430,9 +441,10 @@ if ($hasvirt) {
 	foreach my $tc (@tcats) {
 		local @incat = grep { $_->{'cat'} eq $tc } @buts;
 		print "<ul id='global_$tc' title='$incat[0]->{'catname'}'>\n";
-		foreach my $t (@incat) {
-			print "<li><a href='$t->{'url'}' target=_self>",
-			      "$t->{'title'}</a></li>\n";
+		foreach my $c (@incat) {
+			local $t = $c->{'target'} || "_self";
+			print "<li><a href='$c->{'url'}' target=$t>",
+			      "$c->{'title'}</a></li>\n";
 			}
 		print "</ul>\n";
 		}

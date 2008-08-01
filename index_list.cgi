@@ -1,6 +1,7 @@
 #!/usr/local/bin/perl
 # Show a list of all virtual servers, with links to manage each
 
+$trust_unknown_referers = 1;
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';
@@ -15,10 +16,8 @@ if (@doms) {
 	# Show domains
 	print "<ul>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
-		#$prog = &virtual_server::can_config_domain($d) ?
-		#		"edit_domain.cgi" : "view_domain.cgi";
 		print "<li><a href='index_edit.cgi?dom=$d->{'id'}'>",
-			&virtual_server::show_domain_name($d),</a>\n";
+			&virtual_server::show_domain_name($d),"</a>\n";
 		}
 	print "</ul>\n";
 	}
