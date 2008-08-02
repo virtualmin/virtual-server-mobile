@@ -2,9 +2,9 @@
 # XXX IUI support
 #	XXX column tables should be nicer
 #	XXX Usermin mailbox module support
-#	XXX VM2 support
-#		XXX other mobile devices
 #	XXX tables could be nicer (background color / header, collapsing)
+#		XXX make collapsible sections work on iPhone
+#		XXX ui_hidden_section too
 #	XXX system info page needs to support VM2 and mailboxes and Webmin-only
 
 # Disable buttons on edit_domain page

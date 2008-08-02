@@ -4,6 +4,7 @@ index_vwarn=License Warning
 index_vindex=Update virtual servers
 index_v2index=Update VM2 systems
 index_vfind=Find server:
+index_v2find=Find system:
 index_veditok=OK
 index_vdsearch=Find virtual servers
 index_vssearch=Find VM2 systems
@@ -52,6 +53,11 @@ list_title=List Virtual Servers
 list_noedit=You are not allowed to edit any virtual servers.
 list_none=No virtual servers have been defined on this system yet.
 list_return=virtual servers list
+
+slist_title=List VM2 Systems
+slist_noedit=You are not allowed to edit any VM2 systems.
+slist_none=No VM2 systems have been defined yet.
+slist_return=VM2 systems list
 
 edit_title=Manage Virtual Server
 edit_esearch=No virtual server named $1 found

@@ -190,9 +190,6 @@ if ($hasvirt) {
 		print "</ul>\n";
 		}
 
-	# System or account information
-	print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
-
 	# New features, if any
 	if ($newhtml) {
 		print "<li><a href='index_nf.cgi'>$text{'index_vnf'}</a><br>\n";
@@ -203,14 +200,46 @@ if ($hasvirt) {
 if ($hasvm2) {
 	print "<p>\n" if ($hasvirt);	# Spacer
 
-	# XXX list systems, etc..
+	# List Virtualmin domains
+	print "<form action=index_ssearch.cgi>\n";
+	print "<li><a href='index_slist.cgi'>$text{'index_v2menu'}</a><br>\n";
+
+	# Modify systems
+	if (@servers) {
+		print "<li><a href='server-manager/index.cgi'>$text{'index_v2index'}</a><br>\n";
+		}
+
+	# Search for a server
+	print "<li>$text{'index_v2find'} ",&ui_textbox("search", undef, 15)," ",
+	      &ui_submit($text{'index_veditok'}),"<br>\n";
+
+	# Create system links
+	if (@clinks) {
+		print "<li><b>$text{'index_v2create'}</b><br>\n";
+		print "<ul>\n";
+		foreach my $c (@clinks) {
+			my $form = $c->{'create'} ? 'create_form.cgi'
+						  : 'add_form.cgi';
+			print "<li><a href='/server-manager/$form?",
+			      "type=$c->{'type'}'>",$c->{'desc'},"</a><br>\n";
+			}
+		print "</ul>\n";
+		}
+
+	# Global VM2 links
+	foreach my $c (&unique(@$gcats)) {
+		print "<li><b>",$server_manager::text{'cat_'.$c} ||
+				$text{'left_vm2'.$c},"</b><br>\n";
+		print "<ul>\n";
+		for(my $i=0; $i<@$glinks; $i++) {
+			next if ($gcats->[$i] ne $c);
+			print "<li><a href='$glinks->[$i]'>",
+			      "$gtitles->[$i]</a><br>\n";
+			}
+		print "</ul>\n";
+		}
 	}
 
-# Package updates
-if (@poss) {
-	print "<li><a href='index_updates.cgi' target=_self>",
-	      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
-	}
 
 if ($hasmail) {
 	# Show Usermin folders
@@ -263,6 +292,12 @@ if ($hasmail) {
 	print &ui_form_end();
 	}
 
+# Package updates
+if (@poss) {
+	print "<li><a href='index_updates.cgi' target=_self>",
+	      &text('index_vupdates', scalar(@poss)),"</a><br>\n";
+	}
+
 # Show links to Webmin or Usermin module categories
 print "<li><b>",$text{'index_'.$prod.'cats'},"</b><br>\n";
 print "<ul>\n";
@@ -270,6 +305,10 @@ foreach my $c (sort { $b cmp $a } (keys %cats)) {
 	print "<li><a href='index_webmin.cgi?cat=$c'>$cats{$c}</a><br>\n";
 	}
 print "</ul>\n";
+
+
+# System or account information
+print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
 # Show logout link
 if ($logout_link) {
@@ -329,7 +368,6 @@ if ($hasvirt) {
 
 # VM2-specific options
 if ($hasvm2) {
-	# XXX license warning
 	if (@servers) {
 		print "<li><a href='#servers'>$text{'index_v2menu'}</a></li>\n";
 		print "<li><a href='server-manager/index.cgi'>$text{'index_v2index'}</a></li>\n";
