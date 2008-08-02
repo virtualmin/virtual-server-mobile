@@ -337,6 +337,19 @@ fieldset > .row:last-child {
     margin: 0 0 0 14px;
     line-height: 42px;
     font-weight: bold;
+    font-size: 12px;
+}
+
+.row > .rowvalue {
+    line-height: 42px;
+    margin-right: 14px;
+    font-size: 12px;
+}
+
+.rowhead {
+    text-align: center;
+    margin-top: 5px;
+    font-weight: bold;
 }
 
 .row > .toggle {

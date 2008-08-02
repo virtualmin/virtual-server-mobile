@@ -5,7 +5,6 @@
 #	XXX tables could be nicer (background color / header, collapsing)
 #		XXX make collapsible sections work on iPhone
 #		XXX ui_hidden_section too
-#	XXX system info page needs to support VM2 and mailboxes and Webmin-only
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -157,8 +156,16 @@ sub theme_ui_table_start
 {
 local ($heading, $tabletags, $cols) = @_;
 local $rv;
-$rv .= "<font size=+1>$heading</font><br>\n" if (defined($heading));
-$rv .= "<hr>\n";
+if (&theme_use_iui() && $theme_iui_fieldset_table) {
+	# Use IUI field set
+	$rv .= "<fieldset>\n";
+	$rv .= "<div class=rowhead>$heading</div>\n" if (defined($heading));
+	}
+else {
+	# Table is just one column
+	$rv .= "<font size=+1>$heading</font><br>\n" if (defined($heading));
+	$rv .= "<hr>\n";
+	}
 $main::ui_table_cols = 2;
 $main::ui_table_pos = 0;
 return $rv;
@@ -168,7 +175,12 @@ return $rv;
 # The end of a table started by ui_table_start
 sub theme_ui_table_end
 {
-return "<hr>\n";
+if (&theme_use_iui() && $theme_iui_fieldset_table) {
+	return "</fieldset>\n";
+	}
+else {
+	return "<hr>\n";
+	}
 }
 
 
@@ -179,11 +191,21 @@ sub theme_ui_table_row
 {
 local ($label, $value, $cols) = @_;
 local $rv;
-$rv .= "<b>$label</b><br>\n" if ($label =~ /\S/);
-#$rv .= "&nbsp;&nbsp;" if (defined($label) &&
-#			  $value !~ /^\s*<table/ &&
-#			  $value !~ /^\s*<!--grid/);
-$rv .= "$value<br>\n";
+if (&theme_use_iui() && $theme_iui_fieldset_table) {
+	# Use IUI field set
+	$rv .= "<div class=row>\n";
+	$rv .= "<label>$label</label>\n" if ($label =~ /\S/);
+	$rv .= "<div class=rowvalue>$value</div>\n";
+	$rv .= "</div>\n";
+	}
+else {
+	# Label and value are above each other
+	$rv .= "<b>$label</b><br>\n" if ($label =~ /\S/);
+	#$rv .= "&nbsp;&nbsp;" if (defined($label) &&
+	#			  $value !~ /^\s*<table/ &&
+	#			  $value !~ /^\s*<!--grid/);
+	$rv .= "$value<br>\n";
+	}
 return $rv;
 }
 

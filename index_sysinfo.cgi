@@ -5,38 +5,60 @@ $trust_unknown_referers = 1;
 require './web-lib.pl';
 &init_config();
 require './ui-lib.pl';
-&foreign_require("virtual-server", "virtual-server-lib.pl");
 %text = &load_language($current_theme);
+$theme_iui_fieldset_table = 1;
 
-&ui_print_header(undef, $text{'sysinfo_title'}, "", undef, 0, 1, 1);
-$info = &virtual_server::get_collected_info();
-
-if (!&virtual_server::reseller_admin()) {
-	# Show system info
-	print &ui_table_start($text{'sysinfo_systemheader'}, "width=100%", 2);
-
-	# Hostname
-	print &ui_table_row($text{'sysinfo_host'},
-		    &get_system_hostname());
-
-	# OS
-	print &ui_table_row($text{'sysinfo_os'},
-		    $gconfig{'os_version'} eq '*' ?
-		      $gconfig{'real_os_type'} :
-		      "$gconfig{'real_os_type'} $gconfig{'real_os_version'}");
-
-	# Webmin and Virtualmin versions
-	print &ui_table_row($text{'sysinfo_webmin'},
-		    &get_webmin_version());
-	print &ui_table_row($text{'sysinfo_virtualmin'},
-		    $virtual_server::module_info{'version'});
-
-	# Server time
-	$tm = localtime(time());
-	print &ui_table_row($text{'sysinfo_time'}, $tm);
+# Work out which modules we have
+$prod = &get_product_name();
+if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
+	$hasvirt = 1;
+	&foreign_require("virtual-server", "virtual-server-lib.pl");
+	$info = &virtual_server::get_collected_info();
+	}
+if ($prod eq 'webmin' && &foreign_available("server-manager")) {
+	$hasvm2 = 1;
+	&foreign_require("server-manager", "server-manager-lib.pl");
+	}
+if ($prod eq 'usermin' && &foreign_available("mailbox")) {
+	$hasmail = 1;
 	}
 
-if (&virtual_server::master_admin()) {
+&ui_print_header(undef, $text{'sysinfo_title'}, "", undef, 0, 1, 1);
+
+# Show general system info
+print &ui_table_start($text{'sysinfo_systemheader'}, "width=100%", 2);
+
+# Hostname
+print &ui_table_row($text{'sysinfo_host'},
+	    &get_system_hostname());
+
+# OS
+print &ui_table_row($text{'sysinfo_os'},
+	    $gconfig{'os_version'} eq '*' ?
+	      $gconfig{'real_os_type'} :
+	      "$gconfig{'real_os_type'} $gconfig{'real_os_version'}");
+
+# Webmin and Virtualmin versions
+print &ui_table_row($text{'sysinfo_webmin'},
+	    &get_webmin_version());
+if ($hasvirt) {
+	print &ui_table_row($text{'sysinfo_virtualmin'},
+		    $virtual_server::module_info{'version'});
+	}
+if ($hasvm2) {
+	print &ui_table_row($text{'sysinfo_vm2'},
+		    $server_manager::module_info{'version'});
+	}
+%current_theme_info = &get_theme_info($current_theme);
+print &ui_table_row($text{'sysinfo_theme'},
+	    $current_theme_info{'version'});
+
+# Server time
+$tm = localtime(time());
+print &ui_table_row($text{'sysinfo_time'}, &make_date(time()));
+
+# Virtualmin master admin info, such as system load
+if ($hasvirt && &virtual_server::master_admin()) {
 	# CPU load
 	if ($info->{'load'}) {
 		@c = @{$info->{'load'}};
@@ -73,9 +95,11 @@ if (&virtual_server::master_admin()) {
 				    &nice_size($info->{'disk_total'} -
 					       $info->{'disk_free'})));
 		}
-	print &ui_table_end();
+	}
+print &ui_table_end();
 
-	# Show status of feature servers
+# Show status of feature servers
+if ($hasvirt && &virtual_server::master_admin()) {
 	if ($info->{'startstop'} && &virtual_server::can_stop_servers()) {
 		print &ui_table_start($text{'sysinfo_statusheader'},
 				      "width=100%", 2);
@@ -100,7 +124,10 @@ if (&virtual_server::master_admin()) {
 		print &ui_table_end();
 		}
 	}
-elsif (!&virtual_server::reseller_admin()) {
+
+# Domain owner information
+if ($hasvirt && !&virtual_server::reseller_admin() &&
+	        !&virtual_server::master_admin()) {
 	# Show domain owner info about his server
 	$d = &virtual_server::get_domain_by("user", $remote_user, "parent", "");
 	print &ui_table_row($text{'sysinfo_dom'},
@@ -134,8 +161,10 @@ elsif (!&virtual_server::reseller_admin()) {
 	}
 
 # Show domain and feature counts
-@doms = grep { &virtual_server::can_edit_domain($_) }
-	     &virtual_server::list_domains();
+if ($hasvirt) {
+	@doms = grep { &virtual_server::can_edit_domain($_) }
+		     &virtual_server::list_domains();
+	}
 if (@doms) {
 	print &ui_table_start($text{'sysinfo_virtheader'},
 			      "width=100%", 2);
@@ -167,7 +196,9 @@ if (@doms) {
 	print &ui_table_end();
 	}
 
-if ((&virtual_server::master_admin() || &virtual_server::reseller_admin()) &&
+# Quota using for all or reseller-owned domains
+if ($hasvirt &&
+    (&virtual_server::master_admin() || &virtual_server::reseller_admin()) &&
     &virtual_server::has_home_quotas()) {
 	# Show quota usage
 	$homesize = &virtual_server::quota_bsize("home");
@@ -200,21 +231,60 @@ if ((&virtual_server::master_admin() || &virtual_server::reseller_admin()) &&
 			}
 		foreach my $q (@quota) {
 			print &ui_table_row($q->[0]->{'dom'},
-			  &text($q->[2] ? 'sysinfo_qout' : 'sysinfo_qunlimit',
-				&nice_size($q->[1]), &nice_size($q->[3]),
-				&nice_size($q->[2])));
+			  $q->[2] ? &text('sysinfo_qused',
+					  &nice_size($q->[1]+$q->[3]),
+					  &nice_size($q->[2]))
+				  : &nice_size($q->[1]+$q->[3]));
 			}
 		print &ui_table_end();
 		}
 	}
 
-if (&virtual_server::master_admin() && &virtual_server::can_view_sysinfo() &&
+# Show feature-specific program info
+if ($hasvirt &&
+    &virtual_server::master_admin() && &virtual_server::can_view_sysinfo() &&
     $info->{'progs'}) {
-	# Show feature-specific program info
 	@info = @{$info->{'progs'}};
 	print &ui_table_start($text{'sysinfo_sysinfoheader'}, "width=100%", 2);
 	for($i=0; $i<@info; $i++) {
 		print &ui_table_row($info[$i]->[0], $info[$i]->[1]);
+		}
+	print &ui_table_end();
+	}
+
+# Show VM2 systems
+if ($hasvm2) {
+	@servers = &server_manager::list_available_managed_servers();
+
+	local %statuscount = ( );
+	local %managercount = ( );
+	foreach my $s (@servers) {
+		$statuscount{$s->{'status'}}++;
+		$managercount{$s->{'manager'}}++;
+		}
+
+	# Status grid
+	my @tds = ( "width=40% align=left", "width=10% align=left",
+		    "width=40% align=left", "width=10% align=left" );
+	print &ui_table_start($text{'sysinfo_vm2statuses'}, "width=100%", 2);
+	my @grid = ( );
+	foreach $st (reverse(@server_manager::server_statuses)) {
+		local $fk = { 'status' => $st->[0] };
+		if ($statuscount{$st->[0]}) {
+			print &ui_table_row(
+				&server_manager::describe_status($fk, 1),
+				int($statuscount{$st->[0]}));
+			}
+		}
+	print &ui_table_end();
+
+	# Types grid
+	print &ui_table_start($text{'sysinfo_vm2types'},
+			      "width=100%", 2);
+	@grid = ( );
+	foreach $mg (@server_manager::server_management_types) {
+		$tfunc = "server_manager::type_".$mg."_desc";
+		print &ui_table_row(&$tfunc(), int($managercount{$mg}));
 		}
 	print &ui_table_end();
 	}

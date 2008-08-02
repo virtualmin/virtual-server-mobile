@@ -572,13 +572,13 @@ foreach my $c (sort { $b cmp $a } (keys %cats)) {
 	print "<li><a href='#cat_$c'>$cats{$c}</a></li>\n";
 	}
 # With logout and system info links, if in Webmin-only mode
-if ($logout_link && $haswebmin) {
-	print "<li><a href='$logout_link' target=_self>",
-	      "$logout_title</a></li>\n";
-	}
 if ($haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",
 	      "$text{'index_vsysinfo'}</a></li>\n";
+	}
+if ($logout_link && $haswebmin) {
+	print "<li><a href='$logout_link' target=_self>",
+	      "$logout_title</a></li>\n";
 	}
 print "</ul>\n";
 
