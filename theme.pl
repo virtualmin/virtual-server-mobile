@@ -6,7 +6,6 @@
 #		XXX other mobile devices
 #	XXX tables could be nicer (background color / header, collapsing)
 #	XXX system info page needs to support VM2 and mailboxes and Webmin-only
-#	XXX apply links in Apache module
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -737,6 +736,23 @@ if (@_ > 1 && &theme_use_iui()) {
 	# Open default div for page text
 	if (!$theme_iui_no_default_div) {
 		print "<div class='panel' selected='true' title='$_[0]'>\n";
+		}
+
+	# Below and right-side links
+	if ($_[6] || $_[9]) {
+		local @linksr = split(/<br>\s*/, $_[6]);
+		print "<div class=linksbar>\n";
+		if ($_[9]) {
+			print "<h1>$_[9]</h1>\n";
+			}
+		if (@linksr) {
+			print "<table width=100%><tr>\n";
+			foreach my $l (@linksr) {
+				print "<td class=linksrow>$l</td>\n";
+				}
+			print "</tr></table>\n";
+			}
+		print "</div>\n";
 		}
 	}
 else {
