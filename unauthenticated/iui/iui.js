@@ -178,7 +178,9 @@ addEventListener("click", function(event)
         }
 	else if (link.className == "tabsLink" ||
 		 link.className == "openerOpen" ||
-		 link.className == "openerClosed")
+		 link.className == "openerClosed" ||
+		 link.className == "webminTableHeaderOpen" ||
+		 link.className == "webminTableHeaderClosed")
 	{
 	    // No special animation for Javascript links 
 	    return;
@@ -430,6 +432,24 @@ else {
 	// Open it
 	o.className = "openerOpen";
 	d.className = "hiddenOpen";
+	}
+return false;
+}
+
+/* Used to open or close a hidden table section */
+function openCloseTable(openname, divname)
+{
+var o = document.getElementById(openname);
+var d = document.getElementById(divname);
+if (o.className == "webminTableHeaderOpen") {
+	// Close it
+	o.className = "webminTableHeaderClosed";
+	d.className = "webminTableBodyClosed";
+	}
+else {
+	// Open it
+	o.className = "webminTableHeaderOpen";
+	d.className = "webminTableBodyOpen";
 	}
 return false;
 }

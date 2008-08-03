@@ -500,18 +500,22 @@ fieldset > .row:last-child {
 
 /************************************************************************************************/
 
-/************************************************************************************************/
-
 .openerOpen {
     background-image: url(hiddenOpen.png);
     background-repeat: no-repeat;
     padding-left: 16px;
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
 }
 
 .openerClosed {
     background-image: url(hiddenClosed.png);
     background-repeat: no-repeat;
     padding-left: 16px;
+    text-decoration: none;
+    color: #000000;
+    font-weight: bold;
 }
 
 .hiddenOpen {
@@ -521,6 +525,62 @@ fieldset > .row:last-child {
 .hiddenClosed {
     display: none;
 }
+
+/************************************************************************************************/
+
+.webminTable {
+    background: #d8d8d8 url(pinstripesLight.png);
+    margin-bottom: 4px;
+    border-style: solid;
+    border-width: 1;
+    border-color: #6d84a2;
+}
+
+.webminTableHeader {
+    background: url(toolbar.png) #6d84a2 repeat-x;
+    padding: 5px;
+}
+
+.webminTableBody {
+    background: #d8d8d8 url(pinstripesLight.png);
+    padding: 5px;
+}
+
+.webminTableName {
+    font-weight: bold;
+}
+
+.webminTableValue {
+    padding-left: 8px;
+}
+
+.webminTableHeaderOpen {
+    background-image: url(hiddenOpen.png);
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    text-decoration: none;
+    color: #000000;
+}
+
+.webminTableHeaderClosed {
+    background-image: url(hiddenClosed.png);
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    text-decoration: none;
+    color: #000000;
+}
+
+.webminTableBodyOpen {
+    background: #d8d8d8 url(pinstripesLight.png);
+    display: inline;
+}
+
+.webminTableBodyClosed {
+    background: #d8d8d8 url(pinstripesLight.png);
+    display: none;
+}
+
+/************************************************************************************************/
 
 #preloader {
     display: none;

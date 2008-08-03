@@ -2,8 +2,6 @@
 # XXX IUI support
 #	XXX column tables should be nicer
 #	XXX Usermin mailbox module support
-#	XXX tables could be nicer (background color / header, collapsing)
-#		XXX make collapsible sections work on iPhone
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -160,6 +158,14 @@ if (&theme_use_iui() && $theme_iui_fieldset_table) {
 	$rv .= "<fieldset>\n";
 	$rv .= "<div class=rowhead>$heading</div>\n" if (defined($heading));
 	}
+elsif (&theme_use_iui()) {
+	# Start a styled block for the table
+	$rv .= "<div class='webminTable'>\n";
+	if (defined($heading)) {
+		$rv .= "<div class='webminTableHeader'>$heading</div>\n";
+		}
+	$rv .= "<div class='webminTableBody'>\n";
+	}
 else {
 	# Table is just elements below each other
 	$rv .= "<font size=+1>$heading</font><br>\n" if (defined($heading));
@@ -176,6 +182,9 @@ sub theme_ui_table_end
 {
 if (&theme_use_iui() && $theme_iui_fieldset_table) {
 	return "</fieldset>\n";
+	}
+elsif (&theme_use_iui()) {
+	return "</div></div>\n";
 	}
 else {
 	return "<hr>\n";
@@ -197,6 +206,13 @@ if (&theme_use_iui() && $theme_iui_fieldset_table) {
 	$rv .= "<div class=rowvalue>$value</div>\n";
 	$rv .= "</div>\n";
 	}
+elsif (&theme_use_iui()) {
+	# Styles label and value
+	if ($label =~ /\S/) {
+		$rv .= "<div class='webminTableName'>$label</div>\n";
+		}
+	$rv .= "<div class='webminTableValue'>$value</div>\n";
+	}
 else {
 	# Label and value are above each other
 	$rv .= "<b>$label</b><br>\n" if ($label =~ /\S/);
@@ -209,11 +225,28 @@ return $rv;
 }
 
 # theme_ui_hidden_table_start
-# Just outputs a normal table start, as mobile browsers don't support CSS
 sub theme_ui_hidden_table_start
 {
 local ($heading, $tabletags, $cols, $name, $status) = @_;
-return &theme_ui_table_start($heading, $tabletags, $cols);
+if (&theme_use_iui() && !$theme_iui_fieldset_table) {
+	# Start a CSS / javascript collapsible table for the iPhone
+	local $rv = "<div class='webminTable'>\n";
+	local $openid = "hiddenopener_".$name;
+	local $divid = "hiddendiv_".$name;
+	local $opencls = $status ? "webminTableHeaderOpen"
+				 : "webminTableHeaderClosed";
+	local $divcls = $status ? "webminTableBodyOpen"
+				: "webminTableBodyClosed";
+	$rv .= "<div class=webminTableHeader><a class='$opencls' ".
+	       "href='javascript:openCloseTable(\"$openid\", \"$divid\")' ".
+	       "id='$openid'>$heading</a></div>\n";
+	$rv .= "<div class='$divcls' id='$divid'>\n";
+	return $rv;
+	}
+else {
+	# Just output a normal table start, as mobile browsers don't support CSS
+	return &theme_ui_table_start($heading, $tabletags, $cols);
+	}
 }
 
 # theme_ui_hidden_table_end
