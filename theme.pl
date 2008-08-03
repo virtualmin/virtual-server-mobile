@@ -4,7 +4,6 @@
 #	XXX Usermin mailbox module support
 #	XXX tables could be nicer (background color / header, collapsing)
 #		XXX make collapsible sections work on iPhone
-#		XXX ui_hidden_section too
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -162,7 +161,7 @@ if (&theme_use_iui() && $theme_iui_fieldset_table) {
 	$rv .= "<div class=rowhead>$heading</div>\n" if (defined($heading));
 	}
 else {
-	# Table is just one column
+	# Table is just elements below each other
 	$rv .= "<font size=+1>$heading</font><br>\n" if (defined($heading));
 	$rv .= "<hr>\n";
 	}
@@ -418,28 +417,54 @@ sub theme_select_invert_link
 return undef;
 }
 
+# theme_ui_hidden_start(title, name, status, url)
+# For the iPhone, returns the normal collapsible section. For others, returns
+# a link that may halt other output if not open.
 sub theme_ui_hidden_start
 {
 local ($title, $name, $status, $url) = @_;
-local $nstatus = $status ? 0 : 1;
-print $status ? "-" : "+";
-print " <a href='$url?$name=$nstatus'>$title</a><br>\n";
-if (!$status) {
-	open(NULLFILE, ">$null_file");
-	$main::suppressing_hidden_start = select(NULLFILE);
+local $rv;
+if (&theme_use_iui()) {
+	# Real CSS / javascript collapsing section
+	local $openid = "hiddenopener_".$name;
+	local $divid = "hiddendiv_".$name;
+	local $opencls = $status ? "openerOpen" : "openerClosed";
+	local $divcls = $status ? "hiddenOpen" : "hiddenClosed";
+	$rv .= "<a href='javascript:openCloseHidden(\"$openid\", \"$divid\")' ".
+	       "class='$opencls' id='$openid'>$title</a><br>\n";
+	$rv .= "<div class='$divcls' id='$divid'>\n";
 	}
 else {
-	$main::suppressing_hidden_start = undef;
+	# Fake it by redirecting output to nowhere
+	local $nstatus = $status ? 0 : 1;
+	print $status ? "-" : "+";
+	$rv .= " <a href='$url?$name=$nstatus'>$title</a><br>\n";
+	if (!$status) {
+		open(NULLFILE, ">$null_file");
+		$main::suppressing_hidden_start = select(NULLFILE);
+		}
+	else {
+		$main::suppressing_hidden_start = undef;
+		}
 	}
+return $rv;
 }
 
+# theme_ui_hidden_end(name)
 sub theme_ui_hidden_end
 {
 local ($name) = @_;
-if ($main::suppressing_hidden_start) {
-	select($main::suppressing_hidden_start);
+if (&theme_use_iui()) {
+	# Close hiding div
+	return "</div>\n";
 	}
-return "";
+else {
+	# Stop supressing output
+	if ($main::suppressing_hidden_start) {
+		select($main::suppressing_hidden_start);
+		}
+	return "";
+	}
 }
 
 # theme_ui_links_row(&links)

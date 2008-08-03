@@ -500,6 +500,28 @@ fieldset > .row:last-child {
 
 /************************************************************************************************/
 
+/************************************************************************************************/
+
+.openerOpen {
+    background-image: url(hiddenOpen.png);
+    background-repeat: no-repeat;
+    padding-left: 16px;
+}
+
+.openerClosed {
+    background-image: url(hiddenClosed.png);
+    background-repeat: no-repeat;
+    padding-left: 16px;
+}
+
+.hiddenOpen {
+    display: inline;
+}
+
+.hiddenClosed {
+    display: none;
+}
+
 #preloader {
     display: none;
     background-image: url(loading.gif), url(selection.png),

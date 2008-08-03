@@ -176,8 +176,11 @@ addEventListener("click", function(event)
             link.setAttribute("selected", "progress");
             iui.showPageByHref(link.href, null, null, link, unselect);
         }
-	else if (link.className == "tabsLink")
+	else if (link.className == "tabsLink" ||
+		 link.className == "openerOpen" ||
+		 link.className == "openerClosed")
 	{
+	    // No special animation for Javascript links 
 	    return;
 	}
         else if (!link.target)
@@ -409,6 +412,24 @@ for(var i=0; i<tabpar.childNodes.length; i++) {
 	if (tabch.className == "tabsSel" && tabch != tab) {
 		tabch.className = "tabsUnSel";
 		}
+	}
+return false;
+}
+
+/* Used to open or close a hidden block, typically for documentation */
+function openCloseHidden(openname, divname)
+{
+var o = document.getElementById(openname);
+var d = document.getElementById(divname);
+if (o.className == "openerOpen") {
+	// Close it
+	o.className = "openerClosed";
+	d.className = "hiddenClosed";
+	}
+else {
+	// Open it
+	o.className = "openerOpen";
+	d.className = "hiddenOpen";
 	}
 return false;
 }
