@@ -52,7 +52,6 @@ if (@sections > 1 && &get_webmin_version() >= 1.225) {
 	print $text{'config_section'},"\n";
 	print &ui_select("section", $in{'section'}, \@sections,
 			 1, 0, 0, 0, "onChange='form.submit()'");
-	print &ui_submit($text{'config_change'});
 	print &ui_submit($text{'config_nprev'}, "nprev");
 	print &ui_submit($text{'config_nnext'}, "nnext");
 	print &ui_form_end();

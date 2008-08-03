@@ -12,6 +12,7 @@ index_vdsearchok=Search
 index_vdsearchdom=Domain
 index_vssearchserver=System
 index_vdsearchuser=Username
+index_usearch=Search mail
 index_vglobal=Virtualmin settings
 index_v2global=VM2 settings
 index_v2create=Create VM2 system
@@ -81,6 +82,8 @@ v2main_title=VM2 $1 on $2 ($3)
 v2main_title2=VM2
 main_title=Webmin $1 on $2 ($3)
 main_title2=Webmin
+umain_title=Usermin $1 on $2 ($3)
+umain_title2=Usermin
 
 sysinfo_title=System Information
 sysinfo_header0=System

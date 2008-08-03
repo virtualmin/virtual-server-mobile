@@ -2,6 +2,10 @@
 # XXX IUI support
 #	XXX column tables should be nicer
 #	XXX Usermin mailbox module support
+#		XXX nicer mail / folder lists for iPhone
+#		XXX icons next to folders
+#		XXX next/prev navigator
+#		XXX prefs on every page??
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -74,6 +78,21 @@ for($i=0; $i+1<@_; $i+=2) {
 			else {
 				next;
 				}
+			}
+		elsif ($url eq '' && $module_name eq 'mailbox') {
+			# Don't bother with link to mail list from
+			# pages other than view/reply mail
+			if ($0 =~ /list_(folders|ifolders).cgi/ ||
+			    $0 =~ /list_addresses.cgi/ ||
+			    $0 =~ /edit_sig.cgi/ ||
+			    $0 =~ /edit_(folder|ifolder|virt|imap|pop3|comp).cgi/) {
+				next;
+				}
+			}
+		elsif ($url =~ /^\/mailbox(|\/|index.cgi)$/) {
+			# For links to read mail from other modules, link
+			# to the main menu (ie. preferences)
+			next;
 			}
 		elsif ($url eq '' && $module_name) {
 			$url = "/$module_name/$module_info{'index_link'}";
@@ -781,7 +800,8 @@ if (@_ > 1 && &theme_use_iui()) {
 
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
 	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager") {
+	    $module_name ne "server-manager" &&
+	    $module_name ne "mailbox") {
 		# Module index
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";
@@ -808,8 +828,10 @@ if (@_ > 1 && &theme_use_iui()) {
 		if (!$access{'noconfig'} && !$config{'noprefs'}) {
 			local $cprog = $user_module_config_directory ?
 					"uconfig.cgi" : "config.cgi";
+			local $cname = $cprog eq "uconfig.cgi" ? "Prefs"
+							       : "Config";
 			$theme_iui_toolbar_button =
-			    [ "/$cprog?$module_name", "Config" ];
+			    [ "/$cprog?$module_name", $cname ];
 			}
 		}
 
@@ -850,7 +872,8 @@ else {
 		}
 	if (!$_[5] && !$tconfig{'noindex'} &&
 	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager") {
+	    $module_name ne "server-manager" &&
+	    $module_name ne "mailbox") {
 		# Logout or switch user
 		local @avail = &get_available_module_infos(1);
 		local $nolo = $ENV{'ANONYMOUS_USER'} ||
@@ -869,7 +892,8 @@ else {
 		}
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
 	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager") {
+	    $module_name ne "server-manager" &&
+	    $module_name ne "mailbox") {
 		# Module index
 		local $idx = $module_info{'index_link'};
 		local $mi = $module_index_link || "/$module_name/$idx";

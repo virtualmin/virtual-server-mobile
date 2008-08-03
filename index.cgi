@@ -95,8 +95,17 @@ if (($hasvirt || $hasvm2) && &foreign_available("security-updates")) {
 
 # Check for Usermin mail
 if ($prod eq 'usermin' && &foreign_available("mailbox")) {
-	# XXX title?
+	&foreign_require("mailbox", "mailbox-lib.pl");
+	$title = $gconfig{'nohostname'} ? $text{'umain_title2'} :
+		&text('umain_title', &get_webmin_version(), $hostname, $ostr);
 	$hasmail = 1;
+	@folders = &mailbox::list_folders_sorted();
+	$df = $mailbox::userconfig{'default_folder'};
+	$dfolder = $df ? &mailbox::find_named_folder($df, \@folders) :
+			 $folders[0];
+	%mconfig = &foreign_config("mailbox");
+	$flink = $mconfig{'mail_system'} == 4 ? "mailbox/list_ifolders.cgi"
+					      : "mailbox/list_folders.cgi";
 	}
 
 $haswebmin = !$hasvirt && !$hasvm2 && !$hasmail;
@@ -240,14 +249,8 @@ if ($hasvm2) {
 		}
 	}
 
-
 if ($hasmail) {
 	# Show Usermin folders
-	&foreign_require("mailbox", "mailbox-lib.pl");
-	@folders = &mailbox::list_folders_sorted();
-	$df = $mailbox::userconfig{'default_folder'};
-	$dfolder = $df ? &mailbox::find_named_folder($df, \@folders) :
-			 $folders[0];
 	print &ui_form_start("mailbox/mail_search.cgi");
 	print &ui_hidden("simple", 1);
 	print &ui_hidden("folder", $dfolder->{'index'});
@@ -275,9 +278,6 @@ if ($hasmail) {
 
 	# Show various links for mail/folder management
 	push(@mlinks, "<a href='mailbox/reply_mail.cgi?new=1&folder=$dfolder->{'id'}'>$text{'index_compose'}</a>");
-	%mconfig = &foreign_config("mailbox");
-	$flink = $mconfig{'mail_system'} == 4 ? "mailbox/list_ifolders.cgi"
-					      : "mailbox/list_folders.cgi";
 	push(@mlinks, "<a href='$flink'>$text{'index_lfolders'}</a>");
 	push(@mlinks, "<a href='mailbox/list_addresses.cgi'>$text{'index_laddresses'}</a>");
 	if (!$mconfig{'noprefs'}) {
@@ -286,7 +286,9 @@ if ($hasmail) {
 	if (&foreign_available("filter")) {
 		push(@mlinks, "<a href='filter/'>$text{'index_lfilter'}</a>");
 		}
-	push(@mlinks, "<a href='changepass/'>$text{'index_lpass'}</a>");
+	if (&foreign_available("changepass")) {
+		push(@mlinks, "<a href='changepass/'>$text{'index_lpass'}</a>");
+		}
 	print "<li>$text{'index_mlinks'}\n",join(" | ",@mlinks),"<br>\n";
 
 	print &ui_form_end();
@@ -389,6 +391,55 @@ if ($hasvm2) {
 	# VM2 new features, if any
 	if ($newv2html) {
 		print "<li><a href='#newv2feat'>$text{'index_v2nf'}</a></li>\n";
+		}
+	}
+
+if ($hasmail) {
+	# Usermin folders
+	foreach $f (@folders) {
+		$fid = &mailbox::folder_name($f);
+		$star = $f->{'type'} == 6 &&
+			$mailbox::special_folder_id &&
+			$f->{'id'} == $mailbox::special_folder_id ?
+			 "<img src=mailbox/images/special.gif border=0>" : "";
+		$umsg = "";
+		if (&mailbox::should_show_unread($f)) {
+			local ($c, $u) = &mailbox::mailbox_folder_unread($f);
+			$umsg = "&nbsp;($u)" if ($u);
+			}
+		print "<li><a href='mailbox/index.cgi?id=$fid' target=_self>",
+		      "$star$f->{'name'}$umsg</a></li>\n";
+		}
+
+	# Search mail
+	print "<li><a href='#usearch'>$text{'index_usearch'}</a></li>\n";
+
+	# Compose
+	print "<li><a href='mailbox/reply_mail.cgi?new=1&folder=$dfolder->{'id'}' target=_self>$text{'index_compose'}</a></li>\n";
+
+	# Manage folders
+	print "<li><a href='$flink' target=_self>$text{'index_lfolders'}</a></li>\n";
+
+	# Addressbook
+	print "<li><a href='mailbox/list_addresses.cgi' target=_self>",
+	      "$text{'index_laddresses'}</a></li>\n";
+
+	# Preferences
+	if (!$mconfig{'noprefs'}) {
+		print "<li><a href='uconfig.cgi?mailbox' target=_self>",
+		      "$text{'index_lprefs'}</a></li>\n";
+		}
+
+	# Filter mail
+	if (&foreign_available("filter")) {
+		print "<li><a href='filter/' target=_self>",
+		      "$text{'index_lfilter'}</a></li>\n";
+		}
+
+	# Change password
+	if (&foreign_available("changepass")) {
+		print "<li><a href='changepass/' target=_self>",
+		      "$text{'index_lpass'}</a></li>\n";
 		}
 	}
 
@@ -555,6 +606,24 @@ if ($hasvm2) {
 	      "onClick='submitForm(form)'>$text{'index_vdsearchok'}</a>\n";
 	print "<label>$text{'index_vssearchserver'}</label>\n";
 	print "<input id=search type=text name=search>\n";
+	print "</fieldset>\n";
+	print "</form>\n";
+	}
+
+#################################### Usermin Read Mail
+
+# Popup for mail search
+if ($hasmail) {
+	print "<form id='usearch' class='dialog normalSubmit' action='mailbox/mail_search.cgi' method='post' target=_self>\n";
+	print "<input type=hidden name=simple value=1>\n";
+	print &ui_hidden("folder", $dfolder->{'index'});
+	print "<fieldset>\n";
+	print "<h1>$text{'index_usearch'}</h1>\n";
+	print "<a class='button leftButton' type='cancel' ",
+	      "onClick='cancelDialog(form)'>$text{'cancel'}</a>\n";
+	print "<a class='button blueButton' type='submit' ",
+	      "onClick='submitForm(form)'>$text{'index_vdsearchok'}</a>\n";
+	print "<input id=search type=text name=search style='width:100%'>\n";
 	print "</fieldset>\n";
 	print "</form>\n";
 	}
