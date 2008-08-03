@@ -434,7 +434,7 @@ fieldset > .row:last-child {
 }
 
 .tabsSel {
-    background: #eeeeee;
+    background: #eeeeee url(pinstripesVeryLight.png);
     padding: 2px 2px 2px 2px;
 }
 
@@ -444,7 +444,7 @@ fieldset > .row:last-child {
 }
 
 .tabsUnSel {
-    background: #cccccc;
+    background: #acb2b9 url(pinstripesVeryDark.png);
     padding: 2px 2px 2px 2px;
 }
 
@@ -462,8 +462,11 @@ fieldset > .row:last-child {
 }
 
 .tabsBody {
-    background: #eeeeee;
+    background: #eeeeee url(pinstripesVeryLight.png);
     margin-top: 0;
+    border-style: solid;
+    border-width: 1;
+    border-color: #6d84a2;
 }
 
 .tabsContent {
