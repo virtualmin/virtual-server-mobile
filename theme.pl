@@ -6,7 +6,6 @@
 #		XXX icons next to folders
 #		XXX next/prev navigator
 #		XXX prefs on every page??
-#		XXX make ui_grid_table nicer on iphone (ie. samba)
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -726,12 +725,29 @@ sub theme_ui_grid_table
 local ($elements, $cols, $width, $tds, $tabletags, $title) = @_;
 return "" if (!@$elements);
 if (&theme_use_iui()) {
-	# Two-column grid
-	$cols = 2;
-	local $rv = "<table".
-		    ($width ? " width=$width%" : "").
-		    ($tabletags ? " ".$tabletags : "").
-		    ">\n";
+	# Two-column grid, if narrow enough .. otherwise, one
+	my $maxlen;
+	foreach my $e (@$elements) {
+		my $he = $e;
+		$he =~ s/<[^>]*>//g;
+		$maxlen = length($he) if (length($he) > $maxlen);
+		}
+	$cols = $maxlen > 30 ? 1 : 2;
+
+	# Styled title
+	my $rv;
+	if (defined($title)) {
+		$rv .= "<div class='webminGridBorder'>\n";
+		$rv .= "<div class='webminGridHeader'>$title</div>\n";
+		}
+	else {
+		$rv .= "<div class='webminGrid'>\n";
+		}
+
+	# Grid body as a table
+	$rv .= "<div class='webminGridBody'>\n";
+	$rv .= "<table".($width ? " width=$width%" : "").
+		        ($tabletags ? " ".$tabletags : "").">\n";
 	my $i;
 	for($i=0; $i<@$elements; $i++) {
 		$rv .= "<tr>" if ($i%$cols == 0);
@@ -745,10 +761,7 @@ if (&theme_use_iui()) {
 			}
 		$rv .= "</tr>\n";
 		}
-	$rv .= "</table>\n";
-	if (defined($title)) {
-		$rv = "<b>$title</b><br>\n".$rv;
-		}
+	$rv .= "</table></div></div>\n";
 	return $rv;
 	}
 else {

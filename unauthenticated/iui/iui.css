@@ -585,6 +585,26 @@ fieldset > .row:last-child {
 
 /************************************************************************************************/
 
+.webminGrid {
+}
+
+.webminGridBorder {
+    border-style: solid;
+    border-width: 1;
+    border-color: #6d84a2;
+}
+
+.webminGridHeader {
+    background: url(toolbar.png) #6d84a2 repeat-x;
+    padding: 5px;
+}
+
+.webminGridBody {
+    padding: 5px;
+}
+
+/************************************************************************************************/
+
 #preloader {
     display: none;
     background-image: url(loading.gif), url(selection.png),
