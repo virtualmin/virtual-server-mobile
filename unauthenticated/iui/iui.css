@@ -356,17 +356,17 @@ fieldset > .row:last-child {
     position: absolute;
     top: 6px;
     /*right: 6px;*/
-    width: 100px;
-    height: 28px;
+    width: 80px;
+    height: 24px;
 }
 
 .toggle {
     border: 1px solid #888888;
     -webkit-border-radius: 6px;
     background: #FFFFFF url(toggle.png) repeat-x;
-    font-size: 19px;
+    font-size: 15px;
     font-weight: bold;
-    line-height: 30px;
+    line-height: 26px;
 }
 
 .toggle[toggled="true"] {
@@ -377,7 +377,7 @@ fieldset > .row:last-child {
 .toggleOn {
     display: none;
     position: absolute;
-    width: 60px;
+    width: 40px;
     text-align: center;
     left: 0;
     top: 0;
@@ -387,7 +387,7 @@ fieldset > .row:last-child {
 
 .toggleOff {
     position: absolute;
-    width: 60px;
+    width: 40px;
     text-align: center;
     right: 0;
     top: 0;
@@ -407,7 +407,7 @@ fieldset > .row:last-child {
     top: -1px;
     left: -1px;
     width: 40px;
-    height: 28px;    
+    height: 24px;    
     border: 1px solid #888888;
     -webkit-border-radius: 6px;
     background: #ffffff url(thumb.png) repeat-x;

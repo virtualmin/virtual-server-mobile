@@ -7,7 +7,6 @@
 #		XXX next/prev navigator
 #		XXX prefs on every page??
 #		XXX make ui_grid_table nicer on iphone (ie. samba)
-#		XXX yes/no chooser too big
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
