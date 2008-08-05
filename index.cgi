@@ -493,11 +493,10 @@ if ($hasvirt && @editdoms) {
 	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
 		print "<li>",
-		      ($d->{'disabled'} ? "<i>" : ""),
-		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self>",
-		      &virtual_server::show_domain_name($d),
-		      ($d->{'disabled'} ? "</i>" : ""),
-		      "</a></li>\n";
+		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self ",
+		      ($d->{'disabled'} ? "style='font-style:italic'" : ""),
+		      ">",&virtual_server::show_domain_name($d),
+		      "</a>\n";
 		}
 	print "</ul>\n";
 	}

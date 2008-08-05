@@ -36,10 +36,9 @@ if (@doms) {
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 			    @doms) {
 		print "<li>",
-		      ($d->{'disabled'} ? "<i>" : ""),
-		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self>",
-		      &virtual_server::show_domain_name($d),"</a>",
-		      ($d->{'disabled'} ? "</i>" : ""),
+		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self ",
+		      ($d->{'disabled'} ? "style='font-style:italic'" : ""),
+		      ">",&virtual_server::show_domain_name($d),"</a>",
 		      "</li>\n";
 		}
 	print "</ul>\n";
