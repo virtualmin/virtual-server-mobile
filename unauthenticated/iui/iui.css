@@ -507,7 +507,6 @@ fieldset > .row:last-child {
     background-image: url(hiddenOpen.png);
     background-repeat: no-repeat;
     padding-left: 16px;
-    text-decoration: none;
     color: #000000;
     font-weight: bold;
 }
@@ -516,7 +515,6 @@ fieldset > .row:last-child {
     background-image: url(hiddenClosed.png);
     background-repeat: no-repeat;
     padding-left: 16px;
-    text-decoration: none;
     color: #000000;
     font-weight: bold;
 }
@@ -575,15 +573,17 @@ fieldset > .row:last-child {
 
 .webminTableBodyOpen {
     background: #d8d8d8 url(pinstripesLight.png);
-    display: inline;
+    padding: 5px;
 }
 
 .webminTableBodyClosed {
     background: #d8d8d8 url(pinstripesLight.png);
     display: none;
+    padding: 5px;
 }
 
-/************************************************************************************************/
+/*****************************************************************************/
+/* Webmin grids */
 
 .webminGrid {
 }
@@ -603,7 +603,39 @@ fieldset > .row:last-child {
     padding: 5px;
 }
 
-/************************************************************************************************/
+/*****************************************************************************/
+/* Column tables */
+
+.ui_columns {
+    border-style: solid;
+    border-width: 1;
+    border-color: #6d84a2;
+    border-collapse: collapse;
+}
+
+table.ui_columns td {
+    border-width: 0px;
+    border-style: none;
+    border-spacing: 0px;
+    border-bottom: 1px solid #6d84a2;
+}
+
+table.ui_columns th {
+    border-width: 0px;
+    border-style: none;
+    border-spacing: 0px;
+    background: url(toolbar.png) #6d84a2 repeat-x;
+    font-weight: normal;
+}
+
+/*****************************************************************************/
+/* Help pages and links */
+
+.webminHelpLink {
+    color: #000000;
+}
+
+/*****************************************************************************/
 
 #preloader {
     display: none;

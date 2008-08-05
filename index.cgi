@@ -348,13 +348,13 @@ if ($hasvirt) {
 	# Create links
 	if ($dom_create_mode == 1) {
 		# Can just create own sub-server
-		print "<li><a href='virtual-server/domain_form.cgi'>",
-		      "$text{'index_vaddsub'}</a></li>\n";
+		print "<li><a href=virtual-server/domain_form.cgi ",
+		      "target=_self>$text{'index_vaddsub'}</a></li>\n";
 		}
 	elsif ($dom_create_mode == 2) {
 		# Can create master or sub-server
-		print "<li><a href='virtual-server/domain_form.cgi'>",
-		      "$text{'index_vadddom'}</a></li>\n";
+		print "<li><a href=virtual-server/domain_form.cgi ",
+		      "target=_self>$text{'index_vadddom'}</a></li>\n";
 		}
 
 	# Link to templates

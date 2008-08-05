@@ -1,11 +1,11 @@
 # Theme-level UI override functions
 # XXX IUI support
-#	XXX column tables should be nicer
 #	XXX Usermin mailbox module support
 #		XXX nicer mail / folder lists for iPhone
 #		XXX icons next to folders
 #		XXX next/prev navigator
 #		XXX prefs on every page??
+#	XXX edit user with tabs broken
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -150,7 +150,7 @@ if (&theme_use_iui()) {
 			print "<a id='backButton' class='button' href='#'></a>\n";
 			}
 		if ($theme_iui_toolbar_button) {
-			local $t = $theme_iui_toolbar_button->[0] =~ /help.cgi/ ? "" : "target=_self";
+			local $t = $theme_iui_toolbar_button->[0] =~ /help.cgi/ ? "target=_new" : "target=_self";
 			print "<a class='button' href='$theme_iui_toolbar_button->[0]' $t>$theme_iui_toolbar_button->[1]</a>\n";
 			}
 		print "</div>\n";
@@ -300,15 +300,18 @@ elsif ($module_name eq 'filter' && $0 =~ /index.cgi/) {
 else {
 	# Just regular plain table
 	$rv .= "<table".($noborder ? "" : " border").
-			(defined($width) ? " width=$width%" : "").">\n";
+			(defined($width) ? " width=$width%" : "").
+			" class='ui_columns'>\n";
 	if ($heading) {
 		$rv .= "<font size=+1>$heading</font><br>\n";
 		}
-	$rv .= "<tr>\n";
+	$rv .= "<tr class='ui_columns_heads'>\n";
 	local $i;
 	for($i=0; $i<@$heads; $i++) {
-		$rv .= "<th ".$tdtags->[$i]."><b>".
-	            ($heads->[$i] eq "" ? "<br>" : $heads->[$i])."</b></th>\n";
+		$rv .= "<th ".$tdtags->[$i].">".
+		       (&theme_use_iui() ? "" : "<b>").
+	               ($heads->[$i] eq "" ? "<br>" : $heads->[$i]).
+		       (&theme_use_iui() ? "" : "</b>")."</th>\n";
 		}
 	$rv .= "</tr>\n";
 	}
@@ -372,10 +375,10 @@ elsif ($main::theme_ui_columns_filter) {
 	}
 else {
 	# Regular table
-	$rv .= "<tr>\n";
+	$rv .= "<tr class='ui_columns_row'>\n";
 	local $i;
 	for($i=0; $i<@$cols; $i++) {
-		$rv .= "<td ".$tdtags->[$i].">".
+		$rv .= "<td ".$tdtags->[$i]." class='ui_columns_cell'>".
 		       ($cols->[$i] eq "" ? "<br>" : $cols->[$i])."</td>\n";
 		}
 	$rv .= "</tr>\n";
@@ -389,11 +392,13 @@ sub theme_ui_columns_header
 {
 local ($cols, $tdtags) = @_;
 local $rv;
-$rv .= "<tr>\n";
+$rv .= "<tr class='ui_columns_header'>\n";
 local $i;
 for($i=0; $i<@$cols; $i++) {
-	$rv .= "<th ".$tdtags->[$i]."><b>".
-	       ($cols->[$i] eq "" ? "<br>" : $cols->[$i])."</b></th>\n";
+	$rv .= "<th ".$tdtags->[$i].">".
+	       (&theme_use_iui() ? "" : "<b>").
+	       ($cols->[$i] eq "" ? "<br>" : $heads->[$i]).
+	       (&theme_use_iui() ? "" : "</b>")."</th>\n";
 	}
 $rv .= "</tr>\n";
 return $rv;
@@ -411,7 +416,7 @@ if ($main::theme_ui_columns_folders || $main::theme_ui_columns_filter) {
 	$rv = &theme_ui_columns_row([ $cb, @$cols ], $tdtags);
 	}
 else {
-	$rv .= "<tr>\n";
+	$rv .= "<tr class='ui_checked_columns'>\n";
 	$rv .= "<td ".$tdtags->[0].">".$cb."</td>\n";
 	local $i;
 	for($i=0; $i<@$cols; $i++) {
@@ -431,7 +436,7 @@ sub theme_ui_radio_columns_row
 {
 local ($cols, $tdtags, $checkname, $checkvalue) = @_;
 local $rv;
-$rv .= "<tr>\n";
+$rv .= "<tr class='ui_radio_columns'>\n";
 $rv .= "<td ".$tdtags->[0].">".
        &ui_oneradio($checkname, $checkvalue, "", 0)."</td>\n";
 local $i;
@@ -982,6 +987,11 @@ if ($module_name eq "virtual-server") {
 	# Don't show quotas on Virtualmin menu
 	$config{'show_quotas'} = 0;
 	}
+if (&theme_use_iui()) {
+	# Don't limit text box sizes on IUI
+	$tconfig{'maxboxwidth'} = undef;
+	$tconfig{'maxareawidth'} = undef;
+	}
 }
 
 # Output text-only selector
@@ -1338,7 +1348,8 @@ print "</body></html>\n";
 sub theme_hlink
 {
 local $mod = $_[2] ? $_[2] : $module_name;
-return "<a href='/help.cgi/$mod/$_[1]'>$_[0]</a>";
+return "<a href='/help.cgi/$mod/$_[1]' target=_new ".
+       "class='webminHelpLink'>$_[0]</a>";
 }
 
 # Turn off javascript redirects
