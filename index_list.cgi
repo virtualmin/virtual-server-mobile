@@ -16,8 +16,12 @@ if (@doms) {
 	# Show domains
 	print "<ul>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
-		print "<li><a href='index_edit.cgi?dom=$d->{'id'}'>",
-			&virtual_server::show_domain_name($d),"</a>\n";
+		print "<li>",
+		      ($d->{'disabled'} ? "<i>" : ""),
+		      "<a href='index_edit.cgi?dom=$d->{'id'}'>",
+		      &virtual_server::show_domain_name($d),"</a>",
+		      ($d->{'disabled'} ? "</i>" : ""),
+		      "<br>\n";
 		}
 	print "</ul>\n";
 	}

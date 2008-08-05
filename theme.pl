@@ -6,6 +6,8 @@
 #		XXX icons next to folders
 #		XXX next/prev navigator
 #		XXX prefs on every page??
+#		XXX make ui_grid_table nicer on iphone (ie. samba)
+#		XXX yes/no chooser too big
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -719,15 +721,46 @@ print "</ul>\n";
 }
 
 # Doesn't bother with a grid, just put everything in one column
+# (for most devices) or two columns (for iPhone)
 sub theme_ui_grid_table
 {
-local ($elements, $cols, $width, $tds) = @_;
+local ($elements, $cols, $width, $tds, $tabletags, $title) = @_;
 return "" if (!@$elements);
-local $rv = "<!--grid-->";
-for(my $i=0; $i<@$elements; $i++) {
-	$rv .= $elements->[$i]."<br>\n";
+if (&theme_use_iui()) {
+	# Two-column grid
+	$cols = 2;
+	local $rv = "<table".
+		    ($width ? " width=$width%" : "").
+		    ($tabletags ? " ".$tabletags : "").
+		    ">\n";
+	my $i;
+	for($i=0; $i<@$elements; $i++) {
+		$rv .= "<tr>" if ($i%$cols == 0);
+		$rv .= "<td width=25% valign=top>".$elements->[$i]."</td>\n";
+		$rv .= "</tr>" if ($i%$cols == $cols-1);
+		}
+	if ($i%$cols) {
+		while($i%$cols) {
+			$rv .= "<td width=25%></td>\n";
+			$i++;
+			}
+		$rv .= "</tr>\n";
+		}
+	$rv .= "</table>\n";
+	if (defined($title)) {
+		$rv = "<b>$title</b><br>\n".$rv;
+		}
+	return $rv;
 	}
-return $rv;
+else {
+	# Just in one column
+	local $rv = "<!--grid-->";
+	$rv .= "<b>$title</b><br>\n" if ($title);
+	for(my $i=0; $i<@$elements; $i++) {
+		$rv .= $elements->[$i]."<br>\n";
+		}
+	return $rv;
+	}
 }
 
 sub theme_print_iui_head

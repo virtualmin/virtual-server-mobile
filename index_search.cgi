@@ -35,10 +35,12 @@ if (@doms) {
 	print "<ul title='$text{'search_title'}' selected=true>\n";
 	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) }
 			    @doms) {
-		print "<li><a href='index_edit.cgi?dom=$d->{'id'}' ",
-		      "target=_self>",
-		      &virtual_server::show_domain_name($d),
-		      "</a></li>\n";
+		print "<li>",
+		      ($d->{'disabled'} ? "<i>" : ""),
+		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self>",
+		      &virtual_server::show_domain_name($d),"</a>",
+		      ($d->{'disabled'} ? "</i>" : ""),
+		      "</li>\n";
 		}
 	print "</ul>\n";
 	}
