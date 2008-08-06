@@ -5,8 +5,6 @@
 #		XXX icons next to folders
 #		XXX next/prev navigator
 #		XXX prefs on every page??
-#	XXX edit user with tabs broken
-#	XXX ui_links_row and right-side
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
