@@ -492,6 +492,16 @@ fieldset > .row:last-child {
     margin-bottom: 5px;
 }
 
+.linksbar > h2 {
+    text-align: center;
+    color: #000000;
+    font-size: 16px;
+    height: 20px;
+    margin-top: 0px;
+    padding-top: 5px;
+    margin-bottom: 5px;
+}
+
 .linksrow {
    text-align: center;
    font-size: 14px;

@@ -27,7 +27,9 @@ local ($text) = @_;
 local $rv;
 if ($text) {
 	$rv .= "<div type=panel>\n" if ($theme_iui_no_default_div);
-	$rv .= "<b>$text</b><p>\n";
+	print "<div class=linksbar>\n";
+	print "<h2>$text</h2>\n";
+	print "</div>\n";
 	$rv .= "</div>\n" if ($theme_iui_no_default_div);
 	}
 return $rv;
