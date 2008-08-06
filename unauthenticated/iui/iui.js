@@ -395,10 +395,10 @@ function ddd() { console.log.apply(console, arguments); }
 })();
 
 /* Used to hide and show blocks based on tab selections */
-function selectTab(name, tab)
+function selectTab(name, tabname)
 {
-var div = document.getElementById("div_"+tab);
-var tab = document.getElementById("tab_"+tab);
+var div = document.getElementById("div_"+tabname);
+var tab = document.getElementById("tab_"+tabname);
 tab.className = "tabsSel";
 div.className = "tabVisible";
 var divpar = div.parentNode;
@@ -414,6 +414,10 @@ for(var i=0; i<tabpar.childNodes.length; i++) {
 	if (tabch.className == "tabsSel" && tabch != tab) {
 		tabch.className = "tabsUnSel";
 		}
+	}
+var hids = document.getElementsByName(name);
+if (hids && hids.length > 0) {
+	hids[0].value = tabname;
 	}
 return false;
 }

@@ -6,6 +6,7 @@
 #		XXX next/prev navigator
 #		XXX prefs on every page??
 #	XXX edit user with tabs broken
+#	XXX ui_links_row and right-side
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
@@ -241,6 +242,32 @@ else {
 	$rv .= "$value<br>\n";
 	}
 return $rv;
+}
+
+# theme_ui_hidden_table_row_start(label, name, flag)
+# On the iPhone, returns a collapsible section start. On other devices, does
+# nothing as CSS isn't supported.
+sub theme_ui_hidden_table_row_start
+{
+local ($label, $name, $flag) = @_;
+if (&theme_use_iui()) {
+	my $rv = &theme_ui_hidden_start($label, $name, $flag);
+	return $rv;
+	}
+else {
+	return "";
+	}
+}
+
+sub theme_ui_hidden_table_row_end
+{
+local ($name) = @_;
+if (&theme_use_iui()) {
+	return &theme_ui_hidden_end($name);
+	}
+else {
+	return "";
+	}
 }
 
 # theme_ui_hidden_table_start
@@ -614,7 +641,7 @@ elsif (&theme_use_iui()) {
 		$rv .= "<td class='$c' id='tab_$t->[0]'><a href='' class='tabsLink' onClick='return selectTab(\"$name\", \"$t->[0]\")'>$t->[1]</a></td>\n";
 		}
 	$rv .= "</tr></table>\n";
-	$rv .= "<div class=tabsContent>";
+	$rv .= &ui_hidden($name, $sel)."\n";
 	return $rv;
 	}
 else {
@@ -640,7 +667,7 @@ sub theme_ui_tabs_end
 {
 if (&theme_use_iui()) {
 	# Close big div for whole tab set
-	return "</div></div>\n";
+	return "</div>\n";
 	}
 else {
 	return "";

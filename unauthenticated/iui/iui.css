@@ -454,7 +454,8 @@ fieldset > .row:last-child {
 }
 
 .tabVisible {
-    display: inline;
+    padding-left: 2px;
+    padding-right: 2px;
 }
 
 .tabHidden {
@@ -467,11 +468,6 @@ fieldset > .row:last-child {
     border-style: solid;
     border-width: 1;
     border-color: #6d84a2;
-}
-
-.tabsContent {
-    padding-left: 2px;
-    padding-right: 2px;
 }
 
 /************************************************************************************************/
@@ -626,6 +622,7 @@ table.ui_columns th {
     border-spacing: 0px;
     background: url(toolbar.png) #6d84a2 repeat-x;
     font-weight: normal;
+    text-align: left;
 }
 
 /*****************************************************************************/
