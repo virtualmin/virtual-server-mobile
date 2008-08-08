@@ -445,7 +445,7 @@ if ($hasmail) {
 
 # Package updates
 if (@poss) {
-	print "<li><a href='index_updates.cgi'>",
+	print "<li><a href='index_updates.cgi' target=_self>",
 	      "* ",&text('index_vupdates', scalar(@poss)),"</a></li>\n";
 	}
 
