@@ -1385,5 +1385,34 @@ sub theme_js_redirect
 return "";
 }
 
+# theme_ui_multi_select(name, &values, &options, size, [add-if-missing],
+#		        [disabled?], [options-title, values-title], [width])
+# The Javascript left/right selector isn't supported, so don't even try to
+# use it.
+sub theme_ui_multi_select
+{
+local ($name, $values, $opts, $size, $missing, $dis,
+       $opts_title, $vals_title, $width) = @_;
+return &ui_textarea($name, join("\n", map { $_->[0] } @$values),
+		    $size, 30, "off", $dis);
+}
+
+# theme_ui_radio_table(name, selected, &rows)
+# Returns HTML for a table of radio buttons, each of which has a label and
+# some associated inputs to the right.
+sub theme_ui_radio_table
+{
+local ($name, $sel, $rows) = @_;
+return "" if (!@$rows);
+foreach my $r (@$rows) {
+	$rv .= "<b>".&ui_oneradio($name, $r->[0], $r->[1],
+				  $r->[0] eq $sel)."</b><br>\n";
+	if ($r->[2]) {
+		$rv .= "&nbsp;&nbsp;".$r->[2]."<br>\n";
+		}
+	}
+return $rv;
+}
+
 1;
 
