@@ -241,6 +241,8 @@ a[target="_replace"] {
     color: inherit;
     background: url(listArrow.png) no-repeat right center;
 }
+
+/************************************************************************************************/
     
 body > .dialog {
     top: 0;

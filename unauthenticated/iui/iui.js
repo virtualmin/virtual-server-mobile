@@ -180,7 +180,8 @@ addEventListener("click", function(event)
 		 link.className == "openerOpen" ||
 		 link.className == "openerClosed" ||
 		 link.className == "webminTableHeaderOpen" ||
-		 link.className == "webminTableHeaderClosed")
+		 link.className == "webminTableHeaderClosed" ||
+		 link.className == "iconLink")
 	{
 	    // No special animation for Javascript links 
 	    return;

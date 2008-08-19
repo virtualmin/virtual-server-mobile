@@ -730,7 +730,6 @@ sub theme_icons_table
 {
 local ($links, $titles, $icons, $cols, $href, $w, $h, $befores, $afters) = @_;
 local $i;
-# For other devices, just an HTML list
 print "<ul>\n";
 for($i=0; $i<@$links; $i++) {
 	print "<li class='iconList'>";
