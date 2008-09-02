@@ -1403,6 +1403,7 @@ sub theme_ui_radio_table
 {
 local ($name, $sel, $rows) = @_;
 return "" if (!@$rows);
+my $rv;
 foreach my $r (@$rows) {
 	$rv .= "<b>".&ui_oneradio($name, $r->[0], $r->[1],
 				  $r->[0] eq $sel)."</b><br>\n";
