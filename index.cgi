@@ -395,6 +395,14 @@ if ($hasvm2) {
 	}
 
 if ($hasmail) {
+	# Usermin email address
+	($fromaddr) = &mailbox::split_addresses(
+			&mailbox::get_preferred_from_address());
+	print "<li style='font-size: 12px'>\n";
+	print $fromaddr->[1]," : \n" if ($fromaddr->[1]);
+	print $fromaddr->[0],"\n";
+	print "</li>\n";
+
 	# Usermin folders
 	foreach $f (@folders) {
 		$fid = &mailbox::folder_name($f);
