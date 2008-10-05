@@ -665,7 +665,11 @@ else {
 # Doesn't need to return anything for text-mode tabs
 sub theme_ui_tabs_end
 {
-if (&theme_use_iui()) {
+if ($theme_ui_tabs_current) {
+	# Compose email form .. so do nothing
+	return "";
+	}
+elsif (&theme_use_iui()) {
 	# Close big div for whole tab set
 	return "</div>\n";
 	}
