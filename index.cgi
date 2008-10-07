@@ -227,7 +227,8 @@ if ($hasvm2) {
 		print "<li><b>$text{'index_v2create'}</b><br>\n";
 		print "<ul>\n";
 		foreach my $c (@clinks) {
-			my $form = $c->{'create'} ? 'create_form.cgi'
+			my $form = $c->{'link'} ? $c->{'link'} :
+				   $c->{'create'} ? 'create_form.cgi'
 						  : 'add_form.cgi';
 			print "<li><a href='/server-manager/$form?",
 			      "type=$c->{'type'}'>",$c->{'desc'},"</a><br>\n";
@@ -581,7 +582,9 @@ if ($hasvm2 && @$gcats) {
 if ($hasvm2 && @clinks) {
 	print "<ul id='v2create' title='$text{'index_v2create'}'>\n";
 	foreach my $c (@clinks) {
-		my $form = $c->{'create'} ? 'create_form.cgi' : 'add_form.cgi';
+		my $form = $c->{'link'} ? $c->{'link'} :
+			   $c->{'create'} ? 'create_form.cgi'
+					  : 'add_form.cgi';
 		print "<li><a href='/server-manager/$form?type=$c->{'type'}' ",
 		      "target=_self>",$c->{'desc'},"</a></li>\n";
 		}
