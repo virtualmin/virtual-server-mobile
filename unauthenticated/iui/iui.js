@@ -176,22 +176,8 @@ addEventListener("click", function(event)
             link.setAttribute("selected", "progress");
             iui.showPageByHref(link.href, null, null, link, unselect);
         }
-	else if (link.className == "tabsLink" ||
-		 link.className == "openerOpen" ||
-		 link.className == "openerClosed" ||
-		 link.className == "webminTableHeaderOpen" ||
-		 link.className == "webminTableHeaderClosed" ||
-		 link.className == "iconLink")
-	{
-	    // No special animation for Javascript links 
-	    return;
-	}
-        else if (!link.target)
-        {
-            link.setAttribute("selected", "progress");
-            iui.showPageByHref(link.href, null, null, null, unselect);
-        }
         else
+	    // No special animation
             return;
         
         event.preventDefault();        

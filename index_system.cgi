@@ -29,7 +29,8 @@ if (&theme_use_iui()) {
 	# Show as IUI category and link menus
 	print "<ul id='system' title='$text{'system_title'}' ",
 	      "selected='true'>\n";
-	print "<li>",&server_manager::server_in($s),"</li>\n";
+	print "<li style='font-size:12px'>",
+		&server_manager::server_in($s),"</li>\n";
 	print "<li style='font-size:12px'>$text{'system_status'} : ",
 	      &server_manager::describe_status($s, 1, 1),"</li>\n";
 
