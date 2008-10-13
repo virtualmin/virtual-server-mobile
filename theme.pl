@@ -612,6 +612,13 @@ if ($module_name eq "virtual-server" &&
 	# Show domain menu after saving
 	$url =~ s/\/([^\/]+)\/postsave.cgi/\/index_edit.cgi/g;
 	}
+elsif ($module_name eq "server-manager" && $0 =~ /save_serv.cgi/) {
+	# Show server menu after saving main details
+	local $id = $url =~ /id=(\S+)/ ? $1 : $in{'id'};
+	if ($id) {
+		$url =~ s/\/([^\/]+)\/index.cgi.*/\/index_system.cgi?id=$id/;
+		}
+	}
 elsif ($module_name eq "virtual-server" && $orig eq "" &&
        $url =~ /^((http|https):\/\/([^\/]+))\//) {
 	# Show templates page after saving global config
