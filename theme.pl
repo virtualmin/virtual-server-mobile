@@ -1,10 +1,9 @@
 # Theme-level UI override functions
-# XXX IUI support
-#	XXX Usermin mailbox module support
-#		XXX nicer mail / folder lists for iPhone
-#		XXX icons next to folders
-#		XXX next/prev navigator
-#		XXX prefs on every page??
+# XXX Usermin mailbox module support
+#	XXX nicer mail / folder lists for iPhone
+#	XXX icons next to folders
+#	XXX next/prev navigator
+#	XXX prefs on every page??
 
 # Disable buttons on edit_domain page
 $main::basic_virtualmin_domain = 1;
