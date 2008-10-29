@@ -128,9 +128,8 @@ if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
 		}
 	}
 
-# Get Webmin modules
-@modules = &get_visible_module_infos();
-%cats = &list_categories(\@modules);
+# Get Webmin modules and cats
+@cats = &get_visible_modules_categories();
 
 $theme_iui_no_default_div = 1;
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
@@ -304,8 +303,8 @@ if (@poss) {
 # Show links to Webmin or Usermin module categories
 print "<li><b>",$text{'index_'.$prod.'cats'},"</b><br>\n";
 print "<ul>\n";
-foreach my $c (sort { $b cmp $a } (keys %cats)) {
-	print "<li><a href='index_webmin.cgi?cat=$c'>$cats{$c}</a><br>\n";
+foreach my $c (@cats) {
+	print "<li><a href='index_webmin.cgi?cat=$c->{'code'}'>$c->{'desc'}</a><br>\n";
 	}
 print "</ul>\n";
 
@@ -313,10 +312,17 @@ print "</ul>\n";
 # System or account information
 print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
+# Show refresh modules link
+if (&foreign_available("webmin")) {
+	print "<li><a href=webmin/refresh_modules.cgi>",
+	      "$text{'main_refreshmods'}</a><br>\n";
+	}
+
 # Show logout link
 if ($logout_link) {
 	print "<li><a href='$logout_link'>$logout_title</a><br>\n";
 	}
+
 print "</ul>\n";
 }
 
@@ -469,6 +475,12 @@ if (!$haswebmin) {
 if (!$haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",
 	      "$text{'index_vsysinfo'}</a></li>\n";
+	}
+
+# Refresh modules link
+if (&foreign_available("webmin") && !$haswebmin) {
+	print "<li><a href=webmin/refresh_modules.cgi>",
+	      "$text{'main_refreshmods'}</a></li>\n";
 	}
 
 # Logout link, if possible
@@ -650,13 +662,18 @@ if ($haswebmin) {
 else {
 	print "<ul id='modules' title='$modules_title'>\n";
 	}
-foreach my $c (sort { $b cmp $a } (keys %cats)) {
-	print "<li><a href='#cat_$c'>$cats{$c}</a></li>\n";
+foreach my $c (@cats) {
+	print "<li><a href='#cat_$c->{'code'}'>$c->{'desc'}</a></li>\n";
 	}
-# With logout and system info links, if in Webmin-only mode
+
+# Logout, system info and refresh links, if in Webmin-only mode
 if ($haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",
 	      "$text{'index_vsysinfo'}</a></li>\n";
+	}
+if (&foreign_available("webmin") && $haswebmin) {
+	print "<li><a href=webmin/refresh_modules.cgi>",
+	      "$text{'main_refreshmods'}</a></li>\n";
 	}
 if ($logout_link && $haswebmin) {
 	print "<li><a href='$logout_link' target=_self>",
@@ -665,10 +682,9 @@ if ($logout_link && $haswebmin) {
 print "</ul>\n";
 
 # Webmin modules in categories
-foreach my $c (sort { $b cmp $a } (keys %cats)) {
-	local @incat = grep { $_->{'category'} eq $c } @modules;
-	print "<ul id='cat_$c' title='$cats{$c}'>\n";
-	foreach my $m (sort { lc($a->{'desc'}) cmp lc($b->{'desc'}) } @incat) {
+foreach my $c (@cats) {
+	print "<ul id='cat_$c->{'code'}' title='$c->{'desc'}'>\n";
+	foreach my $m (@{$c->{'modules'}}) {
 		print "<li><a href='$m->{'dir'}/' target=_self>$m->{'desc'}</a></li>\n";
 		}
 	print "</ul>\n";
