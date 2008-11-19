@@ -1396,14 +1396,57 @@ return "";
 
 # theme_ui_multi_select(name, &values, &options, size, [add-if-missing],
 #		        [disabled?], [options-title, values-title], [width])
-# The Javascript left/right selector isn't supported, so don't even try to
-# use it.
 sub theme_ui_multi_select
 {
 local ($name, $values, $opts, $size, $missing, $dis,
        $opts_title, $vals_title, $width) = @_;
-return &ui_textarea($name, join("\n", map { $_->[0] } @$values),
-		    $size, 30, "off", $dis);
+if (&theme_use_iui()) {
+	# For IUI, use checkboxes
+	my $rv;
+	my %already = map { $_->[0], $_ } @$values;
+	if (!$main::theme_ui_multi_select_donejs++) {
+		$rv .= &theme_ui_multi_select_javascript();
+		}
+	local $qname = &quote_escape($name);
+	local $js = "onClick='multi_select_change(\"$qname\", form)'";
+	foreach my $o (@$opts) {
+		$rv .= &ui_checkbox($name."_checkbox", $o->[0], $o->[1],
+				    $already{$o->[0]}, $js)."<br>\n";
+		delete($already{$o->[0]});
+		}
+	foreach my $o (values %$already) {
+		$rv .= &ui_checkbox($name."_checkbox", $o->[0], $o->[1],
+				    1, $js)."<br>\n";
+		}
+	$rv .= &ui_hidden($name, join("\n", map { $_->[0] } @$values));
+	return $rv;
+	}
+else {
+	# The Javascript left/right selector isn't supported, so don't even
+	# try to use it.
+	return &ui_textarea($name, join("\n", map { $_->[0] } @$values),
+			    $size, 30, "off", $dis);
+	}
+}
+
+sub theme_ui_multi_select_javascript
+{
+return <<EOF;
+<script>
+function multi_select_change(name, f)
+{
+var v = [ ];
+var vals = f.elements[name];
+for(var i=0; i<f.elements.length; i++) {
+	var e = f.elements[i];
+	if (e.name == name+"_checkbox" && e.checked) {
+		v.push(e.value);
+		}
+	}
+vals.value = v.join("\\n");
+}
+</script>
+EOF
 }
 
 # theme_ui_radio_table(name, selected, &rows)
