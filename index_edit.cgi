@@ -56,6 +56,11 @@ if (&theme_use_iui()) {
 		next if ($c eq 'objects');
 		my @incat = grep { $_->{'cat'} eq $c } @buts;
 		print "<ul id='editcat_$c' title='$incat[0]->{'catname'}'>\n";
+		my @incatsort = grep { !$_->{'nosort'} } @incat;
+		if (@incatsort) {
+                        @incat = sort { ($a->{'title'} || $a->{'desc'}) cmp
+                                        ($b->{'title'} || $b->{'desc'})} @incat;
+                        }
 		foreach my $b (@incat) {
 			print "<li><a href='$b->{'url'}' target=_self>$b->{'title'}</a></li>\n";
 			}
