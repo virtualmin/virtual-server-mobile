@@ -542,8 +542,19 @@ if ($hasvirt) {
 	print "<ul id='global' title='$text{'index_vglobal'}'>\n";
 	foreach my $tc (@tcats) {
 		local @incat = grep { $_->{'cat'} eq $tc } @buts;
-		print "<li><a href='#global_$tc'>",
-		      "$incat[0]->{'catname'}</a></li>\n";
+		if ($tc) {
+			# Link to category
+			print "<li><a href='#global_$tc'>",
+			      "$incat[0]->{'catname'}</a></li>\n";
+			}
+		else {
+			# Items in no category
+			foreach my $c (@incat) {
+				local $t = $c->{'target'} || "_self";
+				print "<li><a href='$c->{'url'}' target=$t>",
+				      "$c->{'title'}</a></li>\n";
+				}
+			}
 		}
 	print "</ul>\n";
 	}
@@ -551,6 +562,7 @@ if ($hasvirt) {
 # Template-options in categories
 if ($hasvirt) {
 	foreach my $tc (@tcats) {
+		next if (!$tc);		# Non-categorized items are above
 		local @incat = grep { $_->{'cat'} eq $tc } @buts;
 		print "<ul id='global_$tc' title='$incat[0]->{'catname'}'>\n";
 		foreach my $c (@incat) {
