@@ -621,7 +621,7 @@ elsif ($module_name eq "server-manager" && $0 =~ /save_serv.cgi/) {
 elsif ($module_name eq "virtual-server" && $orig eq "" &&
        $url =~ /^((http|https):\/\/([^\/]+))\//) {
 	# Show templates page after saving global config
-	$url = "$1/index_templates.cgi";
+	$url = &theme_use_iui() ? "$1/index.cgi" : "$1/index_templates.cgi";
 	}
 print "Location: $url\n\n";
 }

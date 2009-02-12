@@ -40,7 +40,7 @@ if ($in{'save_next'}) {
 	&redirect("config.cgi?module=$in{'module'}&section=$in{'section_next'}");
 	}
 elsif ($m eq "virtual-server") {
-	&redirect("/index_templates.cgi");
+	&redirect(&theme_use_iui() ? "/index.cgi" : "/index_templates.cgi");
 	}
 else {
 	&redirect("/$m/");
