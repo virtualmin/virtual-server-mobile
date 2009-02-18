@@ -823,10 +823,13 @@ if (&theme_use_iui()) {
 	print "<meta name='viewport' content='width=320; ".
 	      "initial-scale=1.0; maximum-scale=1.0; user-scalable=0;'/>\n";
 	print "<style type='text/css' media='screen'>".
-	      "\@import '/unauthenticated/iui/iui.css';</style>\n";
+	      "\@import '$gconfig{'webprefix'}/unauthenticated/iui/iui.css';".
+	      "</style>\n";
 	print "<script type='application/x-javascript' ".
-              "src='/unauthenticated/iui/iui.js'></script>\n";
-	print "<link rel='apple-touch-icon' href='/unauthenticated/iphone-icon.png'>\n";
+              "src='$gconfig{'webprefix'}/unauthenticated/iui/iui.js'>".
+	      "</script>\n";
+	print "<link rel='apple-touch-icon' ".
+	      "href='$gconfig{'webprefix'}/unauthenticated/iphone-icon.png'>\n";
 	}
 }
 
