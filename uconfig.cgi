@@ -2,11 +2,8 @@
 # Display a form for editing the preferences in a Usermin module, one section
 # at a time.
 
-require './web-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 require './config-lib.pl';
-require './ui-lib.pl';
-&init_config();
-%text = &load_language($current_theme);
 &ReadParse();
 $m = $in{'module'} || $ARGV[0];
 &foreign_available($m) || &error($text{'config_eaccess'});
