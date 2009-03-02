@@ -2,10 +2,7 @@
 # Show a menu of options (list domains, create domains, webmin), or folders
 # if this is Usermin
 
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
-%text = &load_language($current_theme);
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 
 # Work out page title
 $hostname = &get_display_hostname();
@@ -131,7 +128,7 @@ if (!$ENV{'SSL_USER'} && !$ENV{'LOCAL_USER'}) {
 # Get Webmin modules and cats
 @cats = &get_visible_modules_categories();
 
-$theme_iui_no_default_div = 1;
+$main::theme_iui_no_default_div = 1;
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
 
 if (&theme_use_iui()) {
