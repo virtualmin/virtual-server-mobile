@@ -1,11 +1,8 @@
 #!/usr/local/bin/perl
 # Show Webmin modules in some category
 
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &ReadParse();
-%text = &load_language($current_theme);
 
 @cats = &get_visible_modules_categories();
 ($c) = grep { $_->{'code'} eq $in{'cat'} } @cats;
