@@ -25,11 +25,11 @@ sub theme_ui_post_header
 local ($text) = @_;
 local $rv;
 if ($text) {
-	$rv .= "<div type=panel>\n" if ($theme_iui_no_default_div);
+	$rv .= "<div type=panel>\n" if ($main::theme_iui_no_default_div);
 	print "<div class=linksbar>\n";
 	print "<h2>$text</h2>\n";
 	print "</div>\n";
-	$rv .= "</div>\n" if ($theme_iui_no_default_div);
+	$rv .= "</div>\n" if ($main::theme_iui_no_default_div);
 	}
 return $rv;
 }
@@ -114,7 +114,7 @@ for($i=0; $i+1<@_; $i+=2) {
 	}
 if (&theme_use_iui()) {
 	# Close main body div
-	if (!$theme_iui_no_default_div) {
+	if (!$main::theme_iui_no_default_div) {
 		print "</div>\n";
 		}
 
@@ -123,19 +123,19 @@ if (&theme_use_iui()) {
 		# Use first link from footer
 		$theme_iui_toolbar_index = $links[0]->[0];
 		}
-	if (!$theme_iui_no_default_div && !$theme_iui_toolbar_index &&
+	if (!$main::theme_iui_no_default_div && !$theme_iui_toolbar_index &&
 	    $remote_user) {
 		# For pages other than the main index, always have a backlink
 		# (assuming we are logged in)
 		$theme_iui_toolbar_index = "/";
 		}
 	if ($theme_iui_toolbar_title || $theme_iui_toolbar_index ||
-	    $theme_iui_toolbar_button || $theme_iui_no_default_div) {
+	    $theme_iui_toolbar_button || $main::theme_iui_no_default_div) {
 		print "<div class='toolbar'>\n";
 		if ($theme_iui_toolbar_title) {
 			# Title of page, full width if no buttons
 			if ($theme_iui_toolbar_index ||
-			    $theme_iui_no_default_div ||
+			    $main::theme_iui_no_default_div ||
 			    $theme_iui_toolbar_button) {
 				print "<h1 id='pageTitle'></h1>\n";
 				}
@@ -146,7 +146,7 @@ if (&theme_use_iui()) {
 		if ($theme_iui_toolbar_index) {
 			print "<a class='button indexButton' href='$theme_iui_toolbar_index' target=_self>Back</a>\n";
 			}
-		if ($theme_iui_no_default_div) {
+		if ($main::theme_iui_no_default_div) {
 			print "<a id='backButton' class='button' href='#'></a>\n";
 			}
 		if ($theme_iui_toolbar_button) {
@@ -837,10 +837,8 @@ sub theme_header
 {
 print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
 print "<html>\n";
-local $os_type = $gconfig{'real_os_type'} ? $gconfig{'real_os_type'}
-					  : $gconfig{'os_type'};
-local $os_version = $gconfig{'real_os_version'} ? $gconfig{'real_os_version'}
-					        : $gconfig{'os_version'};
+local $os_type = $gconfig{'real_os_type'} || $gconfig{'os_type'};
+local $os_version = $gconfig{'real_os_version'} || $gconfig{'os_version'};
 
 # Head section with title
 print "<head>\n";
@@ -925,7 +923,7 @@ if (@_ > 1 && &theme_use_iui()) {
 		}
 
 	# Open default div for page text
-	if (!$theme_iui_no_default_div) {
+	if (!$main::theme_iui_no_default_div) {
 		print "<div class='panel' selected='true' title='$_[0]'>\n";
 		}
 
@@ -1366,7 +1364,7 @@ if (&theme_use_iui()) {
 	print "<h1 id='pageTitle'>$_[0]</h1>\n";
 	print "<a id='backButton' class='button' href='#'></a>\n";
 	print "</div>\n";
-	if (!$theme_iui_no_default_div) {
+	if (!$main::theme_iui_no_default_div) {
 		print "<div class='panel' selected='true' title='$_[0]'>\n";
 		}
 	}
@@ -1378,7 +1376,7 @@ else {
 
 sub theme_popup_footer
 {
-if (&theme_use_iui() && !$theme_iui_no_default_div) {
+if (&theme_use_iui() && !$main::theme_iui_no_default_div) {
 	print "</div>\n";
 	}
 print "</body></html>\n";
