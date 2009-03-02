@@ -2,11 +2,7 @@
 # Show a simple login form for mobile browsers
 
 $pragma_no_cache = 1;
-#$ENV{'MINISERV_INTERNAL'} || die "Can only be called by miniserv.pl";
-require './web-lib.pl';
-require './ui-lib.pl';
-&init_config();
-&load_theme_library();
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 
 # Set testing cookie
 &ReadParse();
