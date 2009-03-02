@@ -2,11 +2,8 @@
 # Show result of search on some servers
 
 $trust_unknown_referers = 1;
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &foreign_require("virtual-server", "virtual-server-lib.pl");
-%text = &load_language($current_theme);
 &ReadParse();
 
 # Find by domain name or username
@@ -26,7 +23,7 @@ if (@doms == 1) {
 	}
 
 if (@doms) {
-	$theme_iui_no_default_div = 1;
+	$main::theme_iui_no_default_div = 1;
 	}
 &ui_print_header(undef, $text{'search_title'}, "", undef, 0, 1, 1);
 
