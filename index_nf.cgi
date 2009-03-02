@@ -1,11 +1,8 @@
 #!/usr/local/bin/perl
 # Show all new featurs
 
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &foreign_require("virtual-server", "virtual-server-lib.pl");
-%text = &load_language($current_theme);
 
 &ui_print_header(undef, $text{'newfeatures_title'}, "", undef, 0, 1, 1);
 
