@@ -2,10 +2,7 @@
 # Show system or account information
 
 $trust_unknown_referers = 1;
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
-%text = &load_language($current_theme);
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 $theme_iui_fieldset_table = 1;
 
 # Work out which modules we have
