@@ -2,9 +2,8 @@
 # config_save.cgi
 # Save inputs from config.cgi
 
-require './web-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 require './config-lib.pl';
-&init_config();
 &ReadParse();
 $m = $in{'module'};
 &error_setup($text{'config_err'});
