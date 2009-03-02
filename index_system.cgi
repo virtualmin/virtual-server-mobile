@@ -2,13 +2,9 @@
 # Show all available options for some system
 
 $trust_unknown_referers = 1;
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &foreign_require("server-manager", "server-manager-lib.pl");
 &ReadParse();
-&load_theme_library();
-%text = &load_language($current_theme);
 
 # Get and check
 $s = &server_manager::get_managed_server_by("id", $in{'id'});
@@ -17,7 +13,7 @@ $s || &error($text{'system_egone'});
 
 # Show page title. In IUI mode, there is no default <div> (since we generate
 # a list below), and no system name (since it is in the menu list)
-$theme_iui_no_default_div = 1;
+$main::theme_iui_no_default_div = 1;
 &ui_print_header(&theme_use_iui() ? undef : server_manager::server_in($s),
 		 $text{'system_title'}, "", undef, 0, 1, 1);
 
