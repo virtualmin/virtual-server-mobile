@@ -2,11 +2,8 @@
 # Show a list of all VM2 systems, with links to manage each
 
 $trust_unknown_referers = 1;
-require './web-lib.pl';
-&init_config();
-require './ui-lib.pl';
+require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &foreign_require("server-manager", "server-manager-lib.pl");
-%text = &load_language($current_theme);
 
 &ui_print_header(undef, $text{'slist_title'}, "", undef, 0, 1, 1);
 
