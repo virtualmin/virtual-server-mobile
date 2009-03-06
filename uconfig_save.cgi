@@ -13,7 +13,7 @@ $m = $in{'module'};
 
 mkdir("$user_config_directory/$m", 0700);
 &lock_file("$user_config_directory/$m/config");
-&read_file("$user_config_directory/$m/config", \%config);
+&read_file("$user_config_directory/$m/config", \%newconfig);
 &read_file("$config_directory/$m/canconfig", \%canconfig);
 
 $mdir = &module_root_directory($m);
@@ -22,25 +22,22 @@ if (-r "$mdir/uconfig_info.pl") {
 	&foreign_require($m, "uconfig_info.pl");
 	local $fn = "${m}::config_form";
 	if (defined(&$fn)) {
-		local $pkg = $m;
-		$pkg =~ s/[^A-Za-z0-9]/_/g;
-		eval "\%${pkg}::in = \%in";
 		$func++;
-		&foreign_call($m, "config_save", \%config, \%canconfig);
+		&foreign_call($m, "config_save", \%newconfig, \%canconfig);
 		}
 	}
 if (!$func) {
 	# Use config.info to parse config inputs
-	&parse_config(\%config, "$mdir/uconfig.info", $m,
+	&parse_config(\%newconfig, "$mdir/uconfig.info", $m,
 		      %canconfig ? \%canconfig : undef, $in{'section'});
 	}
-&write_file("$user_config_directory/$m/config", \%config);
+&write_file("$user_config_directory/$m/config", \%newconfig);
 &unlock_file("$user_config_directory/$m/config");
 
 # Call any post-config save function
 local $pfn = "${m}::config_post_save";
 if (defined(&$pfn)) {
-	&foreign_call($m, "config_post_save", \%config, \%oldconfig,
+	&foreign_call($m, "config_post_save", \%newconfig, \%oldconfig,
 					      \%canconfig);
 	}
 

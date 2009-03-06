@@ -13,7 +13,7 @@ $access{'noconfig'} && &error($text{'config_ecannot'});
 
 mkdir("$config_directory/$m", 0700);
 &lock_file("$config_directory/$m/config");
-&read_file("$config_directory/$m/config", \%config);
+&read_file("$config_directory/$m/config", \%newconfig);
 
 $mdir = &module_root_directory($m);
 if (-r "$mdir/config_info.pl") {
@@ -21,18 +21,15 @@ if (-r "$mdir/config_info.pl") {
 	&foreign_require($m, "config_info.pl");
 	local $fn = "${m}::config_form";
 	if (defined(&$fn)) {
-		local $pkg = $m;
-		$pkg =~ s/[^A-Za-z0-9]/_/g;
-		eval "\%${pkg}::in = \%in";
 		$func++;
-		&foreign_call($m, "config_save", \%config);
+		&foreign_call($m, "config_save", \%newconfig);
 		}
 	}
 if (!$func) {
 	# Use config.info to parse config inputs
-	&parse_config(\%config, "$mdir/config.info", $m, undef, $in{'section'});
+	&parse_config(\%newconfig, "$mdir/config.info", $m, undef, $in{'section'});
 	}
-&write_file("$config_directory/$m/config", \%config);
+&write_file("$config_directory/$m/config", \%newconfig);
 &unlock_file("$config_directory/$m/config");
 &webmin_log("_config_", undef, undef, \%in, $m);
 if ($in{'save_next'}) {

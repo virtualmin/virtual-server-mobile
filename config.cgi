@@ -71,7 +71,7 @@ if ($s) {
 	}
 print &ui_table_start(&text('config_header', $module_info{'desc'}).$sname,
 		      "width=100%", 2);
-&read_file("$config_directory/$m/config", \%config);
+&read_file("$config_directory/$m/config", \%newconfig);
 
 if (-r "$mdir/config_info.pl") {
 	# Module has a custom config editor
@@ -79,12 +79,12 @@ if (-r "$mdir/config_info.pl") {
 	local $fn = "${m}::config_form";
 	if (defined(&$fn)) {
 		$func++;
-		&foreign_call($m, "config_form", \%config);
+		&foreign_call($m, "config_form", \%newconfig);
 		}
 	}
 if (!$func) {
 	# Use config.info to create config inputs
-	&generate_config(\%config, "$mdir/config.info", $m, undef, undef,
+	&generate_config(\%newconfig, "$mdir/config.info", $m, undef, undef,
 			 $in{'section'});
 	}
 print &ui_table_end();

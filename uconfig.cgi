@@ -71,9 +71,9 @@ if ($s) {
 	}
 print &ui_table_start(&text('config_header', $module_info{'desc'}).$sname,
 		      "width=100%", 2);
-&read_file("$m/defaultuconfig", \%config);
-&read_file("$config_directory/$m/uconfig", \%config);
-&read_file("$user_config_directory/$m/config", \%config);
+&read_file("$m/defaultuconfig", \%newconfig);
+&read_file("$config_directory/$m/uconfig", \%newconfig);
+&read_file("$user_config_directory/$m/config", \%newconfig);
 &read_file("$config_directory/$m/canconfig", \%canconfig);
 
 if (-r "$mdir/uconfig_info.pl") {
@@ -82,12 +82,12 @@ if (-r "$mdir/uconfig_info.pl") {
 	local $fn = "${m}::config_form";
 	if (defined(&$fn)) {
 		$func++;
-		&foreign_call($m, "config_form", \%config, \%canconfig);
+		&foreign_call($m, "config_form", \%newconfig, \%canconfig);
 		}
 	}
 if (!$func) {
 	# Use config.info to create config inputs
-	&generate_config(\%config, "$mdir/uconfig.info", $m,
+	&generate_config(\%newconfig, "$mdir/uconfig.info", $m,
 			 %canconfig ? \%canconfig : undef,
 			 undef, $in{'section'});
 	}
