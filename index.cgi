@@ -509,7 +509,7 @@ if ($newhtml) {
 # Virtualmin domains menu
 if ($hasvirt && @editdoms) {
 	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
-	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
+	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @editdoms) {
 		print "<li>",
 		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self ",
 		      ($d->{'disabled'} ? "style='font-style:italic'" : ""),
