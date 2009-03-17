@@ -45,6 +45,7 @@ sub theme_footer
 {
 local $i;
 local @links;
+local %module_info = get_module_info(get_module_name());
 for($i=0; $i+1<@_; $i+=2) {
 	local $url = $_[$i];
 	if ($url ne '/' || !$tconfig{'noindex'}) {
@@ -52,34 +53,34 @@ for($i=0; $i+1<@_; $i+=2) {
 			# Don't change link to /
 			$url = "/";
 			}
-		elsif ($url eq '' && $module_name eq 'virtual-server' ||
+		elsif ($url eq '' && get_module_name() eq 'virtual-server' ||
 		       $url eq '/virtual-server/') {
 			# Don't bother with virtualmin menu, unless the current
 			# page is view/edit_domain.cgi, in which case link
 			# back to index_edit.cgi
 			if ($0 =~ /(view|edit)_domain.cgi/ &&
 			    $in{'dom'} &&
-			    $module_name eq 'virtual-server') {
+			    get_module_name() eq 'virtual-server') {
 				$url = "/index_edit.cgi?dom=$in{'dom'}";
 				}
 			else {
 				next;
 				}
 			}
-		elsif ($url eq '' && $module_name eq 'server-manager' ||
+		elsif ($url eq '' && get_module_name() eq 'server-manager' ||
 		       $url eq '/server-manager/') {
 			# Don't bother with VM2 menu, unless the current page
 			# is edit_serv.cgi
 			if ($0 =~ /edit_serv.cgi/ &&
 			    $in{'id'} &&
-			    $module_name eq 'server-manager') {
+			    get_module_name() eq 'server-manager') {
 				$url = "/index_system.cgi?id=$in{'id'}";
 				}
 			else {
 				next;
 				}
 			}
-		elsif ($url eq '' && $module_name eq 'mailbox') {
+		elsif ($url eq '' && get_module_name() eq 'mailbox') {
 			# Don't bother with link to mail list from
 			# pages other than view/reply mail
 			if ($0 =~ /list_(folders|ifolders).cgi/ ||
@@ -94,11 +95,12 @@ for($i=0; $i+1<@_; $i+=2) {
 			# to the main menu (ie. preferences)
 			next;
 			}
-		elsif ($url eq '' && $module_name) {
-			$url = "/$module_name/$module_info{'index_link'}";
+		elsif ($url eq '' && get_module_name()) {
+			$url = "/".get_module_name()."/".
+				$module_info{'index_link'};
 			}
-		elsif ($url =~ /^\?/ && $module_name) {
-			$url = "/$module_name/$url";
+		elsif ($url =~ /^\?/ && get_module_name()) {
+			$url = "/".get_module_name()."/$url";
 			}
 		elsif ($url =~ /(edit|view)_domain.cgi\?dom=(\d+)/) {
 			# Force links back to edit form to domain options list
@@ -311,15 +313,15 @@ local $rv;
 $main::theme_ui_columns_folders = 0;
 $main::theme_ui_columns_search = 0;
 $main::theme_ui_columns_filter = 0;
-if ($module_name eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
+if (get_module_name() eq 'mailbox' && $0 =~ /list_(i?)folders.cgi/) {
 	# For folders list, use different format
 	$main::theme_ui_columns_folders = 1;
 	}
-elsif ($module_name eq 'mailbox' && $0 =~ /search_form.cgi/) {
+elsif (get_module_name() eq 'mailbox' && $0 =~ /search_form.cgi/) {
 	# For search form
 	$main::theme_ui_columns_search = 1;
 	}
-elsif ($module_name eq 'filter' && $0 =~ /index.cgi/) {
+elsif (get_module_name() eq 'filter' && $0 =~ /index.cgi/) {
 	# For filter list
 	$main::theme_ui_columns_filter = 1;
 	}
@@ -606,19 +608,19 @@ print &ui_post_header($subtext);
 sub theme_redirect
 {
 local ($orig, $url) = @_;
-if ($module_name eq "virtual-server" &&
+if (get_module_name() eq "virtual-server" &&
     $url =~ /postsave.cgi\?dom=(\d+)/) {
 	# Show domain menu after saving
 	$url =~ s/\/([^\/]+)\/postsave.cgi/\/index_edit.cgi/g;
 	}
-elsif ($module_name eq "server-manager" && $0 =~ /save_serv.cgi/) {
+elsif (get_module_name() eq "server-manager" && $0 =~ /save_serv.cgi/) {
 	# Show server menu after saving main details
 	local $id = $url =~ /id=(\S+)/ ? $1 : $in{'id'};
 	if ($id) {
 		$url =~ s/\/([^\/]+)\/index.cgi.*/\/index_system.cgi?id=$id/;
 		}
 	}
-elsif ($module_name eq "virtual-server" && $orig eq "" &&
+elsif (get_module_name() eq "virtual-server" && $orig eq "" &&
        $url =~ /^((http|https):\/\/([^\/]+))\//) {
 	# Show templates page after saving global config
 	$url = &theme_use_iui() ? "$1/index.cgi" : "$1/index_templates.cgi";
@@ -630,7 +632,7 @@ print "Location: $url\n\n";
 sub theme_ui_tabs_start
 {
 local ($tabs, $name, $sel, $border) = @_;
-if ($module_name eq 'mailbox' && $0 =~ /reply_mail.cgi/) {
+if (get_module_name() eq 'mailbox' && $0 =~ /reply_mail.cgi/) {
 	# Special layout for composing email, where we can't use hiding
 	$theme_ui_tabs_current = $tabs;
 	return undef;
@@ -839,6 +841,7 @@ print "<!doctype html public \"-//W3C//DTD HTML 3.2 Final//EN\">\n";
 print "<html>\n";
 local $os_type = $gconfig{'real_os_type'} || $gconfig{'os_type'};
 local $os_version = $gconfig{'real_os_version'} || $gconfig{'os_version'};
+local %module_info = get_module_info(get_module_name());
 
 # Head section with title
 print "<head>\n";
@@ -886,12 +889,12 @@ if (@_ > 1 && &theme_use_iui()) {
 	$theme_iui_toolbar_title = $_[0];
 
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
-	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager" &&
-	    $module_name ne "mailbox") {
+	    get_module_name() ne "virtual-server" &&
+	    get_module_name() ne "server-manager" &&
+	    get_module_name() ne "mailbox") {
 		# Module index
 		local $idx = $module_info{'index_link'};
-		local $mi = $module_index_link || "/$module_name/$idx";
+		local $mi = $module_index_link || "/".get_module_name()."/$idx";
 		local $mt = $module_index_name || $text{'header_module'};
 		$theme_iui_toolbar_index = $mi;
 		}
@@ -906,7 +909,7 @@ if (@_ > 1 && &theme_use_iui()) {
 	       !$tconfig{'nohelp'}) {
 		# Page help
 		$theme_iui_toolbar_button = [
-			"/help.cgi/$module_name/$_[2]", "Help" ];
+			"/help.cgi/".get_module_name()."/$_[2]", "Help" ];
 		}
 
 	if ($_[3]) {
@@ -918,7 +921,7 @@ if (@_ > 1 && &theme_use_iui()) {
 			local $cname = $cprog eq "uconfig.cgi" ? "Prefs"
 							       : "Config";
 			$theme_iui_toolbar_button =
-			    [ "/$cprog?$module_name", $cname ];
+			    [ "/$cprog?".get_module_name(), $cname ];
 			}
 		}
 
@@ -958,9 +961,9 @@ else {
 			     "$text{'header_servers'}</a>");
 		}
 	if (!$_[5] && !$tconfig{'noindex'} &&
-	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager" &&
-	    $module_name ne "mailbox") {
+	    get_module_name() ne "virtual-server" &&
+	    get_module_name() ne "server-manager" &&
+	    get_module_name() ne "mailbox") {
 		# Logout or switch user
 		local @avail = &get_available_module_infos(1);
 		local $nolo = $ENV{'ANONYMOUS_USER'} ||
@@ -978,12 +981,12 @@ else {
 			}
 		}
 	if (!$_[4] && !$tconfig{'nomoduleindex'} &&
-	    $module_name ne "virtual-server" &&
-	    $module_name ne "server-manager" &&
-	    $module_name ne "mailbox") {
+	    get_module_name() ne "virtual-server" &&
+	    get_module_name() ne "server-manager" &&
+	    get_module_name() ne "mailbox") {
 		# Module index
 		local $idx = $module_info{'index_link'};
-		local $mi = $module_index_link || "/$module_name/$idx";
+		local $mi = $module_index_link || "/".get_module_name()."/$idx";
 		local $mt = $module_index_name || $text{'header_module'};
 		push(@links, "<a href=\"$gconfig{'webprefix'}$mi\">$mt</a>");
 		}
@@ -1003,7 +1006,8 @@ else {
 		if (!$access{'noconfig'} && !$config{'noprefs'}) {
 			local $cprog = $user_module_config_directory ?
 					"uconfig.cgi" : "config.cgi";
-			push(@links, "<a href=\"$gconfig{'webprefix'}/$cprog?$module_name\">$text{'header_config'}</a>");
+			push(@links, "<a href=\"$gconfig{'webprefix'}/$cprog?".
+			     get_module_name()."\">$text{'header_config'}</a>");
 			}
 		}
 
@@ -1020,7 +1024,7 @@ else {
 
 sub theme_post_init_config
 {
-if ($module_name eq "virtual-server") {
+if (get_module_name() eq "virtual-server") {
 	# Don't show quotas on Virtualmin menu
 	$config{'show_quotas'} = 0;
 	}
@@ -1126,7 +1130,7 @@ return "<input type=submit".
 sub theme_ui_textarea
 {
 local ($name, $value, $rows, $cols, $wrap, $dis, $tags) = @_;
-if ($module_name eq "mailbox" && $0 =~ /reply_mail.cgi/ &&
+if (get_module_name() eq "mailbox" && $0 =~ /reply_mail.cgi/ &&
     ($name eq "to" || $name eq "cc" || $name eq "bcc")) {
 	$value =~ s/\n/ /g;
 	return &ui_textbox($name, $value, $cols, $dis, undef, $tags);
@@ -1175,6 +1179,7 @@ sub theme_left_right_align
 {
 return $_[0]." ".$_[1];
 }
+
 sub theme_show_arrows
 {
 local %ttext = &load_language($current_theme);
@@ -1211,6 +1216,7 @@ else {
 	}
 print "<br>\n";
 }
+
 sub theme_show_buttons
 {
 # Show links for common actions on a single mail
@@ -1283,7 +1289,9 @@ if (!@subs) {
 print "<b>$ttext{'view_actions'}</b> ",
       join(" | ", @bacts),"<br>\n";
 }
-if ($module_name eq "mailbox" &&
+
+# XXX how can this work??
+if (get_module_name() eq "mailbox" &&
     $0 =~ /((view|reply)_mail.cgi|search_form.cgi)/) {
 	# UI overrides for viewing email
 	$main::{'left_right_align'} = \&theme_left_right_align;
@@ -1326,12 +1334,12 @@ local $hidden = $mode == 2 ?
 		  $job->{'days'}, $job->{'months'}, $job->{'weekdays'}) : "";
 return &ui_radio_table($name, $mode,
 	 [ $offmsg ? ( [ 0, $offmsg ] ) : ( ),
-	   [ 1, $text{'cron_special'},
+	   [ 1, $virtual_server::text{'cron_special'},
 		   &ui_select($name."_special", $job->{'special'},
 		      [ map { [ $_, $cron::text{'edit_special_'.$_} ] }
 			    ('hourly', 'daily', 'weekly', 'monthly', 'yearly')
 		      ]) ],
-	   [ 2, $text{'cron_cron'},
+	   [ 2, $virtual_server::text{'cron_cron'},
 		   &ui_textbox($name."_hidden", $hidden) ],
 	 ]);
 }
@@ -1384,7 +1392,7 @@ print "</body></html>\n";
 
 sub theme_hlink
 {
-local $mod = $_[2] ? $_[2] : $module_name;
+local $mod = $_[2] ? $_[2] : get_module_name();
 return "<a href='/help.cgi/$mod/$_[1]' target=_new ".
        "class='webminHelpLink'>$_[0]</a>";
 }
