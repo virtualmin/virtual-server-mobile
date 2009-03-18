@@ -1183,12 +1183,14 @@ return $_[0]." ".$_[1];
 sub theme_show_arrows
 {
 local %ttext = &load_language($current_theme);
+local $folder = &get_module_variable('$folder');
+local $mail = &get_module_variable('$mail');
 if (!@sub) {
 	# Get next and previous emails, where they exist
-	local $c = &mailbox_folder_size($folder, 1);
+	local $c = &mailbox::mailbox_folder_size($folder, 1);
 	local $prv = $mail->{'sortidx'} == 0 ? 0 : $mail->{'sortidx'}-1;
 	local $nxt = $mail->{'sortidx'} == $c-1 ? $c-1 : $mail->{'sortidx'}+1;
-	local @beside = &mailbox_list_mails_sorted($prv, $nxt, $folder, 1);
+	local @beside = &mailbox::mailbox_list_mails_sorted($prv, $nxt, $folder, 1);
 
 	if ($mail->{'sortidx'} != 0) {
 		local $mailprv = $beside[$prv];
@@ -1230,20 +1232,20 @@ foreach my $s (@sub) {
 	$url .= "&sub=$s";
 	}
 if ($folder->{'sent'} || $folder->{'drafts'}) {
-	push(@bacts, "<a href='$url&enew=1'>$text{'view_enew'}</a>");
-	push(@bacts, "<a href='$url&ereply=1'>$text{'view_reply'}</a>");
-	push(@bacts, "<a href='$url&erall=1'>$text{'view_reply2'}</a>");
+	push(@bacts, "<a href='$url&enew=1'>$mailbox::text{'view_enew'}</a>");
+	push(@bacts, "<a href='$url&ereply=1'>$mailbox::text{'view_reply'}</a>");
+	push(@bacts, "<a href='$url&erall=1'>$mailbox::text{'view_reply2'}</a>");
 	}
 else {
-	push(@bacts, "<a href='$url&reply=1'>$text{'view_reply'}</a>");
-	push(@bacts, "<a href='$url&rall=1'>$text{'view_reply2'}</a>");
+	push(@bacts, "<a href='$url&reply=1'>$mailbox::text{'view_reply'}</a>");
+	push(@bacts, "<a href='$url&rall=1'>$mailbox::text{'view_reply2'}</a>");
 	}
-push(@bacts, "<a href='$url&new=1'>$text{'mail_compose'}</a>");
-push(@bacts, "<a href='$url&forward=1'>$text{'view_forward'}</a>");
+push(@bacts, "<a href='$url&new=1'>$mailbox::text{'mail_compose'}</a>");
+push(@bacts, "<a href='$url&forward=1'>$mailbox::text{'view_forward'}</a>");
 if (!$_[1]) {
 	# Show mark buttons, except for current mode
 	if (!$folder->{'sent'} && !$folder->{'drafts'}) {
-		$m = &get_mail_read($folder, $mail);
+		$m = &mailbox::get_mail_read($folder, $mail);
 		foreach $i (0 .. 2) {
 			if ($m != $i) {
 				push(@bacts, "<a href='$url&markas$i=1'>".
@@ -1254,28 +1256,28 @@ if (!$_[1]) {
 	}
 if (!$_[1]) {
 	# Show spam and/or ham report buttons
-	if (&can_report_spam($folder) &&
+	if (&mailbox::can_report_spam($folder) &&
 	    $userconfig{'spam_buttons'} =~ /mail/) {
 		if ($userconfig{'spam_del'}) {
-			push(@bacts, "<a href='$url&razor=1'>$text{'view_razordel'}</a>");
+			push(@bacts, "<a href='$url&razor=1'>$mailbox::text{'view_razordel'}</a>");
 			}
 		else {
-			push(@bacts, "<a href='$url&razor=1'>$text{'view_razor'}</a>");
+			push(@bacts, "<a href='$url&razor=1'>$mailbox::text{'view_razor'}</a>");
 			}
 		}
-	if (&can_report_ham($folder) &&
+	if (&mailbox::can_report_ham($folder) &&
 	    $userconfig{'ham_buttons'} =~ /mail/) {
 		if ($userconfig{'white_move'} && $folder->{'spam'}) {
-			push(@bacts, "<a href='$url&white=1'>$text{'view_whitemove'}</a>");
+			push(@bacts, "<a href='$url&white=1'>$mailbox::text{'view_whitemove'}</a>");
 			}
 		else {
-			push(@bacts, "<a href='$url&white=1'>$text{'view_white'}</a>");
+			push(@bacts, "<a href='$url&white=1'>$mailbox::text{'view_white'}</a>");
 			}
 		if ($userconfig{'ham_move'} && $folder->{'spam'}) {
-			push(@bacts, "<a href='$url&ham=1'>$text{'view_hammove'}</a>");
+			push(@bacts, "<a href='$url&ham=1'>$mailbox::text{'view_hammove'}</a>");
 			}
 		else {
-			push(@bacts, "<a href='$url&ham=1'>$text{'view_ham'}</a>");
+			push(@bacts, "<a href='$url&ham=1'>$mailbox::text{'view_ham'}</a>");
 			}
 		}
 	}
@@ -1284,7 +1286,7 @@ if (@folders > 1) {
 	push(@bacts, "<a href='action_mail.cgi?ok1=1&action1=copy&folder=$in{'folder'}&start=$in{'start'}&d=$in{'id'}'>$ttext{'view_copy'}</a>");
 	}
 if (!@subs) {
-	push(@bacts, "<a href='$url&delete=1'>$text{'view_delete'}</a>");
+	push(@bacts, "<a href='$url&delete=1'>$mailbox::text{'view_delete'}</a>");
 	}
 print "<b>$ttext{'view_actions'}</b> ",
       join(" | ", @bacts),"<br>\n";
@@ -1294,33 +1296,29 @@ print "<b>$ttext{'view_actions'}</b> ",
 if (get_module_name() eq "mailbox" &&
     $0 =~ /((view|reply)_mail.cgi|search_form.cgi)/) {
 	# UI overrides for viewing email
-	$main::{'left_right_align'} = \&theme_left_right_align;
 	$mailbox::{'left_right_align'} = \&theme_left_right_align;
-	$main::{'search_link'} = sub { return "" };
 	$mailbox::{'search_link'} = sub { return "" };
-	$main::{'show_arrows'} = \&theme_show_arrows;
 	$mailbox::{'show_arrows'} = \&theme_show_arrows;
-	$main::{'show_buttons'} = \&theme_show_buttons;
 	$mailbox::{'show_buttons'} = \&theme_show_buttons;
 
 	local %ttext = &load_language($current_theme);
-	$text{'view_noheaders'} = $ttext{'view_noheaders'};
-	$text{'view_allheaders'} = $ttext{'view_allheaders'};
-	$text{'view_raw'} = $ttext{'view_raw'};
-	$text{'sform_and'} = $ttext{'search_and'};
-	$text{'sform_or'} = $ttext{'search_or'};
+	$mailbox::text{'view_noheaders'} = $ttext{'view_noheaders'};
+	$mailbox::text{'view_allheaders'} = $ttext{'view_allheaders'};
+	$mailbox::text{'view_raw'} = $ttext{'view_raw'};
+	$mailbox::text{'sform_and'} = $ttext{'search_and'};
+	$mailbox::text{'sform_or'} = $ttext{'search_or'};
 
 	# To supress HTML compose links
-	$text{'reply_html0'} = undef;
-	$text{'reply_html1'} = undef;
+	$mailbox::text{'reply_html0'} = undef;
+	$mailbox::text{'reply_html1'} = undef;
 
 	# Never use HTML editor
-	$userconfig{'head_html'} = 0;
-	$userconfig{'html_edit'} = 0;
-	$userconfig{'view_html'} = 1;
+	$mailbox::userconfig{'head_html'} = 0;
+	$mailbox::userconfig{'html_edit'} = 0;
+	$mailbox::userconfig{'view_html'} = 1;
 
 	# Only show one set of send buttons
-	$userconfig{'send_buttons'} = 0;
+	$mailbox::userconfig{'send_buttons'} = 0;
 	}
 
 sub theme_virtualmin_ui_show_cron_time
@@ -1397,10 +1395,18 @@ return "<a href='/help.cgi/$mod/$_[1]' target=_new ".
        "class='webminHelpLink'>$_[0]</a>";
 }
 
-# Turn off javascript redirects
+# Turn off javascript redirects unless we have IUI
 sub theme_js_redirect
 {
-return "";
+my ($url, $window) = @_;
+if (&theme_use_iui()) {
+	$window ||= "window";
+	return "<script>${window}.location = '".
+		&quote_escape($url)."';</script>\n";
+	}
+else {
+	return "";
+	}
 }
 
 # theme_ui_multi_select(name, &values, &options, size, [add-if-missing],
