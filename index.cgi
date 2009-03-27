@@ -303,17 +303,18 @@ print "<ul>\n";
 foreach my $c (@cats) {
 	print "<li><a href='index_webmin.cgi?cat=$c->{'code'}'>$c->{'desc'}</a><br>\n";
 	}
-print "</ul>\n";
-
-
-# System or account information
-print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
 # Show refresh modules link
 if (&foreign_available("webmin")) {
 	print "<li><a href=webmin/refresh_modules.cgi>",
 	      "$text{'main_refreshmods'}</a><br>\n";
 	}
+
+print "</ul>\n";
+
+
+# System or account information
+print "<li><a href='index_sysinfo.cgi'>$text{'index_vsysinfo'}</a><br>\n";
 
 # Show logout link
 if ($logout_link) {
@@ -472,12 +473,6 @@ if (!$haswebmin) {
 if (!$haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",
 	      "$text{'index_vsysinfo'}</a></li>\n";
-	}
-
-# Refresh modules link
-if (&foreign_available("webmin") && !$haswebmin) {
-	print "<li><a href=webmin/refresh_modules.cgi>",
-	      "$text{'main_refreshmods'}</a></li>\n";
 	}
 
 # Logout link, if possible
@@ -680,7 +675,7 @@ if ($haswebmin) {
 	print "<li><a href='index_sysinfo.cgi' target=_self>",
 	      "$text{'index_vsysinfo'}</a></li>\n";
 	}
-if (&foreign_available("webmin") && $haswebmin) {
+if (&foreign_available("webmin")) {
 	print "<li><a href=webmin/refresh_modules.cgi>",
 	      "$text{'main_refreshmods'}</a></li>\n";
 	}
