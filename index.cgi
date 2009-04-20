@@ -30,6 +30,15 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	$title = $gconfig{'nohostname'} ? $text{'vmain_title2'} :
 		&text('vmain_title', $minfo{'version'}, $hostname, $ostr);
 
+	# Check for install wizard
+	if (defined(&virtual_server::wizard_redirect)) {
+		$redir = &virtual_server::wizard_redirect();
+		if ($redir) {
+			&redirect($redir);
+			return;
+			}
+		}
+
 	# Get domains and allowed actions
 	@doms = &virtual_server::list_domains();
 	@configdoms = grep { &virtual_server::can_config_domain($_) } @doms;
