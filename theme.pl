@@ -16,9 +16,9 @@ $main::nocreate_virtualmin_menu = 1;
 $main::no_browser_uploads = 1;
 
 # The theme will provide links for VM2
-$main::vm2_no_create_links = 1;
-$main::vm2_no_edit_buttons = 1;
-$main::vm2_no_global_links = 1;
+$main::cloudmin_no_create_links = 1;
+$main::cloudmin_no_edit_buttons = 1;
+$main::cloudmin_no_global_links = 1;
 
 sub theme_ui_post_header
 {
