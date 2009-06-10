@@ -46,6 +46,9 @@ index_lfilter=Email filters
 index_lpass=Change password
 index_mlinks=Email links:
 index_compose=Compose
+index_wsearch=Search Webmin
+index_usearch=Search Usermin
+index_wsearchfor=Search for:
 
 webmin_title=Webmin Modules
 webmin_incat=Modules in category $1 ..

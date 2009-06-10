@@ -668,13 +668,21 @@ if ($hasmail) {
 
 #################################### Webmin
 
-# Webmin categories, which may be the first menu
 if ($haswebmin) {
 	print "<ul id='modules' title='$title' selected='true'>\n";
 	}
 else {
 	print "<ul id='modules' title='$modules_title'>\n";
 	}
+
+# Webmin search popup
+if (-r "$root_directory/webmin-search-lib.pl") {
+	print "<li><a href='#wsearch'>",
+		($prod eq 'webmin' ? $text{'index_wsearch'}
+				   : $text{'index_usearch'})."</a></li>\n";
+	}
+
+# Webmin categories
 foreach my $c (@cats) {
 	print "<li><a href='#cat_$c->{'code'}'>$c->{'desc'}</a></li>\n";
 	}
@@ -692,6 +700,7 @@ if ($logout_link && $haswebmin) {
 	print "<li><a href='$logout_link' target=_self>",
 	      "$logout_title</a></li>\n";
 	}
+
 print "</ul>\n";
 
 # Webmin modules in categories
@@ -702,6 +711,20 @@ foreach my $c (@cats) {
 		}
 	print "</ul>\n";
 	}
+
+# Popup for Webmin search
+print "<form id='wsearch' class='dialog normalSubmit' action='webmin_search.cgi' method='post' target=_self>\n";
+print "<fieldset>\n";
+print "<h1>",($prod eq 'webmin' ? $text{'index_wsearch'}
+				: $text{'index_usearch'})."</h1>\n";
+print "<a class='button leftButton' type='cancel' ",
+      "onClick='cancelDialog(form)'>$text{'cancel'}</a>\n";
+print "<a class='button blueButton' type='submit' ",
+      "onClick='submitForm(form)'>$text{'index_vdsearchok'}</a>\n";
+print "<label>$text{'index_wsearchfor'}</label>\n";
+print "<input id=search type=text name=search>\n";
+print "</fieldset>\n";
+print "</form>\n";
 }
 
 
