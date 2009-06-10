@@ -678,8 +678,8 @@ else {
 # Webmin search popup
 if (-r "$root_directory/webmin-search-lib.pl") {
 	print "<li><a href='#wsearch'>",
-		($prod eq 'webmin' ? $text{'index_wsearch'}
-				   : $text{'index_usearch'})."</a></li>\n";
+		($prod eq 'webmin' ? $text{'index_wmsearch'}
+				   : $text{'index_umsearch'})."</a></li>\n";
 	}
 
 # Webmin categories
@@ -715,8 +715,8 @@ foreach my $c (@cats) {
 # Popup for Webmin search
 print "<form id='wsearch' class='dialog normalSubmit' action='webmin_search.cgi' method='post' target=_self>\n";
 print "<fieldset>\n";
-print "<h1>",($prod eq 'webmin' ? $text{'index_wsearch'}
-				: $text{'index_usearch'})."</h1>\n";
+print "<h1>",($prod eq 'webmin' ? $text{'index_wmsearch'}
+				: $text{'index_umsearch'})."</h1>\n";
 print "<a class='button leftButton' type='cancel' ",
       "onClick='cancelDialog(form)'>$text{'cancel'}</a>\n";
 print "<a class='button blueButton' type='submit' ",
