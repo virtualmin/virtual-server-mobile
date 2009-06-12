@@ -11,7 +11,7 @@ if ($@) {
 
 sub theme_use_iui
 {
-return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod|Android/;
+return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod|Android|Pre\//;
 }
 
 1;
