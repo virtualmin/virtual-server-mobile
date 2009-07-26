@@ -8,7 +8,7 @@ require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
 &ui_print_header(undef, $text{'slist_title'}, "", undef, 0, 1, 1);
 
 @allservers = &server_manager::list_managed_servers();
-@servers = &server_manager::list_managed_servers_sorted();
+@servers = &server_manager::list_available_managed_servers_sorted();
 if (@servers) {
 	# Show servers
 	print "<ul>\n";
