@@ -12,6 +12,7 @@ if ($action eq 'move' || $action eq 'copy') {
 	&ui_print_header(undef, $ttext{'action_title'.$action}, "");
 
 	print &ui_form_start("delete_mail.cgi", "post");
+	print &ui_table_start(undef, undef, 2);
 	print &ui_hidden("folder", $in{'folder'});
 	print &ui_hidden("start", $in{'start'});
 	foreach $d (@d) {
