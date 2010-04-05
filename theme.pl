@@ -1344,7 +1344,7 @@ return &ui_radio_table($name, $mode,
 
 sub theme_use_iui
 {
-return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod|Android|Pre|Pixi\//;
+return $ENV{'HTTP_USER_AGENT'} =~ /iPhone|iPod|Android|Pre|Pixi\/|Nintendo/;
 }
 
 sub theme_popup_header
