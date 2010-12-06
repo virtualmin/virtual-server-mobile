@@ -108,7 +108,7 @@ sysinfo_procs=Running processes
 sysinfo_disk=Local disk space
 sysinfo_used=$1 total, $2 used
 sysinfo_header1=Virtualmin Information
-sysinfo_virtualminheader=$sysinfo_header1
+sysinfo_virtualminheader=Virtualmin Information
 sysinfo_fdoms=Virtual servers
 sysinfo_fweb=Virtual websites
 sysinfo_fssl=SSL websites
@@ -252,3 +252,4 @@ search_none=No virtual servers matching $1 found.
 
 ssearch_title=Search systems
 ssearch_none=No Cloudmin systems matching $1 found.
+__norefs=1
