@@ -40,9 +40,8 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 		}
 
 	# Get domains and allowed actions
-	@doms = &virtual_server::list_domains();
+	@doms = &virtual_server::list_visible_domains();
 	@configdoms = grep { &virtual_server::can_config_domain($_) } @doms;
-	@editdoms = grep { &virtual_server::can_edit_domain($_) } @doms;
 	if (&virtual_server::can_create_master_servers() ||
 	    &virtual_server::can_create_sub_servers()) {
 		($dleft, $dreason, $dmax) =
@@ -350,7 +349,7 @@ if ($hasvirt) {
 		print "<li><a href='virtual-server/check.cgi' target=_self>",
 		      "* $virtual_server::text{'index_srefresh'}</a></li>\n";
 		}
-	if (@editdoms) {
+	if (@doms) {
 		print "<li><a href='#domains'>$text{'index_vmenu'}</a></li>\n";
 		}
 	if (@configdoms) {
@@ -511,9 +510,9 @@ if ($newhtml) {
 	}
 
 # Virtualmin domains menu
-if ($hasvirt && @editdoms) {
+if ($hasvirt && @doms) {
 	print "<ul id='domains' title='$text{'index_vmenu'}'>\n";
-	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @editdoms) {
+	foreach my $d (sort { lc($a->{'dom'}) cmp lc($b->{'dom'}) } @doms) {
 		print "<li>",
 		      "<a href='index_edit.cgi?dom=$d->{'id'}' target=_self ",
 		      ($d->{'disabled'} ? "style='font-style:italic'" : ""),
