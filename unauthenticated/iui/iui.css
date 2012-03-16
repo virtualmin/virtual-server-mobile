@@ -58,10 +58,10 @@ body > .toolbar {
     position: absolute;
     overflow: hidden;
     left: 50%;
-    margin: 1px 0 0 -75px;
+    margin: 1px 0 0 -85px;
     height: 45px;
     font-size: 20px;
-    width: 150px;
+    width: 170px;
     font-weight: bold;
     text-shadow: rgba(0, 0, 0, 0.4) 0px -1px 0;
     text-align: center;
