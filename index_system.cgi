@@ -18,7 +18,7 @@ $main::theme_iui_no_default_div = 1;
 		 $text{'system_title'}, "", undef, 0, 1, 1);
 
 # Get all available actions for this server
-@buts = grep { $_ ne '' } &server_manager::get_server_actions($s);
+@buts = grep { $_ && keys(%$_) > 0 } &server_manager::get_server_actions($s);
 my @cats = &unique(map { $_->{'cat'} } @buts);
 
 if (&theme_use_iui()) {
@@ -34,29 +34,35 @@ if (&theme_use_iui()) {
 	foreach my $c (@cats) {
 		my @incat = grep { $_->{'cat'} eq $c } @buts;
 		if (!$c) {
+			# Top-level links
 			foreach my $b (@incat) {
 				$url = &system_action_url($b, $s);
+				$title = $b->{'title'} || $b->{'desc'};
 				print "<li><a href='$url' ",
-				      "target=_self>$b->{'desc'}</a></li>\n";
+				      "target=_self>$title</a></li>\n";
 				}
 			}
 		else {
+			# Category links
 			print "<li><a href='#systemcat_$c'>",
-			      $server_manager::text{'cat_'.$c}."</a></li>\n";
+			      ($server_manager::text{'cat_'.$c} ||
+			       $incat[0]->{'catname'})."</a></li>\n";
 			}
 		}
 	print "</ul>\n";
 
-	# Lists for categories
+	# Lists for things in categories
 	foreach my $c (@cats) {
 		next if (!$c);
 		my @incat = grep { $_->{'cat'} eq $c } @buts;
 		print "<ul id='systemcat_$c' title='",
-		      $server_manager::text{'cat_'.$c},"'>\n";
+		      ($server_manager::text{'cat_'.$c} ||
+		       $incat[0]->{'catname'}),"'>\n";
 		foreach my $b (@incat) {
 			$url = &system_action_url($b, $s);
+			$title = $b->{'desc'} || $b->{'title'};
 			print "<li><a href='$url' ",
-			      "target=_self>$b->{'desc'}</a></li>\n";
+			      "target=_self>$title</a></li>\n";
 			}
 		print "</ul>\n";
 		}
