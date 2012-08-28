@@ -59,7 +59,7 @@ if ($prod eq 'webmin' && &foreign_available("virtual-server")) {
 	@buts = grep { $_->{'icon'} ne 'index' } @buts;		# Skip dom list
 	@tcats = &unique(map { $_->{'cat'} } @buts);
 	$newhtml = &virtual_server::get_new_features_html();
-	$lwarn = &virtual_server::licence_warning_message();
+	$lwarn = &virtual_server::warning_messages();
 	$configcheck = &virtual_server::need_config_check() &&
 		       &virtual_server::can_check_config();
 	}
