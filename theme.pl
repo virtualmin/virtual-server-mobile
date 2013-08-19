@@ -1039,6 +1039,7 @@ if (&theme_use_iui()) {
 sub theme_ui_radio_selector
 {
 local ($opts, $name, $sel) = @_;
+my $rv;
 foreach my $o (@$opts) {
 	$rv .= &ui_oneradio($name, $o->[0], $o->[1], $sel eq $o->[0])."<br>\n";
 	$rv .= $o->[2];
