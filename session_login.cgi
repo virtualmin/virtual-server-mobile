@@ -21,7 +21,13 @@ $title = &theme_use_iui() ? $text{'session_header'} : undef;
 
 # Show any error message
 if (defined($in{'failed'})) {
-	print &ui_subheading($text{'session_failed'});
+	if ($in{'twofactor_msg'}) {
+		print &ui_subheading(&text('session_twofailed',
+				&html_escape($in{'twofactor_msg'}));
+		}
+	else {
+		print &ui_subheading($text{'session_failed'});
+		}
 	}
 elsif ($in{'logout'}) {
 	print &ui_subheading($text{'session_logout'});
@@ -56,6 +62,12 @@ print &ui_table_row($text{'session_user'},
 
 print &ui_table_row($text{'session_pass'},
 	&ui_password("pass", undef, 20));
+
+if ($miniserv{'twofactor_provider'}) {
+	print &ui_table_row($text{'session_twofactor'},
+		&ui_textbox("twofactor", undef, 20, 0, undef,
+			    "autocomplete=off"));
+	}
 
 print &ui_table_row(" ",
 	&ui_checkbox("save", 1, $text{'session_save'}, 1));
