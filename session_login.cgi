@@ -23,7 +23,7 @@ $title = &theme_use_iui() ? $text{'session_header'} : undef;
 if (defined($in{'failed'})) {
 	if ($in{'twofactor_msg'}) {
 		print &ui_subheading(&text('session_twofailed',
-				&html_escape($in{'twofactor_msg'}));
+				&html_escape($in{'twofactor_msg'})));
 		}
 	else {
 		print &ui_subheading($text{'session_failed'});
