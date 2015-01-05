@@ -1,9 +1,12 @@
 #!/usr/local/bin/perl
 # Show system or account information
 
-$trust_unknown_referers = 1;
+use strict;
+use warnings;
+our $trust_unknown_referers = 1;
 require 'virtual-server-mobile/virtual-server-mobile-lib.pl';
-$theme_iui_fieldset_table = 1;
+our $theme_iui_fieldset_table = 1;
+our (%text);
 my $bar_width = 300;
 
 my @info = &list_combined_system_info();
@@ -21,7 +24,7 @@ my @links = grep { $_->{'type'} eq 'link' } @info;
 foreach my $info (@info) {
 	if ($info->{'type'} eq 'warning') {
 		# An alert message
-		# XXX what does this look like on mobile?
+		# XXX Should this go on the first page instead?
 		print &ui_alert_box($info->{'warning'},
 				    $info->{'level'} || 'warn');
 		}
@@ -72,7 +75,7 @@ foreach my $info (@info) {
 if (@links) {
 	my @tlinks = map { $_->{'link'} } @links;
 	my @ttitles = map { $_->{'desc'} } @links;
-	my @icons = map { undef } @links;
+	my @ticons = map { undef } @links;
 	print &icons_table(\@tlinks, \@ttitles, \@ticons);
         }
 
