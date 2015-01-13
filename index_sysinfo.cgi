@@ -17,16 +17,10 @@ my @info = &list_combined_system_info();
 my @links = grep { $_->{'type'} eq 'link' } @info;
 @info = grep { $_->{'type'} ne 'link' } @info;
 
-# Show notifications first
-@info = sort { ($b->{'type'} eq 'warning') <=> ($a->{'type'} eq 'warning') }
-             @info;
-
 foreach my $info (@info) {
 	if ($info->{'type'} eq 'warning') {
-		# An alert message
-		# XXX Should this go on the first page instead?
-		print &ui_alert_box($info->{'warning'},
-				    $info->{'level'} || 'warn');
+		# An alert message .. skip it, since the first page shows them
+		next;
 		}
 	else {
 		my $open = defined($info->{'open'}) ? $info->{'open'} : 1;
