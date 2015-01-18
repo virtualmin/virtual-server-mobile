@@ -30,21 +30,21 @@ foreach my $info (@warns) {
 my @mods = &list_modules_webmin_menu();
 
 # Work out page title
-# XXX
-$hostname = &get_display_hostname();
-$ver = &get_webmin_version();
-&get_miniserv_config(\%miniserv);
-if ($gconfig{'real_os_type'}) {
-	if ($gconfig{'os_version'} eq "*") {
-		$ostr = $gconfig{'real_os_type'};
-		}
-	else {
-		$ostr = "$gconfig{'real_os_type'} $gconfig{'real_os_version'}";
-		}
-	}
+if ($hasvirt) {
+        %minfo = &get_module_info("virtual-server");
+        $title = &text('index_virtualmintitle', $minfo{'version'});
+        }
+elsif ($hasvm2) {
+        %minfo = &get_module_info("server-manager");
+        $title = &text('index_cloudmintitle', $minfo{'version'});
+        }
+elsif (&get_product_name() eq 'usermin') {
+        $title = &text('index_usermintitle', &get_webmin_version());
+        }
 else {
-	$ostr = "$gconfig{'os_type'} $gconfig{'os_version'}";
-	}
+        $title = &text('index_webmintitle', &get_webmin_version());
+        }
+$title = &get_html_title($title);
 
 # Figure out if there are some left menu items to show. If so, they come first
 # and Webmin modules are below. Otherwise, modules are at the top level
@@ -68,17 +68,17 @@ $main::theme_iui_no_default_div = 1;
 &ui_print_header(undef, $title, "", undef, undef, 1, 1);
 
 if (&theme_use_iui()) {
-	&generate_iui_menu(\@leftitems, 'main', $title);
+	&generate_iui_menu(\@leftitems, 'main', $title, 1);
 	}
 else {
 	# XXX plain mode
 	}
 
-# generate_iui_menu(&items, id, title)
+# generate_iui_menu(&items, id, title, visible)
 sub generate_iui_menu
 {
-my ($items, $id, $title) = @_;
-print "<ul id='$id' title='$title' selected='true'>\n";
+my ($items, $id, $title, $visible) = @_;
+print "<ul id='$id' title='$title'",($visible ? " selected='true'" : ""),">\n";
 foreach my $item (@$items) {
 	if ($item->{'type'} eq 'item') {
 		# Link to some page
@@ -93,10 +93,14 @@ foreach my $item (@$items) {
 	elsif ($item->{'type'} eq 'html') {
 		# XXX
 		}
+	elsif ($item->{'type'} eq 'hr') {
+		print "<li><hr></li>\n";
+		}
 	}
 print "</ul>\n";
 foreach my $item (grep { $_->{'type'} eq 'cat' } @$items) {
-	&generate_iui_menu($item->{'members'}, $item->{'id'}, $item->{'desc'});
+	&generate_iui_menu($item->{'members'}, $item->{'id'},
+			   $item->{'desc'}, 0);
 	}
 }
 

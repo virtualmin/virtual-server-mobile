@@ -1,3 +1,8 @@
+index_virtualmintitle=Virtualmin $1
+index_cloudmintitle=Cloudmin $1
+index_webmintitle=Webmin $1
+index_usermintitle=Usermin $1
+
 index_vmenu=List virtual servers
 index_v2menu=List Cloudmin systems
 index_vwarn=License Warning
